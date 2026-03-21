@@ -1,0 +1,7 @@
+{
+  "name": "Tihie Steni ERP",
+  "description": "Advanced ERP system for Tihie Steni with Multi-Warehouse, Inventory Batches, and AI-driven Analytics.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

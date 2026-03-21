@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+  --color-app-bg: var(--app-bg);
+  --color-app-fg: var(--app-fg);
+  --color-app-card: var(--app-card);
+  --color-app-border: var(--app-border);
+  --color-app-muted: var(--app-muted);
+  --color-primary: #34d399;
+}
+
+@layer base {
+  :root {
+    --app-bg: #f8fafc;        /* Oqish fon */
+    --app-fg: #0f172a;        /* TO'Q MATN (Light modeda ko'rinishi uchun) */
+    --app-card: #ffffff;
+    --app-border: #e2e8f0;
+    --app-muted: #64748b;     /* Kulrang matn */
+  }
+
+  .dark {
+    --app-bg: #09090b;        /* Qora fon */
+    --app-fg: #ffffff;        /* OQ MATN (Dark modeda ko'rinishi uchun) */
+    --app-card: #121214;
+    --app-border: rgba(255, 255, 255, 0.1);
+    --app-muted: #a1a1aa;
+  }
+
+  body {
+    @apply bg-app-bg text-app-fg transition-colors duration-500;
+  }
+}

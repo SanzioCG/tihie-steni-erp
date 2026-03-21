@@ -1,0 +1,21 @@
+{
+  "name": "Tihie Steni ERP",
+  "short_name": "TS ERP",
+  "description": "Professional ERP system for Tihie Steni",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#10b981",
+  "icons": [
+    {
+      "src": "https://picsum.photos/seed/ts-logo/192/192",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://picsum.photos/seed/ts-logo/512/512",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
