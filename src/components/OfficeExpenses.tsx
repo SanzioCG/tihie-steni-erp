@@ -42,7 +42,7 @@ export default function OfficeExpenses() {
     <div className="space-y-8 text-left text-app-fg">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-black tracking-tight uppercase italic decoration-primary/30 underline">Office Xarajatlari</h2>
+          <h2 className="text-3xl font-black tracking-tight uppercase  decoration-primary/30">Office Xarajatlari</h2>
           <p className="text-sm text-app-muted italic">Ma'muriy va operatsion xarajatlar nazorati</p>
         </div>
         <div className="flex gap-3">

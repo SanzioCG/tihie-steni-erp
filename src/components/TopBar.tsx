@@ -1,51 +1,35 @@
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useTheme } from 'next-themes';
-import { Sun, Moon, Globe, ChevronDown } from 'lucide-react';
-import { cn } from '../utils';
+import React from 'react';
+import { Menu, Bell, User } from 'lucide-react';
 
-export default function TopBar() {
-  const { i18n } = useTranslation();
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
-
+export default function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
   return (
-    <div className="h-16 border-b border-app-border bg-app-bg/80 backdrop-blur-md sticky top-0 z-30 flex items-center justify-end px-8 gap-4 transition-all">
-      
-      {/* Theme Toggle */}
-      <button 
-        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-        className="p-2.5 rounded-xl bg-app-card border border-app-border text-app-fg hover:border-primary transition-all active:scale-90 shadow-sm"
-      >
-        {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-      </button>
-
-      {/* Language Selector */}
-      <div className="relative group">
-        <button className="flex items-center gap-3 px-3 py-1.5 bg-app-card border border-app-border rounded-xl hover:border-primary/50 transition-all shadow-sm">
-          <Globe size={16} className="text-primary" />
-          <span className="text-xs font-bold uppercase">{i18n.language}</span>
-          <ChevronDown size={14} className="text-app-muted" />
+    <header className="h-20 border-b border-app-border bg-app-card/50 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30">
+      <div className="flex items-center gap-4">
+        {/* Mobil menyu tugmasi */}
+        <button 
+          onClick={onMenuClick}
+          className="lg:hidden p-2 rounded-xl bg-app-fg/5 hover:bg-primary/10 text-app-muted hover:text-primary transition-all"
+        >
+          <Menu size={24} />
         </button>
-        
-        <div className="absolute right-0 mt-2 w-28 py-2 bg-app-card border border-app-border rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-2xl z-50">
-          {['uz', 'ru', 'en'].map((lang) => (
-            <button
-              key={lang}
-              onClick={() => i18n.changeLanguage(lang)}
-              className={cn(
-                "w-full px-4 py-2 text-xs font-bold text-left transition-colors",
-                i18n.language === lang ? "text-primary bg-primary/10" : "text-app-muted hover:text-app-fg hover:bg-app-fg/5"
-              )}
-            >
-              {lang.toUpperCase()}
-            </button>
-          ))}
+        <h2 className="font-bold text-lg text-app-fg hidden sm:block">Operatsion Panel</h2>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <button className="p-2 text-app-muted hover:text-app-fg relative">
+          <Bell size={20} />
+          <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-app-card" />
+        </button>
+        <div className="flex items-center gap-3 pl-4 border-l border-app-border">
+          <div className="text-right hidden md:block">
+            <p className="text-sm font-bold text-app-fg">Admin Foydalanuvchi</p>
+            <p className="text-[10px] text-app-muted">Boshqaruvchi</p>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+            <User size={20} />
+          </div>
         </div>
       </div>
-    </div>
+    </header>
   );
 }
