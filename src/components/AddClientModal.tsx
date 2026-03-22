@@ -7,6 +7,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../supabase';
 
+
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;

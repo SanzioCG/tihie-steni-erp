@@ -1,133 +1,182 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { 
-  Search, TrendingDown, AlertCircle, 
-  Loader2, Banknote, User, ArrowRight,
-  Filter, Calendar
+  Search, Wallet, ArrowRightCircle, 
+  CheckCircle2, Loader2, User, FileDown, Banknote, X
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { generatePDF } from '../utils/exportPDF'; // Mavjud PDF funksiyangiz
 import { cn } from '../utils';
-import PaymentModal from './PaymentModal';
 
 export default function Debts() {
-  const [debtors, setDebtors] = useState<any[]>([]);
+  const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [selectedClient, setSelectedClient] = useState<any>(null);
-  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<any | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paying, setPaying] = useState(false);
 
   const fetchDebtors = async () => {
     setLoading(true);
-    // Balansi 0 dan kichik bo'lgan mijozlarni olamiz
-    const { data } = await supabase
-      .from('clients')
-      .select('*')
-      .lt('balance', 0)
-      .order('balance', { ascending: true }); // Eng katta qarzdorlar tepada
-
-    if (data) setDebtors(data);
+    // Balansi minusda bo'lgan mijozlarni olish
+    const { data } = await supabase.from('clients').select('*').lt('balance', 0).order('balance', { ascending: true });
+    if (data) setClients(data);
     setLoading(false);
   };
 
   useEffect(() => { fetchDebtors(); }, []);
 
-  const totalDebt = debtors.reduce((sum, d) => sum + Math.abs(Number(d.balance)), 0);
+  const handlePayment = async () => {
+    if (!selectedClient || !paymentAmount) return;
+    setPaying(true);
 
-  const filtered = debtors.filter(d => d.full_name.toLowerCase().includes(search.toLowerCase()));
+    try {
+      const amount = Number(paymentAmount);
+      const newBalance = selectedClient.balance + amount;
+
+      // 1. Mijoz balansini yangilash
+      await supabase.from('clients').update({ balance: newBalance }).eq('id', selectedClient.id);
+
+      // 2. MOLIYA JADVALIGA YOZISH (INCOME)
+      await supabase.from('transactions').insert([{
+        type: 'income',
+        category: 'Qarz to\'lovi',
+        amount: amount,
+        description: `${selectedClient.full_name} qarz to'ladi`,
+        created_at: new Date().toISOString()
+      }]);
+
+      // 3. AUDIT LOGGA YOZISH
+      await supabase.from('audit_logs').insert([{
+        action: 'UPDATED',
+        entity: 'MIJOZ',
+        details: `${selectedClient.full_name} $${amount} qarz to'ladi.`,
+        user_name: 'Admin'
+      }]);
+
+      setSelectedClient(null);
+      setPaymentAmount('');
+      fetchDebtors();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setPaying(false);
+    }
+  };
+
+  // PDF EKSPORT
+  const exportDebtsPDF = () => {
+    const headers = [["Mijoz ismi", "Telefon", "Qarzdorlik ($)"]];
+    const dataRows = clients.map(c => [
+      c.full_name,
+      c.phone || '-',
+      `$${Math.abs(c.balance).toLocaleString()}`
+    ]);
+    generatePDF("Qarzdorlar Ro'yxati", headers, dataRows);
+  };
+
+  const totalDebt = clients.reduce((sum, c) => sum + Math.abs(c.balance), 0);
 
   return (
-    <div className="space-y-8 text-left text-app-fg">
+    <div className="space-y-8 text-left animate-in fade-in duration-500">
       {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex justify-between items-center px-2">
         <div>
-          <h2 className="text-3xl font-black tracking-tight uppercase decoration-rose-500/30">Qarzlar Nazorati</h2>
-          <p className="text-sm text-app-muted italic">Debitorlik qarzlarini undirish va monitoring</p>
+          <h2 className="text-3xl font-black text-white uppercase ">Qarzlar Nazorati</h2>
+          <p className="text-sm text-gray-500 italic">Debitorlik qarzdorliklarini boshqarish</p>
         </div>
-        
-        <div className="px-6 py-4 bg-rose-500/10 border border-rose-500/20 rounded-[1.5rem] flex items-center gap-4 shadow-lg shadow-rose-500/5">
-           <div className="p-2 bg-rose-500/20 rounded-lg text-rose-500"><TrendingDown size={24} /></div>
-           <div>
-              <p className="text-[10px] font-bold text-rose-500 uppercase tracking-widest">Umumiy Qarz:</p>
-              <p className="text-xl font-black text-rose-500 tracking-tighter">${totalDebt.toLocaleString()}</p>
-           </div>
+        <div className="flex gap-3">
+          <button onClick={exportDebtsPDF} className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl flex items-center gap-2 hover:bg-white/10 transition-all font-bold text-xs uppercase">
+            <FileDown size={18} /> PDF Eksport
+          </button>
+        </div>
+      </div>
+
+      {/* JAMI QARZ VIDJETI (Eski UI) */}
+      <div className="p-8 bg-rose-500/10 border border-rose-500/20 rounded-[2.5rem] backdrop-blur-md flex items-center justify-between mx-2">
+        <div className="flex items-center gap-6">
+          <div className="p-4 bg-rose-500/20 rounded-2xl text-rose-500"><Wallet size={32} /></div>
+          <div>
+            <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">Umumiy Debitorlik:</p>
+            <p className="text-3xl font-black text-white tracking-tighter">${totalDebt.toLocaleString()}</p>
+          </div>
+        </div>
+        <div className="text-right hidden md:block">
+           <p className="text-[10px] font-bold text-gray-500 uppercase">Qarzdorlar soni:</p>
+           <p className="text-xl font-black text-white">{clients.length} ta</p>
         </div>
       </div>
 
       {/* SEARCH */}
-      <div className="relative group">
-        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-app-muted group-focus-within:text-rose-500" size={18} />
+      <div className="relative mx-2">
+        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
         <input 
-          type="text" placeholder="Qarzdor ismini qidirish..." 
+          type="text" placeholder="Qarzdor mijozni qidirish..." 
           value={search} onChange={e => setSearch(e.target.value)}
-          className="w-full pl-14 pr-4 py-5 bg-app-card border border-app-border rounded-[2rem] text-app-fg outline-none focus:border-rose-500/40 transition-all font-medium shadow-xl"
+          className="w-full pl-14 pr-4 py-5 bg-[#0c0c0e] border border-white/5 rounded-3xl text-white outline-none focus:border-rose-500/30 transition-all"
         />
       </div>
 
-      {/* DEBTORS TABLE */}
-      <div className="bg-app-card border border-app-border rounded-[2.5rem] overflow-hidden backdrop-blur-md shadow-2xl min-h-[400px] relative">
-        {loading && <div className="absolute inset-0 z-10 flex items-center justify-center bg-app-bg/50"><Loader2 className="animate-spin text-rose-500" size={40} /></div>}
-        
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-app-border bg-rose-500/[0.02] text-rose-500">
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em]">Qarzdor Mijoz</th>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-center">Limit</th>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-center">Qarz Miqdori</th>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-right">Amallar</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {filtered.length > 0 ? filtered.map((client) => (
-                <tr key={client.id} className="group hover:bg-rose-500/[0.01] transition-all">
-                  <td className="px-8 py-5">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 font-black">
-                        {client.full_name.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-app-fg">{client.full_name}</p>
-                        <p className="text-[10px] text-app-muted font-bold uppercase tracking-widest">{client.company_name || 'Shaxsiy'}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-8 py-5 text-center">
-                    <span className="text-[11px] font-bold text-gray-500 uppercase border border-white/5 px-2 py-1 rounded-md">
-                      Limit: ${client.credit_limit?.toLocaleString()}
-                    </span>
-                  </td>
-                  <td className="px-8 py-5 text-center text-rose-500">
-                    <span className="text-lg font-black tracking-tighter animate-pulse">
-                      -${Math.abs(client.balance).toLocaleString()}
-                    </span>
-                  </td>
-                  <td className="px-8 py-5 text-right">
-                    <button 
-                      onClick={() => { setSelectedClient(client); setIsPaymentOpen(true); }}
-                      className="px-5 py-2.5 bg-emerald-500 text-black text-[10px] font-black uppercase rounded-xl hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:scale-105 transition-all flex items-center gap-2 ml-auto"
-                    >
-                      <Banknote size={14} /> To'lov Olish
-                    </button>
-                  </td>
-                </tr>
-              )) : !loading && (
-                <tr>
-                   <td colSpan={4} className="py-32 text-center">
-                      <AlertCircle size={48} className="mx-auto text-emerald-500 mb-4 opacity-20" />
-                      <p className="text-app-muted italic font-medium">Hozircha hech kimdan qarz yo'q. Ajoyib!</p>
-                   </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      {/* DEBTORS GRID (Eski UI kartochkalari) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mx-2">
+        {clients.filter(c => c.full_name.toLowerCase().includes(search.toLowerCase())).map((client) => (
+          <div key={client.id} className="p-6 bg-[#0c0c0e] border border-white/5 rounded-[2rem] shadow-2xl hover:border-rose-500/30 transition-all group">
+            <div className="flex justify-between items-start mb-6">
+               <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform">
+                  <User size={24} />
+               </div>
+               <div className="text-right">
+                  <p className="text-[9px] font-black text-gray-500 uppercase">Qarzi:</p>
+                  <p className="text-xl font-black text-rose-500 italic">-${Math.abs(client.balance).toLocaleString()}</p>
+               </div>
+            </div>
+            <h4 className="text-lg font-bold text-white mb-1 uppercase">{client.full_name}</h4>
+            <p className="text-[10px] text-gray-600 font-bold mb-6 uppercase tracking-widest">{client.phone || 'Aloqa yo\'q'}</p>
+            
+            <button 
+              onClick={() => setSelectedClient(client)}
+              className="w-full py-4 bg-white/5 hover:bg-rose-500 hover:text-white text-gray-400 font-black rounded-xl transition-all uppercase text-[10px] tracking-widest flex items-center justify-center gap-2"
+            >
+              <ArrowRightCircle size={16} /> To'lovni qabul qilish
+            </button>
+          </div>
+        ))}
       </div>
 
-      <PaymentModal 
-        isOpen={isPaymentOpen} 
-        onClose={() => setIsPaymentOpen(false)} 
-        onSuccess={fetchDebtors} 
-        client={selectedClient} 
-      />
+      {/* PAYMENT MODAL (Ixcham variant) */}
+      <AnimatePresence>
+        {selectedClient && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setSelectedClient(null)} />
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+              className="relative w-full max-w-[400px] bg-[#0c0c0e] border border-white/10 rounded-[2.5rem] p-10 shadow-2xl space-y-6"
+            >
+              <button onClick={() => setSelectedClient(null)} className="absolute right-6 top-6 text-gray-500"><X size={20}/></button>
+              <div className="text-center">
+                 <h3 className="text-xl font-black text-white italic uppercase tracking-tight">{selectedClient.full_name}</h3>
+                 <p className="text-xs text-rose-500 font-bold uppercase mt-1">Mavjud qarz: ${Math.abs(selectedClient.balance).toLocaleString()}</p>
+              </div>
+
+              <div className="space-y-2">
+                 <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">To'lov summasi ($)</label>
+                 <input 
+                   type="number" autoFocus placeholder="0.00" 
+                   className="w-full px-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-mono font-bold text-xl outline-none focus:border-emerald-500/40 text-center"
+                   value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)}
+                 />
+              </div>
+
+              <button 
+                onClick={handlePayment}
+                disabled={paying || !paymentAmount}
+                className="w-full py-5 bg-[#34d399] text-black font-black rounded-2xl shadow-lg uppercase text-[11px] tracking-widest flex items-center justify-center gap-2"
+              >
+                {paying ? <Loader2 className="animate-spin" size={18}/> : <CheckCircle2 size={18}/>} To'lovni saqlash
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

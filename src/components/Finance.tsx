@@ -1,160 +1,137 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabase';
 import { 
-  Wallet, ArrowUpCircle, ArrowDownCircle, DollarSign, 
-  Plus, Download, Filter, Search, Calendar, Landmark
+  Activity, ArrowUpCircle, ArrowDownCircle, 
+  Plus, AreaChart as AreaIcon, LineChart, BarChart3, PieChart as PieIcon, Wallet 
 } from 'lucide-react';
 import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
+  AreaChart, Area, LineChart as ReLineChart, Line, 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, 
+  Tooltip, ResponsiveContainer, PieChart, Pie, Cell 
 } from 'recharts';
-import { useTheme } from 'next-themes';
 import { cn } from '../utils';
 
-// Mock moliyaviy ma'lumotlar
-const data = [
-  { name: 'Dush', income: 4000, expense: 2400 },
-  { name: 'Sesh', income: 3000, expense: 1398 },
-  { name: 'Chor', income: 5000, expense: 3800 },
-  { name: 'Pay', income: 2780, expense: 3908 },
-  { name: 'Jum', income: 4890, expense: 4800 },
-  { name: 'Shan', income: 5390, expense: 3800 },
-  { name: 'Yak', income: 4490, expense: 4300 },
-];
-
-const transactions = [
-  { id: 1, desc: 'Sotuv: Alyuminiy Profil #23', type: 'income', amount: '+1,200,000', category: 'Sotuv', date: 'Bugun, 14:20' },
-  { id: 2, desc: 'Ombor ijarasi', type: 'expense', amount: '-4,500,000', category: 'Ijara', date: 'Bugun, 10:05' },
-  { id: 3, desc: 'Xarid: Tekstil Xomashyo', type: 'expense', amount: '-8,200,000', category: 'Xarid', date: 'Kecha, 18:30' },
-  { id: 4, desc: 'Sotuv: Mato Premium (10 rulon)', type: 'income', amount: '+12,500,000', category: 'Sotuv', date: 'Kecha, 15:10' },
-];
+const COLORS = ['#34d399', '#fbbf24', '#818cf8', '#f43f5e', '#a78bfa'];
 
 export default function Finance() {
-  const { theme } = useTheme();
-  const textColor = theme === 'dark' ? '#a1a1aa' : '#64748b';
-  const gridColor = theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+  const [loading, setLoading] = useState(true);
+  const [chartType, setChartType] = useState('area');
+  const [data, setData] = useState({ balance: 0, income: 0, expense: 0, mainChart: [], categoryData: [] });
+
+  const fetchFinanceData = async () => {
+    setLoading(true);
+    const { data: txs } = await supabase.from('transactions').select('*').order('created_at', { ascending: true });
+
+    if (txs) {
+      const totalIn = txs.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
+      const totalOut = txs.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
+      
+      const categories = txs.filter(t => t.type === 'expense').reduce((acc: any, t) => {
+        acc[t.category] = (acc[t.category] || 0) + Number(t.amount);
+        return acc;
+      }, {});
+
+      setData({
+        balance: totalIn - totalOut,
+        income: totalIn,
+        expense: totalOut,
+        categoryData: Object.keys(categories).map(key => ({ name: key, value: categories[key] })),
+        mainChart: txs.slice(-15).map(t => ({
+          name: new Date(t.created_at).toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' }),
+          income: t.type === 'income' ? Number(t.amount) : 0,
+          expense: t.type === 'expense' ? Number(t.amount) : 0,
+        }))
+      });
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchFinanceData(); }, []);
+
+  const renderChart = () => {
+    const common = { data: data.mainChart, margin: { left: -20, top: 10 } };
+    if (chartType === 'line') return (
+      <ReLineChart {...common}>
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
+        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 11}} />
+        <YAxis axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 11}} />
+        <Tooltip contentStyle={{backgroundColor: '#0c0c0e', border: '1px solid #1f2937', borderRadius: '10px'}} />
+        <Line type="monotone" dataKey="income" stroke="#34d399" strokeWidth={3} dot={{r:4}} />
+        <Line type="monotone" dataKey="expense" stroke="#f43f5e" strokeWidth={3} dot={{r:4}} />
+      </ReLineChart>
+    );
+    if (chartType === 'bar') return (
+      <BarChart {...common}>
+        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 11}} />
+        <YAxis axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 11}} />
+        <Tooltip cursor={{fill: 'rgba(255,255,255,0.02)'}} />
+        <Bar dataKey="income" fill="#34d399" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="expense" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+      </BarChart>
+    );
+    return (
+      <AreaChart {...common}>
+        <defs>
+          <linearGradient id="cI" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#34d399" stopOpacity={0.2}/><stop offset="95%" stopColor="#34d399" stopOpacity={0}/></linearGradient>
+          <linearGradient id="cO" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#f43f5e" stopOpacity={0.2}/><stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/></linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
+        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 11}} />
+        <YAxis axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 11}} />
+        <Tooltip contentStyle={{backgroundColor: '#0c0c0e', border: 'none', borderRadius: '10px'}} />
+        <Area type="monotone" dataKey="income" stroke="#34d399" strokeWidth={4} fill="url(#cI)" />
+        <Area type="monotone" dataKey="expense" stroke="#f43f5e" strokeWidth={4} fill="url(#cO)" />
+      </AreaChart>
+    );
+  };
 
   return (
-    <div className="space-y-8">
-      {/* HEADER & TOP ACTIONS */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h2 className="text-3xl font-bold text-app-fg tracking-tight">Moliya va Hisobotlar</h2>
-          <p className="text-sm text-app-muted">Holdingning moliyaviy holati tahlili</p>
-        </div>
-        <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-5 py-3 bg-app-card border border-app-border rounded-2xl text-app-fg hover:border-primary/50 transition-all shadow-sm">
-            <Download size={18} />
-            Eksport
-          </button>
-          <button className="flex items-center gap-2 px-6 py-3 bg-primary text-black font-bold rounded-2xl hover:shadow-[0_0_20px_rgba(52,211,153,0.4)] transition-all active:scale-95">
-            <Plus size={20} />
-            Yangi tranzaksiya
-          </button>
+    <div className="space-y-8 text-left animate-in fade-in duration-500">
+      <div className="flex justify-between items-center px-2">
+        <h2 className="text-3xl font-black text-white uppercase tracking-tighter ">Moliya Dashboard</h2>
+        <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
+          <button onClick={() => setChartType('area')} className={cn("p-2 rounded-lg", chartType === 'area' ? "bg-white/10 text-primary" : "text-gray-500")}><AreaIcon size={16}/></button>
+          <button onClick={() => setChartType('line')} className={cn("p-2 rounded-lg", chartType === 'line' ? "bg-white/10 text-primary" : "text-gray-500")}><LineChart size={16}/></button>
+          <button onClick={() => setChartType('bar')} className={cn("p-2 rounded-lg", chartType === 'bar' ? "bg-white/10 text-primary" : "text-gray-500")}><BarChart3 size={16}/></button>
         </div>
       </div>
 
-      {/* STATS CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-8 bg-app-card border border-app-border rounded-[2.5rem] relative overflow-hidden group backdrop-blur-md">
-          <div className="absolute top-[-10%] right-[-10%] w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/20 transition-all" />
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 bg-primary/10 rounded-2xl text-primary border border-primary/20">
-              <Landmark size={24} />
-            </div>
-            <p className="text-sm font-bold text-app-muted uppercase tracking-widest">Jami Balans</p>
-          </div>
-          <h3 className="text-3xl font-bold text-app-fg tracking-tighter">1,450,200,000 UZS</h3>
-          <p className="mt-2 text-[10px] text-primary font-bold uppercase tracking-wider">+12.5% o'tgan oydan</p>
-        </div>
-
-        <div className="p-8 bg-app-card border border-app-border rounded-[2.5rem] backdrop-blur-md">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-500 border border-emerald-500/20">
-              <ArrowUpCircle size={24} />
-            </div>
-            <p className="text-sm font-bold text-app-muted uppercase tracking-widest">Kirim (Bugun)</p>
-          </div>
-          <h3 className="text-3xl font-bold text-app-fg tracking-tighter">45,000,000 UZS</h3>
-        </div>
-
-        <div className="p-8 bg-app-card border border-app-border rounded-[2.5rem] backdrop-blur-md">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 bg-rose-500/10 rounded-2xl text-rose-500 border border-rose-500/20">
-              <ArrowDownCircle size={24} />
-            </div>
-            <p className="text-sm font-bold text-app-muted uppercase tracking-widest">Chiqim (Bugun)</p>
-          </div>
-          <h3 className="text-3xl font-bold text-app-fg tracking-tighter">12,400,000 UZS</h3>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mx-2">
+         <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl">
+            <p className="text-[10px] font-black text-gray-500 uppercase mb-4 tracking-widest">Jami Balans</p>
+            <h3 className="text-4xl font-black text-white italic">{data.balance.toLocaleString()} <span className="text-xs text-gray-700">UZS</span></h3>
+         </div>
+         <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl text-emerald-500">
+            <ArrowUpCircle className="mb-4" size={24}/><h3 className="text-3xl font-black italic">+{data.income.toLocaleString()}</h3>
+         </div>
+         <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl text-rose-500">
+            <ArrowDownCircle className="mb-4" size={24}/><h3 className="text-3xl font-black italic">-{data.expense.toLocaleString()}</h3>
+         </div>
       </div>
 
-      {/* CHART SECTION */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 p-8 bg-app-card border border-app-border rounded-[2.5rem] backdrop-blur-md">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-lg font-bold text-app-fg">Kirim-chiqim grafigi</h3>
-            <div className="flex gap-2">
-              <div className="flex items-center gap-2 text-xs font-bold text-emerald-500">
-                <div className="w-2 h-2 rounded-full bg-emerald-500" /> Daromad
-              </div>
-              <div className="flex items-center gap-2 text-xs font-bold text-rose-500">
-                <div className="w-2 h-2 rounded-full bg-rose-500" /> Xarajat
-              </div>
-            </div>
-          </div>
-          <div className="h-72 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data}>
-                <defs>
-                  <linearGradient id="colorInc" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="colorExp" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: textColor, fontSize: 11}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: textColor, fontSize: 11}} />
-                <Tooltip contentStyle={{backgroundColor: theme === 'dark' ? '#121214' : '#fff', border: 'none', borderRadius: '15px'}} />
-                <Area type="monotone" dataKey="income" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorInc)" />
-                <Area type="monotone" dataKey="expense" stroke="#f43f5e" strokeWidth={3} fillOpacity={1} fill="url(#colorExp)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mx-2">
+        <div className="lg:col-span-2 p-8 bg-[#0c0c0e] border border-white/5 rounded-[3rem] shadow-2xl relative">
+          <h4 className="text-lg font-black text-white mb-10 italic uppercase tracking-widest flex items-center gap-2"><Activity size={20} className="text-primary"/> Analitika</h4>
+          <div className="h-80 w-full">{renderChart()}</div>
         </div>
 
-        {/* TRANSACTIONS LIST */}
-        <div className="p-8 bg-app-card border border-app-border rounded-[2.5rem] backdrop-blur-md overflow-hidden">
-          <h3 className="text-lg font-bold text-app-fg mb-6">Oxirgi amallar</h3>
-          <div className="space-y-6">
-            {transactions.map((tr) => (
-              <div key={tr.id} className="flex items-center justify-between group cursor-pointer">
-                <div className="flex items-center gap-4">
-                  <div className={cn(
-                    "w-11 h-11 rounded-xl flex items-center justify-center border transition-all",
-                    tr.type === 'income' ? "bg-emerald-500/5 border-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500/20" : "bg-rose-500/5 border-rose-500/10 text-rose-500 group-hover:bg-rose-500/20"
-                  )}>
-                    {tr.type === 'income' ? <ArrowUpCircle size={20} /> : <ArrowDownCircle size={20} />}
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-app-fg truncate w-32 md:w-full">{tr.desc}</p>
-                    <p className="text-[10px] text-app-muted font-bold uppercase tracking-widest">{tr.category} • {tr.date}</p>
-                  </div>
-                </div>
-                <p className={cn(
-                  "text-sm font-bold tracking-tighter",
-                  tr.type === 'income' ? "text-emerald-500" : "text-rose-500"
-                )}>
-                  {tr.amount}
-                </p>
-              </div>
-            ))}
-          </div>
-          <button className="w-full mt-8 py-3 bg-app-fg/5 rounded-2xl text-[10px] font-bold text-app-muted uppercase tracking-[0.3em] hover:bg-app-fg/10 transition-all">
-            Barcha tranzaksiyalar
-          </button>
+        <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-[3rem] shadow-2xl">
+           <h4 className="text-lg font-black text-white mb-8 italic uppercase tracking-widest flex items-center gap-2"><PieIcon size={20} className="text-primary"/> Xarajatlar</h4>
+           <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                 <PieChart>
+                    <Pie data={data.categoryData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                      {data.categoryData.map((e, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} stroke="none" />)}
+                    </Pie>
+                    <Tooltip contentStyle={{backgroundColor: '#0c0c0e', border: 'none', borderRadius: '10px'}} />
+                 </PieChart>
+              </ResponsiveContainer>
+           </div>
+           <div className="mt-6 space-y-3">
+              {data.categoryData.map((cat, i) => (
+                <div key={i} className="flex justify-between items-center text-[10px] font-black uppercase"><span className="text-gray-500">{cat.name}</span><span className="text-white">{cat.value.toLocaleString()}</span></div>
+              ))}
+           </div>
         </div>
       </div>
     </div>

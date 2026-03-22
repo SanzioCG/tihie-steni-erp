@@ -4,6 +4,7 @@ import {
   Package, Boxes, LogOut, ShieldCheck, Settings, Receipt, X 
 } from 'lucide-react';
 import { cn } from '../utils';
+import { useTranslation } from 'react-i18next'; // Til uchun import
 
 interface SidebarProps {
   activeTab: string;
@@ -13,35 +14,37 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen }: SidebarProps) {
+  const { t } = useTranslation(); // t funksiyasini chaqiramiz
+
   const menuGroups = [
     {
-      title: 'Asosiy',
+      title: t('main', 'Asosiy'), // Lug'atda bo'lsa t('main'), bo'lmasa 'Asosiy'
       items: [
-        { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-        { id: 'finance', icon: Wallet, label: 'Moliya' },
+        { id: 'dashboard', icon: LayoutDashboard, label: t('dashboard') },
+        { id: 'finance', icon: Wallet, label: t('Transactions') },
       ]
     },
     {
-      title: 'Savdo va CRM',
+      title: t('sales_crm', 'Savdo va CRM'),
       items: [
-        { id: 'sales', icon: ShoppingCart, label: 'Sotuvlar' },
-        { id: 'clients', icon: Users, label: 'Mijozlar' },
-        { id: 'debts', icon: Banknote, label: 'Qarzlar' },
+        { id: 'sales', icon: ShoppingCart, label: t('sales') },
+        { id: 'clients', icon: Users, label: t('clients', 'Mijozlar') },
+        { id: 'debts', icon: Banknote, label: t('debts', 'Qarzlar') },
       ]
     },
     {
-      title: 'Inventar',
+      title: t('inventory'),
       items: [
-        { id: 'products', icon: Package, label: 'Mahsulotlar' },
-        { id: 'stock', icon: Boxes, label: 'Zaxira', badge: 4 },
+        { id: 'products', icon: Package, label: t('products') },
+        { id: 'stock', icon: Boxes, label: t('stock'), badge: 4 },
       ]
     },
     {
-      title: 'Boshqaruv',
+      title: t('admin', 'Boshqaruv'),
       items: [
-        { id: 'expenses', icon: Receipt, label: 'Office Xarajatlari' },
-        { id: 'audit', icon: ShieldCheck, label: 'Audit Log' },
-        { id: 'settings', icon: Settings, label: 'Sozlamalar' },
+        { id: 'expenses', icon: Receipt, label: t('expenses', 'Office Xarajatlari') },
+        { id: 'audit', icon: ShieldCheck, label: t('audit', 'Audit Log') },
+        { id: 'settings', icon: Settings, label: t('settings') },
       ]
     }
   ];
@@ -125,7 +128,7 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen }: 
         <div className="mt-auto pt-4 border-t border-app-border">
            <button className="flex items-center gap-3 w-full p-3 text-app-muted hover:text-rose-500 transition-colors group font-bold text-sm">
               <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
-              Chiqish
+              {t('logout')}
            </button>
         </div>
       </div>

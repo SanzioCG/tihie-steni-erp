@@ -3,8 +3,10 @@ import { createPortal } from 'react-dom';
 import { X, Camera, FolderOpen, Loader2, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../supabase';
+import { useTranslation } from 'react-i18next'; // Til hookini import qildik
 
 export default function AddProductModal({ isOpen, onClose, onSuccess, initialData }: any) {
+  const { t } = useTranslation(); // t funksiyasini chaqirdik
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -30,7 +32,7 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, initialDat
           unit: initialData.unit || 'pcs',
           min_stock: initialData.min_stock?.toString() || '10'
         });
-        setImagePreview(initialData.image_url); // Eski rasm URLi
+        setImagePreview(initialData.image_url);
       } else {
         setFormData({ 
           series: '', name_uz: '', attribute: '',
@@ -47,7 +49,7 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, initialDat
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
-      setImagePreview(URL.createObjectURL(file)); // Brauzerda ko'rsatish
+      setImagePreview(URL.createObjectURL(file));
     }
   };
 
@@ -55,27 +57,20 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, initialDat
     e.preventDefault();
     setLoading(true);
     try {
-      let finalImageUrl = imagePreview; // Agar yangi rasm tanlanmasa, eskisi qoladi
+      let finalImageUrl = imagePreview;
 
-      // AGAR YANGI RASM TANLANGAN BO'LSA
       if (imageFile) {
         const fileExt = imageFile.name.split('.').pop();
-        const fileName = `${Date.now()}.${fileExt}`; // Unique nom beramiz
-        const filePath = fileName; // 'public/' papkasiz to'g'ridan-to'g'ri bucketga
+        const fileName = `${Date.now()}.${fileExt}`;
+        const filePath = fileName;
 
-        const { data: uploadData, error: upErr } = await supabase.storage
-          .from('products') // Bucket nomi: products
-          .upload(filePath, imageFile, {
-            upsert: true // Agar rasm bo'lsa, ustiga yozish
-          });
+        const { error: upErr } = await supabase.storage
+          .from('products')
+          .upload(filePath, imageFile, { upsert: true });
 
         if (upErr) throw upErr;
 
-        // Yuklangan rasmning Public URLini olish
-        const { data: urlData } = supabase.storage
-          .from('products')
-          .getPublicUrl(filePath);
-        
+        const { data: urlData } = supabase.storage.from('products').getPublicUrl(filePath);
         finalImageUrl = urlData.publicUrl;
       }
 
@@ -97,12 +92,23 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, initialDat
         : await supabase.from('products').insert([saveData]);
 
       if (error) throw error;
-      
+
+      // ==========================================
+      // 👇 AUDIT LOG QISMI (SHU YERGA QO'SHILDI)
+      // ==========================================
+      await supabase.from('audit_logs').insert([{
+        action: initialData ? 'UPDATED' : 'CREATED',
+        entity: 'MAHSULOT',
+        details: `${initialData ? 'Mahsulot tahrirlandi' : 'Yangi mahsulot qo\'shildi'}: ${formData.name_uz}`,
+        user_name: 'Admin'
+      }]);
+      // ==========================================
+
       onSuccess();
       onClose();
     } catch (err: any) { 
       console.error(err);
-      alert("Xatolik: " + err.message); 
+      alert(t('error') + ": " + err.message); 
     } finally { 
       setLoading(false); 
     }
@@ -121,7 +127,7 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, initialDat
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3 font-bold text-white tracking-tight italic">
             <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_#34d399]" />
-            {initialData ? 'Mahsulotni tahrirlash' : 'Yangi mahsulot'}
+            {initialData ? t('edit') : t('add_product')} {/* Tarjima ulandi */}
           </div>
           <button onClick={onClose} className="p-2 bg-white/5 rounded-xl border border-white/5 text-gray-500 hover:text-white transition-all"><X size={20}/></button>
         </div>
@@ -139,32 +145,31 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, initialDat
             <div className="space-y-2">
               <label className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1e] border border-white/5 rounded-xl text-[11px] font-bold text-gray-300 hover:bg-white/5 cursor-pointer transition-all">
                 <FolderOpen size={14} className="text-amber-500" />
-                <span>Rasm tanlash</span>
+                <span>{t('select_product', 'Rasm tanlash')}</span> {/* Tarjima ulandi */}
                 <input type="file" className="hidden" onChange={handleImageChange} accept="image/*" />
               </label>
               <p className="text-[9px] text-gray-700 uppercase font-bold tracking-widest italic">JPG, PNG, WEBP • Max 2MB</p>
             </div>
           </div>
 
-          {/* ... Qolgan inputlar o'zgarishsiz qoladi ... */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
              <div className="space-y-2">
-               <label className="text-[9px] font-bold text-gray-600 uppercase tracking-widest ml-1">Seriya</label>
+               <label className="text-[9px] font-bold text-gray-600 uppercase tracking-widest ml-1">{t('sku', 'Seriya')}</label>
                <input value={formData.series} onChange={e => setFormData({...formData, series: e.target.value})} className="w-full px-4 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-sm text-white outline-none focus:border-primary/30" />
              </div>
              <div className="space-y-2">
-               <label className="text-[9px] font-bold text-gray-600 uppercase tracking-widest ml-1">Nomi</label>
+               <label className="text-[9px] font-bold text-gray-600 uppercase tracking-widest ml-1">{t('products', 'Nomi')}</label>
                <input required value={formData.name_uz} onChange={e => setFormData({...formData, name_uz: e.target.value})} className="w-full px-4 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-sm text-white outline-none focus:border-primary/30" />
              </div>
              <div className="space-y-2">
-               <label className="text-[9px] font-bold text-gray-600 uppercase tracking-widest ml-1">Rang</label>
+               <label className="text-[9px] font-bold text-gray-600 uppercase tracking-widest ml-1">{t('status', 'Rang')}</label>
                <input value={formData.attribute} onChange={e => setFormData({...formData, attribute: e.target.value})} className="w-full px-4 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-sm text-white outline-none focus:border-primary/30" />
              </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-2">
-              <label className="text-[9px] font-bold text-gray-600 uppercase tracking-widest ml-1">Kategoriya</label>
+              <label className="text-[9px] font-bold text-gray-600 uppercase tracking-widest ml-1">{t('category')}</label>
               <select value={formData.category_id} onChange={(e) => setFormData({...formData, category_id: e.target.value})} className="w-full px-4 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-sm text-white outline-none focus:border-primary/30">
                 {categories.map(c => <option key={c.id} value={c.id} className="bg-[#0c0c0e]">{c.name_uz}</option>)}
               </select>
@@ -176,10 +181,10 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, initialDat
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-6 border-t border-white/5">
-            <button type="button" onClick={onClose} className="px-8 py-3 text-xs font-bold text-gray-500 hover:text-white uppercase tracking-widest">Bekor qilish</button>
+            <button type="button" onClick={onClose} className="px-8 py-3 text-xs font-bold text-gray-500 hover:text-white uppercase tracking-widest">{t('cancel')}</button>
             <button disabled={loading} type="submit" className="px-10 py-4 bg-primary text-black font-extrabold rounded-xl shadow-lg hover:scale-[1.03] active:scale-95 transition-all flex items-center gap-2 uppercase tracking-widest text-[11px]">
               {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-              {initialData ? 'Yangilash' : 'Saqlash'}
+              {initialData ? t('confirm') : t('save')}
             </button>
           </div>
         </form>

@@ -10,11 +10,13 @@ import Clients from './components/Clients';
 import Debts from './components/Debts';
 import Audit from './components/Audit';
 import OfficeExpenses from './components/OfficeExpenses';
+import Settings from './components/Settings'; // <--- 1. IMPORT QO'SHILDI
 import { ThemeProvider } from './components/ThemeProvider';
 import { motion, AnimatePresence } from 'framer-motion';
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar holati
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -27,6 +29,7 @@ export default function App() {
       case 'debts':     return <Debts />;
       case 'audit':     return <Audit />;
       case 'expenses':  return <OfficeExpenses />;
+      case 'settings':  return <Settings />; // <--- 2. SOZLAMALAR UCHUN CASE QO'SHILDI
       default:          return <Dashboard />;
     }
   };
@@ -35,7 +38,7 @@ export default function App() {
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={true}>
       <div className="min-h-screen bg-app-bg text-app-fg transition-colors duration-500 flex">
         
-        {/* Sidebar va uning propslari */}
+        {/* Sidebar */}
         <Sidebar 
           activeTab={activeTab} 
           setActiveTab={setActiveTab} 
@@ -43,7 +46,7 @@ export default function App() {
           setIsOpen={setIsSidebarOpen} 
         />
         
-        {/* Mobil qurilmalarda sidebar ochiqligida qora fon (Overlay) */}
+        {/* Mobile Overlay */}
         <AnimatePresence>
           {isSidebarOpen && (
             <motion.div 
@@ -56,7 +59,7 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        {/* Asosiy kontent maydoni */}
+        {/* Content Area */}
         <div className="flex-1 flex flex-col min-h-screen lg:ml-72 w-full overflow-x-hidden">
           <TopBar onMenuClick={() => setIsSidebarOpen(true)} />
           
