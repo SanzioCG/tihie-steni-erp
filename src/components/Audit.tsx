@@ -77,7 +77,7 @@ export default function Audit() {
       </div>
 
       {/* JADVAL */}
-      <div className="bg-app-card border border-app-border rounded-[2.5rem] overflow-hidden min-h-[500px] relative">
+      <div className="bg-app-card border border-app-border rounded-[2.5rem] overflow-hidden min-h-125 relative">
         {loading && <div className="absolute inset-0 z-10 flex items-center justify-center bg-app-bg/50"><Loader2 className="animate-spin text-primary" size={40} /></div>}
         
         <table className="w-full text-left">
@@ -91,7 +91,7 @@ export default function Audit() {
           </thead>
           <tbody className="divide-y divide-white/5">
             {filteredLogs.map((log) => (
-              <tr key={log.id} className="group hover:bg-white/[0.01]">
+              <tr key={log.id} className="group hover:bg-white/1">
                 <td className="px-8 py-5 text-app-muted font-mono text-[11px]">
                   {new Date(log.created_at).toLocaleString()}
                 </td>

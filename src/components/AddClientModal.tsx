@@ -78,7 +78,7 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initialData
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-999 flex items-center justify-center p-4 overflow-y-auto">
       {/* Backdrop */}
       <motion.div 
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -91,7 +91,7 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initialData
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-[650px] bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl p-8 md:p-10 my-8"
+        className="relative w-full max-w-162.5 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl p-8 md:p-10 my-8"
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-10">
@@ -117,7 +117,7 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initialData
                 required 
                 value={formData.full_name} 
                 onChange={e => setFormData({...formData, full_name: e.target.value})} 
-                className="w-full px-5 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white outline-none focus:border-primary/30 transition-all" 
+                className="w-full px-5 py-4 bg-white/3 border border-white/5 rounded-2xl text-white outline-none focus:border-primary/30 transition-all" 
                 placeholder="Masalan: Aliyev Vali" 
               />
             </div>
@@ -126,7 +126,7 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initialData
               <select 
                 value={formData.client_type} 
                 onChange={e => setFormData({...formData, client_type: e.target.value})} 
-                className="w-full px-5 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white outline-none appearance-none cursor-pointer"
+                className="w-full px-5 py-4 bg-white/3 border border-white/5 rounded-2xl text-white outline-none appearance-none cursor-pointer"
               >
                 <option value="Chakana (Retail)" className="bg-[#0c0c0e]">Chakana (Retail)</option>
                 <option value="Ulgurji (Wholesale)" className="bg-[#0c0c0e]">Ulgurji (Wholesale)</option>
@@ -144,7 +144,7 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initialData
                 <input 
                   value={formData.phone} 
                   onChange={e => setFormData({...formData, phone: e.target.value})} 
-                  className="w-full pl-10 pr-4 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white outline-none text-sm" 
+                  className="w-full pl-10 pr-4 py-4 bg-white/3 border border-white/5 rounded-2xl text-white outline-none text-sm" 
                   placeholder="+998" 
                 />
               </div>
@@ -156,7 +156,7 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initialData
                 <input 
                   value={formData.telegram} 
                   onChange={e => setFormData({...formData, telegram: e.target.value})} 
-                  className="w-full pl-10 pr-4 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white outline-none text-sm" 
+                  className="w-full pl-10 pr-4 py-4 bg-white/3 border border-white/5 rounded-2xl text-white outline-none text-sm" 
                   placeholder="@username" 
                 />
               </div>
@@ -168,7 +168,7 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initialData
                 <input 
                   value={formData.company_name} 
                   onChange={e => setFormData({...formData, company_name: e.target.value})} 
-                  className="w-full pl-10 pr-4 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white outline-none text-sm" 
+                  className="w-full pl-10 pr-4 py-4 bg-white/3 border border-white/5 rounded-2xl text-white outline-none text-sm" 
                   placeholder="MCHJ nomi" 
                 />
               </div>
@@ -182,7 +182,7 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initialData
               <input 
                 value={formData.inn} 
                 onChange={e => setFormData({...formData, inn: e.target.value})} 
-                className="w-full px-5 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white outline-none font-mono" 
+                className="w-full px-5 py-4 bg-white/3 border border-white/5 rounded-2xl text-white outline-none font-mono" 
                 placeholder="123456789" 
               />
             </div>
@@ -192,7 +192,7 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initialData
                 type="number" 
                 value={formData.credit_limit} 
                 onChange={e => setFormData({...formData, credit_limit: e.target.value})} 
-                className="w-full px-5 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white outline-none font-mono" 
+                className="w-full px-5 py-4 bg-white/3 border border-white/5 rounded-2xl text-white outline-none font-mono" 
               />
             </div>
           </div>
@@ -205,7 +205,7 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initialData
               <input 
                 value={formData.address} 
                 onChange={e => setFormData({...formData, address: e.target.value})} 
-                className="w-full pl-10 pr-4 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white outline-none text-sm" 
+                className="w-full pl-10 pr-4 py-4 bg-white/3 border border-white/5 rounded-2xl text-white outline-none text-sm" 
                 placeholder="Viloyat, tuman, ko'cha..." 
               />
             </div>

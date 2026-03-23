@@ -1,170 +1,190 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { 
-  TrendingUp, AlertTriangle, Activity, ShoppingBag,
-  History, Wallet
+  TrendingUp, AlertTriangle, Activity, ShoppingBag, 
+  History, Wallet, Loader2, ArrowUpRight, Globe
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, 
-  Tooltip, ResponsiveContainer
+  Tooltip, ResponsiveContainer 
 } from 'recharts';
-import { useTheme } from 'next-themes';
 import { useTranslation } from 'react-i18next';
+import { useCurrencyStore } from '../store/useCurrencyStore'; // Valyuta do'koni
 import { cn } from '../utils';
 
-export default function Dashboard() {
-  const { theme } = useTheme();
+export default function Dashboard({ setActiveTab }: { setActiveTab: (tab: string) => void }) {
   const { t, i18n } = useTranslation();
+  const { currency, setCurrency, fetchRates, convert, rates } = useCurrencyStore();
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState({
+  const [stats, setStats] = useState({
     totalRevenue: 0,
-    assetValue: 0,
+    inventoryValue: 0,
     totalDebts: 0,
-    lowStock: 0,
-    recentActivity: [] as any[],
-    chartData: [] as any[]
+    lowStockCount: 0,
+    chartData: [] as any[],
+    recentActivity: [] as any[]
   });
 
-  useEffect(() => {
-    const fetchDashboardStats = async () => {
+  const fetchDashboardData = async () => {
+    try {
       setLoading(true);
-      try {
-        // 1. Jami Tushum (Sales)
-        const { data: sales } = await supabase.from('sales').select('total_amount, created_at');
-        const revenue = sales?.reduce((sum, s) => sum + Number(s.total_amount), 0) || 0;
 
-        // 2. Ombor Qiymati va Kam Zaxira (User kiritgan limit asosida)
-        // remaining_quantity va min_limit ustunlarini olamiz
-        const { data: batches } = await supabase.from('batches').select('remaining_quantity, purchase_price, min_limit');
-        
-        const assets = batches?.reduce((sum, b) => sum + (Number(b.remaining_quantity) * Number(b.purchase_price)), 0) || 0;
-        
-        // 🔥 ENG MUHIMI: Foydalanuvchi kiritgan min_limit bilan solishtirish
-        const lowStockCount = batches?.filter(b => 
-          Number(b.remaining_quantity) <= Number(b.min_limit || 0)
-        ).length || 0;
+      // 1. Jami tushum (Bazada USD)
+      const { data: sales } = await supabase.from('sales').select('total_amount, created_at');
+      const revenueUSD = sales?.reduce((sum, s) => sum + Number(s.total_amount), 0) || 0;
 
-        // 3. Jami Qarzlar
-        const { data: clients } = await supabase.from('clients').select('balance');
-        const debts = clients?.filter(c => c.balance < 0).reduce((sum, c) => sum + Math.abs(Number(c.balance)), 0) || 0;
+      // 2. Ombor Qiymati (remaining_quantity * purchase_price - Bazada USD)
+      const { data: batches } = await supabase.from('batches').select('remaining_quantity, purchase_price, min_limit');
+      const invValueUSD = batches?.reduce((sum, b) => sum + (Number(b.remaining_quantity) * Number(b.purchase_price)), 0) || 0;
+      const lowStock = batches?.filter(b => Number(b.remaining_quantity) <= Number(b.min_limit || 0)).length || 0;
 
-        // 4. Oxirgi harakatlar
-        const { data: logs } = await supabase.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(5);
+      // 3. Jami Qarzlar (Bazada USD)
+      const { data: clients } = await supabase.from('clients').select('balance');
+      const debtsUSD = clients?.filter(c => c.balance < 0).reduce((sum, c) => sum + Math.abs(Number(c.balance)), 0) || 0;
 
-        // 5. Grafik ma'lumotlari
-        const chart = sales?.slice(-7).map(s => ({
-          name: new Date(s.created_at).toLocaleDateString(i18n.language === 'uz' ? 'uz-UZ' : i18n.language === 'ru' ? 'ru-RU' : 'en-US', { weekday: 'short' }),
-          sum: s.total_amount
-        })) || [];
+      // 4. Oxirgi Harakatlar
+      const { data: logs } = await supabase.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(6);
 
-        setData({
-          totalRevenue: revenue,
-          assetValue: assets,
-          totalDebts: debts,
-          lowStock: lowStockCount,
-          recentActivity: logs || [],
-          chartData: chart
-        });
-      } catch (err) {
-        console.error("Dashboard error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+      // 5. Grafik (Oxirgi 7 kun) - Kursga ko'paytirilgan holatda
+      const chart = sales?.slice(-7).map(s => ({
+        name: new Date(s.created_at).toLocaleDateString(i18n.language, { weekday: 'short' }),
+        sumUSD: s.total_amount // Bazadagi asl qiymat
+      })) || [];
 
-    fetchDashboardStats();
+      setStats({
+        totalRevenue: revenueUSD,
+        inventoryValue: invValueUSD,
+        totalDebts: debtsUSD,
+        lowStockCount: lowStock,
+        chartData: chart,
+        recentActivity: logs || []
+      });
+    } catch (err) {
+      console.error("Dashboard error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // Ma'lumotlar o'zgarganda real-time yangilash (ixtiyoriy)
-    const subscription = supabase.channel('any_change')
-      .on('postgres_changes', { event: '*', schema: 'public' }, () => fetchDashboardStats())
-      .subscribe();
+  useEffect(() => {
+    fetchRates(); // Bankdan kurslarni olish
+    fetchDashboardData();
 
-    return () => { supabase.removeChannel(subscription); };
+    // Real-time listener
+    const channel = supabase.channel('db_sync').on('postgres_changes', { event: '*', schema: 'public' }, () => fetchDashboardData()).subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [i18n.language]);
 
-  const textColor = theme === 'dark' ? '#a1a1aa' : '#64748b';
-  const gridColor = theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+  if (loading) return <div className="h-96 flex items-center justify-center"><Loader2 className="animate-spin text-primary" size={48} /></div>;
 
   return (
-    <div className="space-y-8 text-left text-app-fg animate-in fade-in duration-500">
-      {/* HEADER */}
-      <div className="flex justify-between items-center px-2">
+    <div className="space-y-8 text-left animate-in fade-in duration-500">
+      
+      {/* HEADER & CURRENCY SWITCHER */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-2">
         <div>
-          <h2 className="text-3xl font-black tracking-tight uppercase ">{t('dashboard')}</h2>
-          <p className="text-sm text-app-muted font-medium italic mt-1">
-            {i18n.language === 'uz' ? 'Holdingning real vaqtdagi moliyaviy holati' : 
-             i18n.language === 'ru' ? 'Финансовое состояние холдинга в реальном времени' : 
-             'Real-time financial status of the holding'}
+          <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">
+            {t('dashboard')}
+          </h2>
+          <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.3em] mt-1 flex items-center gap-2">
+             <Globe size={12} /> {t('live_monitoring')} • Real-time CBU Rates
           </p>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-xl text-primary animate-pulse">
-           <Activity size={16} />
-           <span className="text-[10px] font-black uppercase tracking-widest">Live Monitoring</span>
+
+        {/* VALYUTA TANLASH TUGMALARI */}
+        <div className="flex bg-white/5 p-1 rounded-2xl border border-white/5">
+           {(['USD', 'UZS', 'EUR', 'RUB'] as const).map((c) => (
+             <button
+               key={c}
+               onClick={() => setCurrency(c)}
+               className={cn(
+                 "px-5 py-2 rounded-xl text-[10px] font-black transition-all",
+                 currency === c ? "bg-primary text-black shadow-lg shadow-primary/20" : "text-gray-500 hover:text-white"
+               )}
+             >
+               {c}
+             </button>
+           ))}
         </div>
       </div>
 
-      {/* KPI CARDS */}
+      {/* KPI CARDS (Barcha qiymatlar convert() funksiyasidan o'tadi) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mx-2">
-        <KPIItem label={t('total_revenue')} value={`$${data.totalRevenue.toLocaleString()}`} icon={TrendingUp} color="text-primary" trend="+12%" />
-        <KPIItem label={t('inventory_value')} value={`$${data.assetValue.toLocaleString()}`} icon={ShoppingBag} color="text-blue-400" trend={t('available')} />
-        <KPIItem label={t('debts_label')} value={`$${data.totalDebts.toLocaleString()}`} icon={Wallet} color="text-rose-500" trend="!" />
-        
-        {/* KAM ZAXIRA KARTASI */}
         <KPIItem 
-          label={t('low_stock')} 
-          value={`${data.lowStock} ta partiya`} 
-          icon={AlertTriangle} 
-          color={data.lowStock > 0 ? "text-rose-500" : "text-amber-500"} 
-          trend="Ombor" 
+          label={t('total_revenue')} 
+          value={convert(stats.totalRevenue)} 
+          icon={TrendingUp} 
+          color="text-emerald-500" 
         />
+        
+        <div onClick={() => setActiveTab('stock')} className="cursor-pointer">
+          <KPIItem 
+            label={t('inventory_value')} 
+            value={convert(stats.inventoryValue)} 
+            icon={ShoppingBag} 
+            color="text-blue-400" 
+            trend="OMBOR" 
+          />
+        </div>
+
+        <div onClick={() => setActiveTab('debts')} className="cursor-pointer">
+          <KPIItem 
+            label={t('debts_label')} 
+            value={convert(stats.totalDebts)} 
+            icon={Wallet} 
+            color="text-rose-500" 
+            trend="QARZLAR" 
+          />
+        </div>
+
+        <div onClick={() => setActiveTab('lowstock')} className="cursor-pointer">
+          <KPIItem 
+            label={t('low_stock')} 
+            value={`${stats.lowStockCount} ta partiya`} 
+            icon={AlertTriangle} 
+            color={stats.lowStockCount > 0 ? "text-rose-500 animate-pulse" : "text-amber-500"} 
+            trend="DIQQAT" 
+          />
+        </div>
       </div>
 
-      {/* CHARTS & ACTIVITY */}
+      {/* CHARTS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mx-2">
         <div className="lg:col-span-2 p-8 bg-[#0c0c0e] border border-white/5 rounded-[3rem] shadow-2xl relative">
-          <h3 className="text-lg font-bold uppercase italic tracking-widest mb-10 flex items-center gap-2 text-white">
-            <Activity size={20} className="text-primary" /> {i18n.language === 'uz' ? 'Savdo Dinamikasi' : 'Продажи'}
-          </h3>
-          <div className="h-80 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data.chartData}>
-                <defs>
-                  <linearGradient id="colorSum" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#34d399" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#34d399" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: textColor, fontSize: 11}} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: textColor, fontSize: 11}} />
-                <Tooltip contentStyle={{backgroundColor: '#0c0c0e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '15px', color: '#fff'}} />
-                <Area type="monotone" dataKey="sum" stroke="#34d399" strokeWidth={4} fill="url(#colorSum)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+           <h3 className="text-lg font-black text-white uppercase italic mb-10 flex items-center gap-3">
+             <Activity className="text-primary"/> Savdo Dinamikasi ({currency})
+           </h3>
+           <div className="h-80 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={stats.chartData.map(d => ({ ...d, sumConverted: currency === 'USD' ? d.sumUSD : currency === 'UZS' ? d.sumUSD * rates.USD : (d.sumUSD * rates.USD) / (rates[currency] || 1) }))}>
+                  <defs><linearGradient id="grad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#34d399" stopOpacity={0.2}/><stop offset="95%" stopColor="#34d399" stopOpacity={0}/></linearGradient></defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 11}} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 11}} />
+                  <Tooltip contentStyle={{backgroundColor: '#080809', border: '1px solid #1f2937', borderRadius: '15px', color: '#fff'}} 
+                    formatter={(val: number) => [convert(val), 'Summa']}
+                  />
+                  <Area type="monotone" dataKey="sumConverted" stroke="#34d399" strokeWidth={4} fill="url(#grad)" animationDuration={1500} />
+                </AreaChart>
+              </ResponsiveContainer>
+           </div>
         </div>
 
-        <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-[3rem] shadow-2xl">
-          <h3 className="text-lg font-bold uppercase italic tracking-widest mb-8 flex items-center gap-2 text-white">
-            <History size={20} className="text-primary" /> {t('recent_activity')}
-          </h3>
-          <div className="space-y-6 overflow-y-auto max-h-[400px] pr-2 no-scrollbar">
-            {data.recentActivity.map((log) => (
+        {/* RECENT ACTIVITY */}
+        <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-[3rem] shadow-2xl overflow-hidden">
+          <h3 className="text-lg font-black text-white uppercase italic mb-8 flex items-center gap-3"><History className="text-primary"/> {t('recent_activity')}</h3>
+          <div className="space-y-6 overflow-y-auto max-h-87.5 no-scrollbar">
+            {stats.recentActivity.map((log: any) => (
               <div key={log.id} className="flex items-start gap-4 group">
                 <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
-                  <Activity size={16} className="text-gray-500 group-hover:text-primary" />
+                  <Activity size={16} className="text-gray-600 group-hover:text-primary" />
                 </div>
                 <div>
                   <p className="text-sm font-bold text-white leading-tight">{log.details}</p>
-                  <p className="text-[10px] text-gray-600 font-medium mt-1 uppercase tracking-tighter">
-                    {new Date(log.created_at).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })} • {log.user_name}
-                  </p>
+                  <p className="text-[10px] text-gray-600 font-bold mt-1 uppercase">{new Date(log.created_at).toLocaleTimeString(i18n.language)}</p>
                 </div>
               </div>
             ))}
-            {data.recentActivity.length === 0 && (
-              <div className="text-center py-10 text-gray-600 italic">{t('no_data')}</div>
-            )}
           </div>
         </div>
       </div>
@@ -174,17 +194,14 @@ export default function Dashboard() {
 
 function KPIItem({ label, value, icon: Icon, color, trend }: any) {
   return (
-    <div className="p-6 bg-[#0c0c0e] border border-white/5 rounded-[2rem] shadow-xl hover:border-primary/30 transition-all group">
-      <div className="flex items-center justify-between mb-4">
-        <div className={cn("p-3 bg-white/5 rounded-2xl group-hover:scale-110 transition-transform", color)}>
-          <Icon size={24} />
-        </div>
-        <span className="text-[9px] font-black px-2 py-1 rounded-lg border border-white/5 bg-white/5 text-gray-500 uppercase italic tracking-widest">
-          {trend}
-        </span>
+    <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-xl hover:border-primary/20 transition-all group relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 rounded-full blur-3xl -mr-10 -mt-10" />
+      <div className="flex items-center justify-between mb-5">
+        <div className={cn("p-3 bg-white/5 rounded-2xl group-hover:scale-110 transition-transform", color)}><Icon size={26} /></div>
+        {trend && <span className="text-[9px] font-black px-2 py-1 rounded-lg bg-white/5 text-gray-500 uppercase italic tracking-widest">{trend}</span>}
       </div>
-      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-1">{label}</p>
-      <h3 className="text-2xl font-black tracking-tighter text-white">{value}</h3>
+      <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-1">{label}</p>
+      <h3 className="text-3xl font-black text-white tracking-tighter italic">{value}</h3>
     </div>
   );
 }

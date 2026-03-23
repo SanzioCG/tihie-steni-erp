@@ -1,88 +1,91 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Camera, FolderOpen, Loader2, Save } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { X, Camera, Loader2, Save, Link as LinkIcon, Hash } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { supabase } from '../supabase';
-import { useTranslation } from 'react-i18next'; // Til hookini import qildik
 
 export default function AddProductModal({ isOpen, onClose, onSuccess, initialData }: any) {
-  const { t } = useTranslation(); // t funksiyasini chaqirdik
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
+  const [existingSeries, setExistingSeries] = useState<string[]>([]);
+  
+  // Rasm state'lari
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState('');
 
   const [formData, setFormData] = useState({
-    series: '', name_uz: '', attribute: '',
-    sku: '', category_id: '', unit: 'pcs', min_stock: '10'
+    category_id: '',
+    series: '',
+    name_uz: '',
+    sku: '', 
+    min_stock: '10'
   });
 
   useEffect(() => {
     const init = async () => {
-      const { data } = await supabase.from('categories').select('*');
-      if (data) setCategories(data);
+      const { data: cats } = await supabase.from('categories').select('*').order('name_uz');
+      if (cats) setCategories(cats);
+
+      const { data: prods } = await supabase.from('products').select('series');
+      if (prods) {
+        const uniqueSeries = Array.from(new Set(prods.map(p => p.series).filter(Boolean)));
+        setExistingSeries(uniqueSeries as string[]);
+      }
 
       if (initialData) {
         setFormData({
+          category_id: initialData.category_id || '',
           series: initialData.series || '',
           name_uz: initialData.name_uz || '',
-          attribute: initialData.attribute || '',
           sku: initialData.sku || '',
-          category_id: initialData.category_id || '',
-          unit: initialData.unit || 'pcs',
           min_stock: initialData.min_stock?.toString() || '10'
         });
-        setImagePreview(initialData.image_url);
-      } else {
-        setFormData({ 
-          series: '', name_uz: '', attribute: '',
-          sku: '', category_id: data?.[0]?.id || '', unit: 'pcs', min_stock: '10' 
-        });
-        setImagePreview(null);
-        setImageFile(null);
+        if (initialData.image_url?.includes('supabase')) {
+          setImagePreview(initialData.image_url);
+        } else {
+          setImageUrl(initialData.image_url || '');
+          setImagePreview(initialData.image_url || null);
+        }
       }
     };
     if (isOpen) init();
   }, [isOpen, initialData]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
+      setImageUrl(''); // Fayl tanlansa, URL o'chadi
     }
+  };
+
+  const handleUrlChange = (val: string) => {
+    setImageUrl(val);
+    setImagePreview(val); // URL yozilsa, preview yangilanadi
+    setImageFile(null);   // URL yozilsa, tanlangan fayl bekor bo'ladi
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      let finalImageUrl = imagePreview;
+      let finalImageUrl = imageUrl || imagePreview;
 
       if (imageFile) {
-        const fileExt = imageFile.name.split('.').pop();
-        const fileName = `${Date.now()}.${fileExt}`;
-        const filePath = fileName;
-
-        const { error: upErr } = await supabase.storage
-          .from('products')
-          .upload(filePath, imageFile, { upsert: true });
-
+        const fileName = `${Date.now()}.${imageFile.name.split('.').pop()}`;
+        const { error: upErr } = await supabase.storage.from('products').upload(fileName, imageFile);
         if (upErr) throw upErr;
-
-        const { data: urlData } = supabase.storage.from('products').getPublicUrl(filePath);
+        const { data: urlData } = supabase.storage.from('products').getPublicUrl(fileName);
         finalImageUrl = urlData.publicUrl;
       }
 
       const saveData = {
+        category_id: formData.category_id,
         series: formData.series,
         name_uz: formData.name_uz,
-        name_ru: formData.name_uz,
-        name_en: formData.name_uz,
-        attribute: formData.attribute,
         sku: formData.sku,
-        category_id: formData.category_id,
-        unit: formData.unit,
         image_url: finalImageUrl,
         min_stock: Number(formData.min_stock)
       };
@@ -92,101 +95,100 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, initialDat
         : await supabase.from('products').insert([saveData]);
 
       if (error) throw error;
-
-      // ==========================================
-      // 👇 AUDIT LOG QISMI (SHU YERGA QO'SHILDI)
-      // ==========================================
-      await supabase.from('audit_logs').insert([{
-        action: initialData ? 'UPDATED' : 'CREATED',
-        entity: 'MAHSULOT',
-        details: `${initialData ? 'Mahsulot tahrirlandi' : 'Yangi mahsulot qo\'shildi'}: ${formData.name_uz}`,
-        user_name: 'Admin'
-      }]);
-      // ==========================================
-
       onSuccess();
       onClose();
-    } catch (err: any) { 
-      console.error(err);
-      alert(t('error') + ": " + err.message); 
-    } finally { 
-      setLoading(false); 
-    }
+    } catch (err: any) { alert(err.message); } finally { setLoading(false); }
   };
 
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-999 flex items-start justify-center p-4 md:p-10 overflow-y-auto">
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
+    <div className="fixed inset-0 z-1000 flex items-center justify-center p-4">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={onClose} />
       
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="relative my-auto w-full max-w-[650px] bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl p-8 md:p-10"
+        initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+        className="relative w-full max-w-150 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl p-8 md:p-10"
       >
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3 font-bold text-white tracking-tight italic">
+          <h3 className="text-xl font-black text-white italic uppercase flex items-center gap-3">
             <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_#34d399]" />
-            {initialData ? t('edit') : t('add_product')} {/* Tarjima ulandi */}
-          </div>
-          <button onClick={onClose} className="p-2 bg-white/5 rounded-xl border border-white/5 text-gray-500 hover:text-white transition-all"><X size={20}/></button>
+            {initialData ? 'Tahrirlash' : 'Yangi Mahsulot'}
+          </h3>
+          <button onClick={onClose} className="p-2 bg-white/5 rounded-xl text-gray-500 hover:text-white transition-all"><X size={20}/></button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 text-left">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          
           {/* IMAGE SECTION */}
-          <div className="flex items-center gap-6">
-            <div className="relative w-24 h-24 rounded-2xl bg-white/[0.03] border-2 border-dashed border-white/10 flex items-center justify-center overflow-hidden shrink-0">
-              {imagePreview ? (
-                <img src={imagePreview} className="w-full h-full object-cover" />
-              ) : (
-                <Camera size={20} className="text-gray-700" />
-              )}
-            </div>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1e] border border-white/5 rounded-xl text-[11px] font-bold text-gray-300 hover:bg-white/5 cursor-pointer transition-all">
-                <FolderOpen size={14} className="text-amber-500" />
-                <span>{t('select_product', 'Rasm tanlash')}</span> {/* Tarjima ulandi */}
-                <input type="file" className="hidden" onChange={handleImageChange} accept="image/*" />
-              </label>
-              <p className="text-[9px] text-gray-700 uppercase font-bold tracking-widest italic">JPG, PNG, WEBP • Max 2MB</p>
+          <div className="flex items-center gap-5 p-5 bg-white/2 border border-white/5 rounded-3xl">
+            {/* Clickable Icon/Preview */}
+            <label className="relative w-24 h-24 rounded-3xl bg-white/5 border-2 border-dashed border-white/10 flex items-center justify-center overflow-hidden shrink-0 cursor-pointer hover:border-primary/40 transition-all group">
+                {imagePreview ? (
+                    <img src={imagePreview} className="w-full h-full object-cover" />
+                ) : (
+                    <div className="flex flex-col items-center gap-1 text-gray-700 group-hover:text-primary transition-colors">
+                        <Camera size={24} />
+                        <span className="text-[7px] font-black uppercase">Fayl yuklash</span>
+                    </div>
+                )}
+                <input type="file" className="hidden" onChange={handleFileChange} accept="image/*" />
+            </label>
+
+            {/* URL Input Area */}
+            <div className="flex-1 space-y-2">
+                <label className="text-[9px] font-black text-gray-600 uppercase tracking-widest ml-1">Rasm havolasi (URL)</label>
+                <div className="relative">
+                    <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" size={14} />
+                    <input 
+                        value={imageUrl} 
+                        onChange={e => handleUrlChange(e.target.value)} 
+                        placeholder="https://..." 
+                        className="w-full pl-10 pr-4 py-3.5 bg-white/5 border border-white/5 rounded-2xl text-white text-[11px] outline-none focus:border-primary/30 font-medium" 
+                    />
+                </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-             <div className="space-y-2">
-               <label className="text-[9px] font-bold text-gray-600 uppercase tracking-widest ml-1">{t('sku', 'Seriya')}</label>
-               <input value={formData.series} onChange={e => setFormData({...formData, series: e.target.value})} className="w-full px-4 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-sm text-white outline-none focus:border-primary/30" />
-             </div>
-             <div className="space-y-2">
-               <label className="text-[9px] font-bold text-gray-600 uppercase tracking-widest ml-1">{t('products', 'Nomi')}</label>
-               <input required value={formData.name_uz} onChange={e => setFormData({...formData, name_uz: e.target.value})} className="w-full px-4 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-sm text-white outline-none focus:border-primary/30" />
-             </div>
-             <div className="space-y-2">
-               <label className="text-[9px] font-bold text-gray-600 uppercase tracking-widest ml-1">{t('status', 'Rang')}</label>
-               <input value={formData.attribute} onChange={e => setFormData({...formData, attribute: e.target.value})} className="w-full px-4 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-sm text-white outline-none focus:border-primary/30" />
-             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* 1. KATEGORIYA VA SERIYA */}
+          <div className="grid grid-cols-2 gap-5 text-left">
             <div className="space-y-2">
-              <label className="text-[9px] font-bold text-gray-600 uppercase tracking-widest ml-1">{t('category')}</label>
-              <select value={formData.category_id} onChange={(e) => setFormData({...formData, category_id: e.target.value})} className="w-full px-4 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-sm text-white outline-none focus:border-primary/30">
-                {categories.map(c => <option key={c.id} value={c.id} className="bg-[#0c0c0e]">{c.name_uz}</option>)}
+              <label className="text-[9px] font-black text-gray-600 uppercase tracking-widest ml-2">1. Kategoriya</label>
+              <select required value={formData.category_id} onChange={(e) => setFormData({...formData, category_id: e.target.value})} className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-sm text-white font-bold outline-none cursor-pointer">
+                <option value="">Tanlang</option>
+                {categories.map(c => <option key={c.id} value={c.id} className="bg-black">{c.name_uz}</option>)}
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-[9px] font-bold text-gray-600 uppercase tracking-widest ml-1">SKU</label>
-              <input required value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value})} className="w-full px-4 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-sm text-white" />
+              <label className="text-[9px] font-black text-gray-600 uppercase tracking-widest ml-2">2. Seriya</label>
+              <input list="series-data" required value={formData.series} onChange={e => setFormData({...formData, series: e.target.value})} className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-sm text-white font-bold outline-none focus:border-primary/30" placeholder="Komfort" />
+              <datalist id="series-data">{existingSeries.map(s => <option key={s} value={s} />)}</datalist>
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-6 border-t border-white/5">
-            <button type="button" onClick={onClose} className="px-8 py-3 text-xs font-bold text-gray-500 hover:text-white uppercase tracking-widest">{t('cancel')}</button>
-            <button disabled={loading} type="submit" className="px-10 py-4 bg-primary text-black font-extrabold rounded-xl shadow-lg hover:scale-[1.03] active:scale-95 transition-all flex items-center gap-2 uppercase tracking-widest text-[11px]">
-              {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-              {initialData ? t('confirm') : t('save')}
+          {/* 2. NOM VA ID */}
+          <div className="grid grid-cols-2 gap-5 text-left">
+            <div className="space-y-2">
+              <label className="text-[9px] font-black text-gray-600 uppercase tracking-widest ml-2">3. Mahsulot nomi</label>
+              <input required value={formData.name_uz} onChange={e => setFormData({...formData, name_uz: e.target.value})} className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-sm text-white font-bold outline-none focus:border-primary/30" placeholder="Nomi..." />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[9px] font-black text-gray-600 uppercase tracking-widest ml-2">4. Mahsulot ID (SKU)</label>
+              <div className="relative">
+                <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" size={16} />
+                <input required value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value})} className="w-full pl-12 pr-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-sm text-white font-mono font-bold outline-none focus:border-primary/30" placeholder="ID-001" />
+              </div>
+            </div>
+          </div>
+
+          {/* ACTIONS */}
+          <div className="flex items-center justify-end gap-6 pt-6 border-t border-white/5">
+            <button type="button" onClick={onClose} className="text-[10px] font-black text-gray-600 hover:text-white uppercase transition-all">Bekor qilish</button>
+            <button disabled={loading} type="submit" className="px-12 py-4 bg-primary text-black font-black rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2 uppercase text-[10px]">
+              {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Saqlash
             </button>
           </div>
+
         </form>
       </motion.div>
     </div>,

@@ -66,7 +66,7 @@ export default function OfficeExpenses() {
     <div className="space-y-8 text-left p-6 animate-in fade-in duration-500">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-black text-white uppercase ">Office Xarajatlari</h2>
-        <button onClick={() => setIsModalOpen(true)} className="px-8 py-3.5 bg-[#34d399] text-black font-black rounded-2xl shadow-lg hover:scale-105 transition-all uppercase text-[10px] tracking-widest">+ Yangi Xarajat</button>
+        <button onClick={() => setIsModalOpen(true)} className="px-8 py-3.5 bg-primary text-black font-black rounded-2xl shadow-lg hover:scale-105 transition-all uppercase text-[10px] tracking-widest">+ Yangi Xarajat</button>
       </div>
 
       <div className="p-8 bg-rose-500/10 border border-rose-500/20 rounded-[2.5rem] flex items-center gap-6">
@@ -74,13 +74,13 @@ export default function OfficeExpenses() {
         <div><p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">Umumiy Xarajatlar:</p><p className="text-3xl font-black text-white tracking-tighter">${expenses.reduce((sum, e) => sum + Number(e.amount), 0).toLocaleString()}</p></div>
       </div>
 
-      <div className="bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl relative min-h-[300px]">
+      <div className="bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl relative min-h-75">
         {loading && <div className="absolute inset-0 flex items-center justify-center bg-black/50"><Loader2 className="animate-spin text-primary" size={40} /></div>}
         <table className="w-full text-left">
-          <thead className="bg-white/5 text-[#34d399]"><tr><th className="px-8 py-6 text-[10px] font-black uppercase">Nomi</th><th className="px-8 py-6 text-[10px] font-black uppercase text-center">Kategoriya</th><th className="px-8 py-6 text-[10px] font-black uppercase text-right">Summa</th></tr></thead>
+          <thead className="bg-white/5 text-primary"><tr><th className="px-8 py-6 text-[10px] font-black uppercase">Nomi</th><th className="px-8 py-6 text-[10px] font-black uppercase text-center">Kategoriya</th><th className="px-8 py-6 text-[10px] font-black uppercase text-right">Summa</th></tr></thead>
           <tbody className="divide-y divide-white/5">
             {expenses.map((e) => (
-              <tr key={e.id} className="hover:bg-white/[0.02] transition-all">
+              <tr key={e.id} className="hover:bg-white/2 transition-all">
                 <td className="px-8 py-5 text-white font-bold">{e.title}</td>
                 <td className="px-8 py-5 text-center"><span className="px-3 py-1 bg-white/5 rounded-lg text-[9px] text-gray-500 font-bold uppercase">{e.category}</span></td>
                 <td className="px-8 py-5 text-right font-black text-rose-500">-${Number(e.amount).toLocaleString()}</td>
@@ -92,16 +92,16 @@ export default function OfficeExpenses() {
 
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-200 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative w-full max-w-[400px] bg-[#0c0c0e] border border-white/10 rounded-[2rem] p-8 shadow-2xl space-y-6">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative w-full max-w-100 bg-[#0c0c0e] border border-white/10 rounded-4xl p-8 shadow-2xl space-y-6">
                <h3 className="text-lg font-black text-white italic">Yangi xarajat</h3>
                <div className="space-y-4">
                  <input className="w-full px-5 py-3.5 bg-white/5 border border-white/5 rounded-xl text-white outline-none" placeholder="Xarajat nomi" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
                  <div className="relative">
                    <div onClick={() => setIsDropdownOpen(!isDropdownOpen)} className="w-full px-5 py-3.5 bg-white/5 border border-white/5 rounded-xl text-white flex justify-between cursor-pointer"><span className={cn("text-sm font-bold", selectedCat.color)}>{selectedCat.name}</span><ChevronDown size={16}/></div>
                    {isDropdownOpen && (
-                     <div className="absolute top-full mt-2 w-full bg-[#161618] border border-white/10 rounded-xl overflow-hidden z-[210]">
+                     <div className="absolute top-full mt-2 w-full bg-[#161618] border border-white/10 rounded-xl overflow-hidden z-210">
                        {CATEGORIES.map(cat => <div key={cat.id} onClick={() => {setFormData({...formData, category: cat.id}); setIsDropdownOpen(false);}} className="p-4 hover:bg-white/5 text-xs font-bold text-white cursor-pointer">{cat.name}</div>)}
                      </div>
                    )}

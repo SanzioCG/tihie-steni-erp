@@ -11,6 +11,7 @@ import Debts from './components/Debts';
 import Audit from './components/Audit';
 import OfficeExpenses from './components/OfficeExpenses';
 import Settings from './components/Settings'; // <--- 1. IMPORT QO'SHILDI
+import LowStock from './components/LowStock'; // YANGI KAM QOLGANLAR COMPONENTI
 import { ThemeProvider } from './components/ThemeProvider';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -20,9 +21,10 @@ export default function App() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'dashboard': return <Dashboard />;
+      case 'dashboard': return <Dashboard setActiveTab={setActiveTab} />;
       case 'products':  return <Inventory />;
       case 'stock':     return <Stock />;
+      case 'lowstock':  return <LowStock />; // YANGI KAM QOLGANLAR UCHUN CASE QO'SHILDI
       case 'finance':   return <Finance />;
       case 'sales':     return <Sales />;
       case 'clients':   return <Clients />;
@@ -30,7 +32,6 @@ export default function App() {
       case 'audit':     return <Audit />;
       case 'expenses':  return <OfficeExpenses />;
       case 'settings':  return <Settings />; // <--- 2. SOZLAMALAR UCHUN CASE QO'SHILDI
-      default:          return <Dashboard />;
     }
   };
 

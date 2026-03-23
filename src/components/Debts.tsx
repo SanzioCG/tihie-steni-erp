@@ -120,7 +120,7 @@ export default function Debts() {
       {/* DEBTORS GRID (Eski UI kartochkalari) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mx-2">
         {clients.filter(c => c.full_name.toLowerCase().includes(search.toLowerCase())).map((client) => (
-          <div key={client.id} className="p-6 bg-[#0c0c0e] border border-white/5 rounded-[2rem] shadow-2xl hover:border-rose-500/30 transition-all group">
+          <div key={client.id} className="p-6 bg-[#0c0c0e] border border-white/5 rounded-4xl shadow-2xl hover:border-rose-500/30 transition-all group">
             <div className="flex justify-between items-start mb-6">
                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform">
                   <User size={24} />
@@ -146,10 +146,10 @@ export default function Debts() {
       {/* PAYMENT MODAL (Ixcham variant) */}
       <AnimatePresence>
         {selectedClient && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-200 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setSelectedClient(null)} />
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-              className="relative w-full max-w-[400px] bg-[#0c0c0e] border border-white/10 rounded-[2.5rem] p-10 shadow-2xl space-y-6"
+              className="relative w-full max-w-100 bg-[#0c0c0e] border border-white/10 rounded-[2.5rem] p-10 shadow-2xl space-y-6"
             >
               <button onClick={() => setSelectedClient(null)} className="absolute right-6 top-6 text-gray-500"><X size={20}/></button>
               <div className="text-center">
@@ -169,7 +169,7 @@ export default function Debts() {
               <button 
                 onClick={handlePayment}
                 disabled={paying || !paymentAmount}
-                className="w-full py-5 bg-[#34d399] text-black font-black rounded-2xl shadow-lg uppercase text-[11px] tracking-widest flex items-center justify-center gap-2"
+                className="w-full py-5 bg-primary text-black font-black rounded-2xl shadow-lg uppercase text-[11px] tracking-widest flex items-center justify-center gap-2"
               >
                 {paying ? <Loader2 className="animate-spin" size={18}/> : <CheckCircle2 size={18}/>} To'lovni saqlash
               </button>
