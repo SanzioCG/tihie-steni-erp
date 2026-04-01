@@ -83,7 +83,7 @@ export default function Dashboard({ setActiveTab }: { setActiveTab: (tab: string
       {/* HEADER & CURRENCY SWITCHER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-2">
         <div>
-          <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">
+          <h2 className="text-3xl font-black text-white uppercase  tracking-tighter">
             {t('dashboard')}
           </h2>
           <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.3em] mt-1 flex items-center gap-2">

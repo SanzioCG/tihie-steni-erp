@@ -49,7 +49,7 @@ export default function Settings() {
               type="text" 
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white font-bold outline-none focus:border-primary/30 transition-all" 
+              className="w-full px-6 py-4 bg-white/3 border border-white/5 rounded-2xl text-white font-bold outline-none focus:border-primary/30 transition-all" 
               placeholder="Ismingizni kiriting"
             />
           </div>
@@ -59,7 +59,7 @@ export default function Settings() {
             <label className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] ml-2 flex items-center gap-2">
               <Globe size={12} /> Tizim tili
             </label>
-            <div className="grid grid-cols-3 gap-2 bg-white/5 p-1.5 rounded-[1.5rem] border border-white/5">
+            <div className="grid grid-cols-3 gap-2 bg-white/5 p-1.5 rounded-3xl border border-white/5">
               {['uz', 'ru', 'en'].map((lang) => (
                 <button
                   key={lang}
