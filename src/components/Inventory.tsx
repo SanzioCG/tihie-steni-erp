@@ -59,7 +59,7 @@ export default function Inventory() {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-2">
         <div>
-          <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">
+          <h2 className="text-3xl font-black text-white uppercase  tracking-tighter">
             Mahsulot Katalogi
           </h2>
           <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.3em] opacity-60">Tizimdagi barcha mahsulotlar pasporti</p>

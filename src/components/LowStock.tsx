@@ -67,7 +67,7 @@ export default function LowStock() {
     <div className="space-y-6 text-left p-2 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-2">
         <div>
-          <h2 className="text-3xl font-black text-rose-500 uppercase italic tracking-tighter flex items-center gap-3">
+          <h2 className="text-3xl font-black text-rose-500 uppercase tracking-tighter flex items-center gap-3">
             <AlertTriangle size={32} /> Kam qolganlar
           </h2>
           <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.3em] opacity-60">Zaxira limiti tugagan partiyalar</p>

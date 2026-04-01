@@ -26,7 +26,7 @@ export default function Stock() {
   return (
     <div className="space-y-6 text-left p-2 animate-in fade-in duration-500">
       <div className="flex justify-between items-center px-2">
-        <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">Ombor Zaxirasi</h2>
+        <h2 className="text-3xl font-black text-white uppercase  tracking-tighter">Ombor Zaxirasi</h2>
         <button onClick={() => { setEditingBatch(null); setIsInboundOpen(true); }} className="px-8 py-3.5 bg-primary text-black font-black rounded-2xl shadow-lg uppercase text-[11px]">+ Yangi Kirim</button>
       </div>
 

@@ -70,7 +70,7 @@ export default function Sales() {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-2">
         <div>
-          <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">Sotuvlar Tarixi</h2>
+          <h2 className="text-3xl font-black text-white uppercase  tracking-tighter">Sotuvlar Tarixi</h2>
           <p className="text-sm text-gray-500 italic mt-1">Barcha amalga oshirilgan bitimlar va qoldiqlar nazorati</p>
         </div>
         <button 
