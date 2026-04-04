@@ -1,20 +1,21 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 🏛️ Silent Walls ERP (ТИХИЕ СТЕНЫ)
 
-# Run and deploy your AI Studio app
+Advanced Enterprise Resource Planning (ERP) system specifically designed for Textile and Construction Materials business.
 
-This contains everything you need to run your app locally.
+## 🚀 Key Features
+- **📏 Smart Metrology Logic:** Automated calculation for Textile ($m^2 = Width \times Length$) and Profiles (Linear meters).
+- **🛒 Multi-item POS Terminal:** Basket-based checkout system with real-time stock deduction.
+- **💰 Real-time Currency:** Integrated with Central Bank of Uzbekistan (CBU) API for live USD to UZS/EUR/RUB conversion.
+- **👥 Deep CRM:** Customer purchase history, debt tracking (Debitor), and automated balance management.
+- **🛡️ Security:** Role-based access control (Admin, Director, Manager).
+- **📊 Analytics:** Interactive financial charts (Area, Line, Bar) and expense distribution (Donut chart).
 
-View your app in AI Studio: https://ai.studio/apps/aa43e887-d20d-4515-962a-4a62138f3e65
+## 🛠️ Tech Stack
+- **Frontend:** React.js, TypeScript, Tailwind CSS v4, Framer Motion.
+- **Backend/Database:** Supabase (PostgreSQL), Auth, Storage.
+- **State Management:** Zustand.
+- **Visualization:** Recharts.
+- **Deployment:** Vercel (PWA enabled).
 
-## Run Locally
-
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## 📸 Screenshots
+*(Bu yerga loyihaning eng chiroyli 2-3 ta rasmini qo'ying)*
