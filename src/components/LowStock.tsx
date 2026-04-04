@@ -6,11 +6,12 @@ import {
   FileDown, CheckCircle2, Plus 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next'; // QO'SHILDI
 import { cn, exportToPDF } from '../utils'; 
 import InboundModal from './InboundModal';
 
-// 🔥 EXPORT DEFAULT BO'LISHI SHART!
 export default function LowStock() {
+  const { t, i18n } = useTranslation(); // QO'SHILDI
   const [stocks, setStocks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -21,7 +22,6 @@ export default function LowStock() {
   const fetchLowStock = async () => {
     try {
       setLoading(true);
-      // Supabase so'rovini bazadagi nomlar bilan moslashtiramiz
       const { data, error } = await supabase
         .from('batches')
         .select(`
@@ -36,7 +36,6 @@ export default function LowStock() {
       if (error) throw error;
 
       if (data) {
-        // 🔥 MANTIQ: Qoldiq limitga teng yoki undan kichik bo'lsa
         const filtered = data.filter(b => {
           const qty = Number(b.remaining_quantity || 0);
           const limit = Number(b.min_limit || 0);
@@ -68,15 +67,21 @@ export default function LowStock() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-2">
         <div>
           <h2 className="text-3xl font-black text-rose-500 uppercase tracking-tighter flex items-center gap-3">
-            <AlertTriangle size={32} /> Kam qolganlar
+            <AlertTriangle size={32} /> {t('low_stock')}
           </h2>
-          <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.3em] opacity-60">Zaxira limiti tugagan partiyalar</p>
+          <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.3em] opacity-60">{t('low_stock_subtitle')}</p>
         </div>
       </div>
 
       <div className="relative mx-2">
         <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600" size={20} />
-        <input type="text" placeholder="Qidirish..." value={search} onChange={e => setSearch(e.target.value)} className="w-full pl-14 pr-4 py-5 bg-[#0c0c0e] border border-rose-500/20 rounded-3xl text-white outline-none focus:border-rose-500/40 shadow-xl" />
+        <input 
+          type="text" 
+          placeholder={t('search')} 
+          value={search} 
+          onChange={e => setSearch(e.target.value)} 
+          className="w-full pl-14 pr-4 py-5 bg-[#0c0c0e] border border-rose-500/20 rounded-3xl text-white outline-none focus:border-rose-500/40 shadow-xl uppercase font-black" 
+        />
       </div>
 
       <div className="bg-[#0c0c0e] border border-rose-500/10 rounded-[2.5rem] overflow-hidden shadow-2xl relative min-h-112.5 mx-2">
@@ -87,14 +92,14 @@ export default function LowStock() {
             <thead className="bg-rose-500/5 text-rose-500 border-b border-rose-500/10 uppercase">
               <tr>
                 <th className="px-6 py-6 text-[9px] font-black text-center w-16">#</th>
-                <th className="px-6 py-6 text-[9px] font-black">Rasm</th>
-                <th className="px-6 py-6 text-[9px] font-black text-center">Kategoriya</th>
-                <th className="px-6 py-6 text-[9px] font-black text-center">Partiya</th>
-                <th className="px-6 py-6 text-[9px] font-black text-center">ID (SKU)</th>
-                <th className="px-6 py-6 text-[9px] font-black">Mahsulot Nomi</th>
-                <th className="px-6 py-6 text-[9px] font-black text-center">Qoldiq</th>
-                <th className="px-6 py-6 text-[9px] font-black text-right">Limit</th>
-                <th className="px-6 py-6 text-[9px] font-black text-center">Amallar</th>
+                <th className="px-6 py-6 text-[9px] font-black">{t('image')}</th>
+                <th className="px-6 py-6 text-[9px] font-black text-center">{t('category')}</th>
+                <th className="px-6 py-6 text-[9px] font-black text-center">{t('batch')}</th>
+                <th className="px-6 py-6 text-[9px] font-black text-center">{t('sku')}</th>
+                <th className="px-6 py-6 text-[9px] font-black">{t('name')}</th>
+                <th className="px-6 py-6 text-[9px] font-black text-center">{t('qoldiq')}</th>
+                <th className="px-6 py-6 text-[9px] font-black text-right">{t('limit')}</th>
+                <th className="px-6 py-6 text-[9px] font-black text-center">{t('actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/3">
@@ -119,7 +124,9 @@ export default function LowStock() {
                     </td>
                     <td className="px-6 py-5 text-right font-bold text-gray-600 font-mono">{batch.min_limit}</td>
                     <td className="px-6 py-5 text-center">
-                      <button onClick={() => { setEditingBatch(batch); setIsInboundOpen(true); }} className="p-2.5 bg-rose-500 text-black rounded-xl hover:scale-110 shadow-lg shadow-rose-500/20"><Plus size={16}/></button>
+                      <button onClick={() => { setEditingBatch(batch); setIsInboundOpen(true); }} className="p-2.5 bg-rose-500 text-black rounded-xl hover:scale-110 shadow-lg shadow-rose-500/20">
+                        <Plus size={16}/>
+                      </button>
                     </td>
                   </tr>
                 );
@@ -129,7 +136,7 @@ export default function LowStock() {
         </div>
 
         {!loading && filteredData.length === 0 && (
-          <div className="py-32 text-center text-gray-600 italic">Hozircha kam qolgan tovarlar yo'q.</div>
+          <div className="py-32 text-center text-gray-600 italic uppercase text-[10px] tracking-widest">{t('no_low_stock')}</div>
         )}
       </div>
 

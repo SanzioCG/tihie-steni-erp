@@ -39,10 +39,10 @@ export default function PaymentModal({ isOpen, onClose, onSuccess, client }: any
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-999 flex items-center justify-center p-4">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-        className="relative w-full max-w-[400px] bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl p-10"
+        className="relative w-full max-w-100 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl p-10"
       >
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3 font-bold text-white italic">

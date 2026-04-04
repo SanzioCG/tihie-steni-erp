@@ -1,138 +1,198 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { 
-  Activity, ArrowUpCircle, ArrowDownCircle, 
-  Plus, AreaChart as AreaIcon, LineChart, BarChart3, PieChart as PieIcon, Wallet 
+  Wallet, ArrowUpCircle, ArrowDownCircle, 
+  FileDown, Activity, PieChart as PieIcon, 
+  Loader2, TrendingUp, History
 } from 'lucide-react';
 import { 
-  AreaChart, Area, LineChart as ReLineChart, Line, 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell 
 } from 'recharts';
-import { cn } from '../utils';
+import { useTranslation } from 'react-i18next';
+import { useCurrencyStore } from '../store/useCurrencyStore';
+import { cn, exportToPDF } from '../utils';
 
 const COLORS = ['#34d399', '#fbbf24', '#818cf8', '#f43f5e', '#a78bfa'];
 
 export default function Finance() {
+  const { t, i18n } = useTranslation();
+  const { convert, fetchRates } = useCurrencyStore();
   const [loading, setLoading] = useState(true);
-  const [chartType, setChartType] = useState('area');
-  const [data, setData] = useState({ balance: 0, income: 0, expense: 0, mainChart: [], categoryData: [] });
+  
+  const [stats, setStats] = useState<any>({
+    balance: 0,
+    totalIncome: 0,
+    totalExpense: 0,
+    netProfit: 0,
+    chartData: [],
+    categoryData: [],
+    recentTransactions: []
+  });
 
   const fetchFinanceData = async () => {
-    setLoading(true);
-    const { data: txs } = await supabase.from('transactions').select('*').order('created_at', { ascending: true });
+    try {
+      setLoading(true);
+      await fetchRates();
 
-    if (txs) {
-      const totalIn = txs.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
-      const totalOut = txs.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
+      const { data: txs } = await supabase.from('transactions').select('*').order('created_at', { ascending: true });
       
-      const categories = txs.filter(t => t.type === 'expense').reduce((acc: any, t) => {
-        acc[t.category] = (acc[t.category] || 0) + Number(t.amount);
-        return acc;
-      }, {});
+      const { data: sales } = await supabase.from('sales').select('total_profit');
+      const salesProfitSum = sales?.reduce((s, x) => s + Number(x.total_profit), 0) || 0;
 
-      setData({
-        balance: totalIn - totalOut,
-        income: totalIn,
-        expense: totalOut,
-        categoryData: Object.keys(categories).map(key => ({ name: key, value: categories[key] })),
-        mainChart: txs.slice(-15).map(t => ({
-          name: new Date(t.created_at).toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' }),
+      if (txs) {
+        const income = txs.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
+        const expense = txs.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
+
+        const catMap = txs.filter(t => t.type === 'expense').reduce((acc: any, t) => {
+          acc[t.category] = (acc[t.category] || 0) + Number(t.amount);
+          return acc;
+        }, {});
+        const categoryStats = Object.keys(catMap).map(key => ({ name: key, value: catMap[key] }));
+
+        const chartMapped = txs.slice(-10).map(t => ({
+          name: new Date(t.created_at).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' }),
           income: t.type === 'income' ? Number(t.amount) : 0,
           expense: t.type === 'expense' ? Number(t.amount) : 0,
-        }))
-      });
+        }));
+
+        setStats({
+          balance: income - expense,
+          totalIncome: income,
+          totalExpense: expense,
+          netProfit: salesProfitSum - expense,
+          categoryData: categoryStats,
+          chartData: chartMapped,
+          recentTransactions: txs.slice().reverse().slice(0, 10)
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  useEffect(() => { fetchFinanceData(); }, []);
+  useEffect(() => {
+    fetchFinanceData();
+    const channel = supabase.channel('fin_sync').on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => fetchFinanceData()).subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [i18n.language]);
 
-  const renderChart = () => {
-    const common = { data: data.mainChart, margin: { left: -20, top: 10 } };
-    if (chartType === 'line') return (
-      <ReLineChart {...common}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
-        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 11}} />
-        <YAxis axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 11}} />
-        <Tooltip contentStyle={{backgroundColor: '#0c0c0e', border: '1px solid #1f2937', borderRadius: '10px'}} />
-        <Line type="monotone" dataKey="income" stroke="#34d399" strokeWidth={3} dot={{r:4}} />
-        <Line type="monotone" dataKey="expense" stroke="#f43f5e" strokeWidth={3} dot={{r:4}} />
-      </ReLineChart>
-    );
-    if (chartType === 'bar') return (
-      <BarChart {...common}>
-        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 11}} />
-        <YAxis axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 11}} />
-        <Tooltip cursor={{fill: 'rgba(255,255,255,0.02)'}} />
-        <Bar dataKey="income" fill="#34d399" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="expense" fill="#f43f5e" radius={[4, 4, 0, 0]} />
-      </BarChart>
-    );
-    return (
-      <AreaChart {...common}>
-        <defs>
-          <linearGradient id="cI" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#34d399" stopOpacity={0.2}/><stop offset="95%" stopColor="#34d399" stopOpacity={0}/></linearGradient>
-          <linearGradient id="cO" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#f43f5e" stopOpacity={0.2}/><stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/></linearGradient>
-        </defs>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
-        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 11}} />
-        <YAxis axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 11}} />
-        <Tooltip contentStyle={{backgroundColor: '#0c0c0e', border: 'none', borderRadius: '10px'}} />
-        <Area type="monotone" dataKey="income" stroke="#34d399" strokeWidth={4} fill="url(#cI)" />
-        <Area type="monotone" dataKey="expense" stroke="#f43f5e" strokeWidth={4} fill="url(#cO)" />
-      </AreaChart>
-    );
-  };
+  if (loading) return <div className="h-screen flex items-center justify-center bg-app-bg"><Loader2 className="animate-spin text-primary" size={48} /></div>;
 
   return (
-    <div className="space-y-8 text-left animate-in fade-in duration-500">
-      <div className="flex justify-between items-center px-2">
-        <h2 className="text-3xl font-black text-white uppercase tracking-tighter ">Moliya Dashboard</h2>
-        <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
-          <button onClick={() => setChartType('area')} className={cn("p-2 rounded-lg", chartType === 'area' ? "bg-white/10 text-primary" : "text-gray-500")}><AreaIcon size={16}/></button>
-          <button onClick={() => setChartType('line')} className={cn("p-2 rounded-lg", chartType === 'line' ? "bg-white/10 text-primary" : "text-gray-500")}><LineChart size={16}/></button>
-          <button onClick={() => setChartType('bar')} className={cn("p-2 rounded-lg", chartType === 'bar' ? "bg-white/10 text-primary" : "text-gray-500")}><BarChart3 size={16}/></button>
+    <div className="space-y-6 text-left font-sans pb-24 md:pb-10">
+      {/* HEADER */}
+      <div className="flex justify-between items-center px-4">
+        <div>
+          <h2 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter">{t('finance_analysis')}</h2>
+          <p className="text-[9px] text-gray-500 font-black uppercase tracking-[0.3em]">Real-time Financial Status</p>
+        </div>
+        <button onClick={() => exportToPDF("Moliya_Hisoboti", [[t('category'), t('amount')]], stats.categoryData.map((c:any) => [c.name, convert(c.value)]))} 
+          className="p-3 bg-white/5 border border-white/10 rounded-2xl text-white hover:bg-white/10 transition-all">
+          <FileDown size={20} />
+        </button>
+      </div>
+
+      {/* KPI KARTALARI */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mx-4">
+        <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-4xl shadow-xl relative overflow-hidden group">
+           <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full blur-3xl" />
+           <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">{t('total_balance')}</p>
+           <h3 className="text-3xl font-black text-white tracking-tighter">{convert(stats.balance)}</h3>
+        </div>
+
+        <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-4xl shadow-xl flex justify-between items-center relative overflow-hidden">
+           <div>
+              <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2">{t('net_profit_label')}</p>
+              <h3 className="text-3xl font-black text-white tracking-tighter">{convert(stats.netProfit)}</h3>
+           </div>
+           <div className="p-4 bg-emerald-500/10 rounded-2xl text-emerald-500 shadow-lg shadow-emerald-500/5">
+              <TrendingUp size={24} strokeWidth={3} />
+           </div>
+        </div>
+
+        <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-4xl shadow-xl">
+           <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-3">{t('total_expenses')}</p>
+           <h3 className="text-3xl font-black text-white tracking-tighter">-{convert(stats.totalExpense)}</h3>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mx-2">
-         <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl">
-            <p className="text-[10px] font-black text-gray-500 uppercase mb-4 tracking-widest">Jami Balans</p>
-            <h3 className="text-4xl font-black text-white italic">{data.balance.toLocaleString()} <span className="text-xs text-gray-700">UZS</span></h3>
-         </div>
-         <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl text-emerald-500">
-            <ArrowUpCircle className="mb-4" size={24}/><h3 className="text-3xl font-black italic">+{data.income.toLocaleString()}</h3>
-         </div>
-         <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl text-rose-500">
-            <ArrowDownCircle className="mb-4" size={24}/><h3 className="text-3xl font-black italic">-{data.expense.toLocaleString()}</h3>
-         </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mx-2">
-        <div className="lg:col-span-2 p-8 bg-[#0c0c0e] border border-white/5 rounded-[3rem] shadow-2xl relative">
-          <h4 className="text-lg font-black text-white mb-10 italic uppercase tracking-widest flex items-center gap-2"><Activity size={20} className="text-primary"/> Analitika</h4>
-          <div className="h-80 w-full">{renderChart()}</div>
+      {/* GRAFIKLAR */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mx-4">
+        <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl h-100">
+          <h4 className="text-[10px] font-black text-gray-500 uppercase mb-10 flex items-center gap-2">
+            <Activity size={14} className="text-primary"/> {t('flow_dynamics')}
+          </h4>
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={stats.chartData}>
+                <defs>
+                  <linearGradient id="cI" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#34d399" stopOpacity={0.3}/><stop offset="95%" stopColor="#34d399" stopOpacity={0}/></linearGradient>
+                  <linearGradient id="cO" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3}/><stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/></linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 10}} dy={10} />
+                <YAxis hide />
+                <Tooltip 
+                  contentStyle={{backgroundColor: '#0c0c0e', border: '1px solid #1f2937', borderRadius: '15px', color: '#fff'}} 
+                  labelStyle={{color: '#9ca3af'}}
+                />
+                <Area type="monotone" name={t('income')} dataKey="income" stroke="#34d399" strokeWidth={4} fill="url(#cI)" />
+                <Area type="monotone" name={t('expense')} dataKey="expense" stroke="#f43f5e" strokeWidth={4} fill="url(#cO)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
-        <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-[3rem] shadow-2xl">
-           <h4 className="text-lg font-black text-white mb-8 italic uppercase tracking-widest flex items-center gap-2"><PieIcon size={20} className="text-primary"/> Xarajatlar</h4>
-           <div className="h-64 w-full">
+        <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl flex flex-col items-center">
+           <h4 className="text-[10px] font-black text-gray-500 uppercase mb-8 self-start flex items-center gap-2">
+            <PieIcon size={14} className="text-primary"/> {t('expense_distribution')}
+           </h4>
+           <div className="h-60 w-full">
               <ResponsiveContainer width="100%" height="100%">
                  <PieChart>
-                    <Pie data={data.categoryData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                      {data.categoryData.map((e, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} stroke="none" />)}
+                    <Pie data={stats.categoryData.length > 0 ? stats.categoryData : [{value: 1}]} cx="50%" cy="50%" innerRadius={60} outerRadius={85} paddingAngle={5} dataKey="value">
+                      {stats.categoryData.map((e:any, i:number) => <Cell key={i} fill={COLORS[i % COLORS.length]} stroke="none" />)}
                     </Pie>
                     <Tooltip contentStyle={{backgroundColor: '#0c0c0e', border: 'none', borderRadius: '10px'}} />
                  </PieChart>
               </ResponsiveContainer>
            </div>
-           <div className="mt-6 space-y-3">
-              {data.categoryData.map((cat, i) => (
-                <div key={i} className="flex justify-between items-center text-[10px] font-black uppercase"><span className="text-gray-500">{cat.name}</span><span className="text-white">{cat.value.toLocaleString()}</span></div>
+           <div className="grid grid-cols-2 gap-x-10 gap-y-3 mt-6 w-full px-4">
+              {stats.categoryData.map((cat:any, i:number) => (
+                <div key={i} className="flex justify-between items-center border-b border-white/5 pb-2">
+                   <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full" style={{backgroundColor: COLORS[i % COLORS.length]}} />
+                      <span className="text-[10px] font-bold text-gray-400 uppercase">{cat.name}</span>
+                   </div>
+                   <span className="text-[11px] font-black text-white">{convert(cat.value)}</span>
+                </div>
               ))}
            </div>
         </div>
+      </div>
+
+      {/* OXIRGI AMALLAR */}
+      <div className="mx-4 p-8 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl">
+         <h4 className="text-[10px] font-black text-gray-500 uppercase mb-8 flex items-center gap-2">
+           <History size={14} className="text-primary"/> {t('recent_transactions')}
+         </h4>
+         <div className="space-y-4">
+            {stats.recentTransactions.map((tx: any) => (
+              <div key={tx.id} className="flex justify-between items-center p-4 bg-white/2 rounded-2xl border border-white/5 group hover:border-primary/20 transition-all">
+                 <div className="text-left">
+                    <p className="text-sm font-black text-white uppercase tracking-tight truncate max-w-50">{tx.description}</p>
+                    <p className="text-[9px] text-gray-600 font-black uppercase mt-1 tracking-widest">{tx.category} • {new Date(tx.created_at).toLocaleDateString(i18n.language)}</p>
+                 </div>
+                 <div className={cn("text-base font-black tracking-tighter", tx.type === 'income' ? "text-emerald-500" : "text-rose-500")}>
+                    {tx.type === 'income' ? '+' : '-'}{convert(tx.amount)}
+                 </div>
+              </div>
+            ))}
+            {stats.recentTransactions.length === 0 && <p className="py-10 text-center text-gray-700 font-black uppercase text-[10px] tracking-widest">{t('no_data')}</p>}
+         </div>
       </div>
     </div>
   );

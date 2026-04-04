@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { Search, Loader2, Edit3, Ruler, Package, Hash, Maximize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next'; // QO'SHILDI
 import { useCurrencyStore } from '../store/useCurrencyStore';
 import { cn } from '../utils';
 import InboundModal from './InboundModal';
 
 export default function Stock() {
+  const { t, i18n } = useTranslation(); // QO'SHILDI
   const { convert } = useCurrencyStore();
   const [stocks, setStocks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,8 +28,12 @@ export default function Stock() {
   return (
     <div className="space-y-6 text-left p-2 animate-in fade-in duration-500">
       <div className="flex justify-between items-center px-2">
-        <h2 className="text-3xl font-black text-white uppercase  tracking-tighter">Ombor Zaxirasi</h2>
-        <button onClick={() => { setEditingBatch(null); setIsInboundOpen(true); }} className="px-8 py-3.5 bg-primary text-black font-black rounded-2xl shadow-lg uppercase text-[11px]">+ Yangi Kirim</button>
+        <h2 className="text-3xl font-black text-white uppercase tracking-tighter">
+          {t('stock_inventory')}
+        </h2>
+        <button onClick={() => { setEditingBatch(null); setIsInboundOpen(true); }} className="px-8 py-3.5 bg-primary text-black font-black rounded-2xl shadow-lg uppercase text-[11px]">
+          + {t('new_inbound')}
+        </button>
       </div>
 
       <div className="bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl relative min-h-125">
@@ -37,16 +43,16 @@ export default function Stock() {
             <thead className="bg-white/5 text-primary border-b border-white/5">
               <tr>
                 <th className="px-6 py-6 text-[9px] font-black uppercase text-center w-16">#</th>
-                <th className="px-6 py-6 text-[9px] font-black uppercase">Partiya</th>
-                <th className="px-6 py-6 text-[9px] font-black uppercase">Rasm</th>
-                <th className="px-6 py-6 text-[9px] font-black text-center">ID (SKU)</th>
-                <th className="px-6 py-6 text-[9px] font-black text-center">Kategoriya</th>
-                <th className="px-6 py-6 text-[9px] font-black">Seriya / Nomi</th>
-                <th className="px-6 py-6 text-[9px] font-black text-center">O'lcham</th>
-                <th className="px-6 py-6 text-[9px] font-black text-center">Qoldiq</th>
-                <th className="px-6 py-6 text-[9px] font-black text-right">Tan Narx</th>
-                <th className="px-6 py-6 text-[9px] font-black text-right">Sotuv Narxi</th>
-                <th className="px-6 py-6 text-[9px] font-black text-center">Amallar</th>
+                <th className="px-6 py-6 text-[9px] font-black uppercase">{t('batch')}</th>
+                <th className="px-6 py-6 text-[9px] font-black uppercase">{t('image')}</th>
+                <th className="px-6 py-6 text-[9px] font-black text-center">{t('sku')}</th>
+                <th className="px-6 py-6 text-[9px] font-black text-center">{t('category')}</th>
+                <th className="px-6 py-6 text-[9px] font-black">{t('series_name')}</th>
+                <th className="px-6 py-6 text-[9px] font-black text-center">{t('size')}</th>
+                <th className="px-6 py-6 text-[9px] font-black text-center">{t('qoldiq')}</th>
+                <th className="px-6 py-6 text-[9px] font-black text-right">{t('tan_narx')}</th>
+                <th className="px-6 py-6 text-[9px] font-black text-right">{t('sotuv_narxi')}</th>
+                <th className="px-6 py-6 text-[9px] font-black text-center">{t('actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/3">
@@ -71,7 +77,9 @@ export default function Stock() {
                     </td>
                     <td className="px-6 py-5 text-center">
                        <span className="text-[10px] font-bold text-gray-400 italic">
-                          {batch.width_m ? `Eni: ${batch.width_m}m | Bo'yi: ${batch.length_m}m` : `L: ${batch.length_m}m`}
+                          {batch.width_m 
+                            ? `${t('width_label')}: ${batch.width_m}m | ${t('height_label')}: ${batch.length_m}m` 
+                            : `L: ${batch.length_m}m`}
                        </span>
                     </td>
                     <td className="px-6 py-5 text-center">
@@ -82,11 +90,18 @@ export default function Stock() {
                     <td className="px-6 py-5 text-right font-black text-emerald-400 font-mono text-base">{convert(batch.purchase_price)}</td>
                     <td className="px-6 py-5 text-right font-black text-primary font-mono text-base">{convert(batch.selling_price)}</td>
                     <td className="px-6 py-5 text-center">
-                       <button onClick={() => { setEditingBatch(batch); setIsInboundOpen(true); }} className="p-2.5 bg-white/5 hover:bg-primary text-gray-500 hover:text-black rounded-xl border border-white/5 transition-all"><Edit3 size={16}/></button>
+                       <button onClick={() => { setEditingBatch(batch); setIsInboundOpen(true); }} className="p-2.5 bg-white/5 hover:bg-primary text-gray-500 hover:text-black rounded-xl border border-white/5 transition-all">
+                         <Edit3 size={16}/>
+                       </button>
                     </td>
                   </tr>
                 );
               })}
+              {stocks.length === 0 && !loading && (
+                <tr>
+                  <td colSpan={11} className="py-20 text-center text-gray-700 font-black uppercase text-[10px] tracking-widest">{t('no_data')}</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -95,7 +110,9 @@ export default function Stock() {
       <AnimatePresence>
         {selectedImage && (
           <div className="fixed inset-0 z-2000 flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl" onClick={() => setSelectedImage(null)}>
-            <motion.img initial={{ scale: 0.8 }} animate={{ scale: 1 }} src={selectedImage} className="max-w-full max-h-[90vh] rounded-3xl shadow-2xl border border-white/10" />
+            <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }}>
+              <img src={selectedImage} className="max-w-full max-h-[90vh] rounded-3xl shadow-2xl border border-white/10" alt="Zoomed" />
+            </motion.div>
           </div>
         )}
       </AnimatePresence>

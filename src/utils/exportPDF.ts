@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { robotoBase64 } from './font-base64'; // 🟢 Shrift faylini import qilamiz
 
-// Rasmni URL orqali yuklab olish yordamchisi
 const loadImage = (url: string): Promise<HTMLImageElement> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -12,53 +12,51 @@ const loadImage = (url: string): Promise<HTMLImageElement> => {
   });
 };
 
-export const generatePDF = async (title: string, headers: string[][], data: any[][]) => {
+export const generatePDF = async (title: string, headers: string[][], data: any[][], clientInfo?: any) => {
+  // 1. PDF yaratish
   const doc = new jsPDF();
 
+  // 2. Kirill shriftini ro'yxatdan o'tkazish (ENG MUHIM JOYI)
   try {
-    // 1. Header (Qora fon)
+    doc.addFileToVFS('Roboto-Regular.ttf', robotoBase64);
+    doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
+    doc.setFont('Roboto'); // Standart shriftni Roboto qildik
+  } catch (e) {
+    console.error("Shrift yuklashda xato, standart shrift ishlatiladi.");
+  }
+
+  try {
+    // Header (Qora fon)
     doc.setFillColor(12, 12, 14);
-    doc.rect(0, 0, 210, 45, 'F');
+    doc.rect(0, 0, 210, 50, 'F');
 
-    // 2. Logotipni Public papkadan olish
-    try {
-      const logoImg = await loadImage('/logo.png');
-      doc.addImage(logoImg, 'PNG', 15, 10, 25, 25); // X:15, Y:10, W:25, H:25
-    } catch (e) {
-      console.error("Logotip yuklanmadi, vektorli shakl ishlatiladi.");
-      // Agar rasm topilmasa, o'rniga yashil aylana chizadi
-      doc.setDrawColor(52, 211, 153);
-      doc.circle(27, 22, 12, 'S');
-    }
-
-    // 3. BREND NOMI (ТИХИЕ СТЕНЫ)
-    // DIQQAT: Ruscha yozuv chiqishi uchun shriftni 'helvetica' emas 'courier' yoki 
-    // maxsus yuklangan shrift qilish kerak.
+    // Brend Nomi
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(22);
-    doc.setFont("courier", "bold"); // 'courier' ba'zan rus tilini taniy oladi
-    doc.text("TIHIE STENI", 45, 22); 
+    doc.setFont('Roboto', 'normal'); // Shriftni ishlatamiz
+    doc.text("TIHIE STENI", 45, 25); 
     
-    // Pastki kichik yozuv
     doc.setTextColor(52, 211, 153);
     doc.setFontSize(8);
-    doc.setFont("helvetica", "normal");
-    doc.text("HOLDING ERP SYSTEM - UZBEKISTAN", 45, 30);
+    doc.text("HOLDING ERP SYSTEM - UZBEKISTAN", 45, 33);
 
-    // 4. SANA
-    doc.setTextColor(150, 150, 150);
+    // Mijoz va Sana
+    doc.setTextColor(200, 200, 200);
     doc.setFontSize(9);
-    doc.text(`Sana: ${new Date().toLocaleString()}`, 145, 30);
+    doc.text(`Sana: ${new Date().toLocaleString()}`, 150, 25);
+    if (clientInfo) {
+      doc.text(`Mijoz: ${clientInfo.name}`, 150, 32);
+      doc.text(`Tel: ${clientInfo.phone || '—'}`, 150, 38);
+    }
 
-    // 5. HISOBOT NOMI (Jadval tepasida)
+    // Jadval sarlavhasi
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    doc.text(title.toUpperCase(), 15, 60);
+    doc.text(title.toUpperCase(), 15, 65);
 
-    // 6. JADVAL (AutoTable)
+    // 3. JADVAL (AUTO-TABLE)
     autoTable(doc, {
-      startY: 65,
+      startY: 72,
       head: headers,
       body: data,
       theme: 'grid',
@@ -66,25 +64,21 @@ export const generatePDF = async (title: string, headers: string[][], data: any[
         fillColor: [52, 211, 153], 
         textColor: [0, 0, 0], 
         fontStyle: 'bold',
-        halign: 'center'
+        font: 'Roboto' // Jadval tepasi uchun
       },
       styles: { 
-        fontSize: 9, 
+        fontSize: 10, 
         cellPadding: 4,
-        font: "courier" // Jadval ichidagi ruscha matnlar uchun
+        font: 'Roboto', // 🟢 Jadval ichidagi kirill harflari uchun
       },
       alternateRowStyles: { fillColor: [248, 250, 252] },
       margin: { left: 15, right: 15 }
     });
 
-    // 7. FOOTER
-    const pageCount = (doc as any).internal.getNumberOfPages();
-    doc.setFontSize(8);
-    doc.setTextColor(150, 150, 150);
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.text(`Sahifa ${i} / ${pageCount}`, 105, 285, { align: 'center' });
-      doc.text("© 2024 Silent Walls ERP. Barcha huquqlar himoyalangan.", 15, 285);
+    if (clientInfo?.total) {
+      const finalY = (doc as any).lastAutoTable.finalY + 10;
+      doc.setFontSize(14);
+      doc.text(`JAMI: ${clientInfo.total}`, 195, finalY, { align: 'right' });
     }
 
     doc.save(`${title.replace(/\s+/g, '_')}.pdf`);

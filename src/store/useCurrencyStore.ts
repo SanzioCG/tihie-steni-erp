@@ -36,7 +36,7 @@ export const useCurrencyStore = create<CurrencyState>()(
           const rubRate = parseFloat(data.find((i: any) => i.Ccy === 'RUB').Rate);
 
           set({ rates: { USD: usdRate, EUR: eurRate, RUB: rubRate } });
-          console.log("Bank kurslari yangilandi:", { usdRate, eurRate, rubRate });
+          //console.log("Bank kurslari yangilandi:", { usdRate, eurRate, rubRate });
         } catch (e) {
           console.error("Bank kursini yangilashda xato!");
         }
