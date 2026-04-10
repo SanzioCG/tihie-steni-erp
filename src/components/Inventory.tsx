@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { 
   Search, Loader2, Plus, Edit2, Trash2, 
-  Package, X, Maximize2, Filter, ChevronDown 
+  Package, X, Maximize2, Filter, Boxes 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import AddProductModal from './AddProductModal';
+import toast from 'react-hot-toast';
+import { cn } from '../utils';
 
 export default function Inventory() {
   const { t, i18n } = useTranslation();
@@ -23,24 +25,50 @@ export default function Inventory() {
   const fetchData = async () => {
     try {
       setLoading(true);
+      
+      // 1. Kategoriyalarni olish
       const { data: cats } = await supabase.from('categories').select('*').order('name_uz');
       if (cats) setCategories(cats);
 
+      // 2. Mahsulotlarni partiyalari bilan birga olish (Stock hisoblash uchun)
       const { data: prods, error } = await supabase
         .from('products')
-        .select(`*, categories (id, name_uz)`)
+        .select(`
+          *, 
+          categories (id, name_uz),
+          batches (remaining_quantity)
+        `)
         .order('name_uz', { ascending: true });
       
       if (error) throw error;
-      setProducts(prods || []);
-    } catch (err) {
-      console.error("Fetch error:", err);
+
+      // 🟢 Har bir mahsulot uchun umumiy qoldiqni (Stock) hisoblaymiz
+      const enrichedProducts = prods?.map(p => ({
+        ...p,
+        total_stock: p.batches?.reduce((acc: number, b: any) => acc + (b.remaining_quantity || 0), 0) || 0
+      }));
+
+      setProducts(enrichedProducts || []);
+    } catch (err: any) {
+      toast.error("Ma'lumot yuklashda xato: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => { fetchData(); }, []);
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm(t('confirm_delete_prod'))) return;
+    try {
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) throw error;
+      toast.success("Mahsulot o'chirildi");
+      fetchData();
+    } catch (err: any) {
+      toast.error("O'chirish imkonsiz: Mahsulotga bog'liq savdo yoki partiyalar bor");
+    }
+  };
 
   const filtered = products?.filter(p => {
     const matchesSearch = p.name_uz?.toLowerCase().includes(search.toLowerCase()) || 
@@ -101,9 +129,9 @@ export default function Inventory() {
                 <th className="px-6 py-6 text-[10px] font-black uppercase text-center w-16">#</th>
                 <th className="px-6 py-6 text-[10px] font-black uppercase">{t('image')}</th>
                 <th className="px-6 py-6 text-[10px] font-black uppercase text-center">{t('category')}</th>
-                <th className="px-6 py-6 text-[10px] font-black uppercase">{t('series')}</th>
                 <th className="px-6 py-6 text-[10px] font-black uppercase">{t('name')}</th>
                 <th className="px-6 py-6 text-[10px] font-black uppercase text-center">{t('sku')}</th>
+                <th className="px-6 py-6 text-[10px] font-black uppercase text-center">{t('stock') || 'Zaxira'}</th>
                 <th className="px-6 py-6 text-[10px] font-black uppercase text-right">{t('actions')}</th>
               </tr>
             </thead>
@@ -119,7 +147,15 @@ export default function Inventory() {
                     >
                       {p.image_url ? (
                         <>
-                          <img src={p.image_url} className="w-full h-full object-cover transition-transform group-hover/img:scale-110" alt="" />
+                          <img 
+                            // 🟢 Keshni tozalash uchun vaqt tamg'asi qo'shildi
+                            src={`${p.image_url}${p.image_url.includes('?') ? '&' : '?'}v=${new Date(p.updated_at).getTime()}`} 
+                            className="w-full h-full object-cover transition-transform group-hover/img:scale-110" 
+                            alt="" 
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=Error';
+                            }}
+                          />
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity">
                              <Maximize2 size={14} className="text-white" />
                           </div>
@@ -129,15 +165,31 @@ export default function Inventory() {
                   </td>
 
                   <td className="px-6 py-5 text-center">
-                    <span className="px-3 py-1 bg-primary/10 text-primary border border-primary/20 rounded-lg text-[9px] font-black uppercase tracking-widest">
+                    <span className="px-3 py-1 bg-white/5 text-gray-400 border border-white/5 rounded-lg text-[9px] font-black uppercase tracking-widest">
                       {p.categories?.name_uz}
                     </span>
                   </td>
 
-                  <td className="px-6 py-5 font-black text-gray-400 uppercase text-[11px] tracking-tight">{p.series || '—'}</td>
-                  <td className="px-6 py-5 font-black text-sm uppercase tracking-tight">{p.name_uz}</td>
+                  <td className="px-6 py-5">
+                    <p className="font-black text-sm uppercase tracking-tight">{p.name_uz}</p>
+                    <p className="text-[9px] text-gray-600 font-bold uppercase tracking-widest mt-0.5">{p.series || '—'}</p>
+                  </td>
+
                   <td className="px-6 py-5 text-center font-mono text-[10px] text-gray-500 font-black uppercase tracking-tighter">{p.sku}</td>
                   
+                  {/* 🟢 OMBORE QOLDIG'I USTUNI */}
+                  <td className="px-6 py-5 text-center">
+                    <div className={cn(
+                      "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border font-black text-xs",
+                      p.total_stock <= (p.min_stock || 10) 
+                        ? "bg-rose-500/10 border-rose-500/20 text-rose-500 animate-pulse" 
+                        : "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                    )}>
+                      <Boxes size={14} />
+                      {p.total_stock.toFixed(2)}
+                    </div>
+                  </td>
+
                   <td className="px-6 py-5 text-right">
                     <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
                       <button 
@@ -147,7 +199,7 @@ export default function Inventory() {
                         <Edit2 size={16}/>
                       </button>
                       <button 
-                        onClick={async () => { if(window.confirm(t('confirm_delete_prod'))) { await supabase.from('products').delete().eq('id', p.id); fetchData(); } }} 
+                        onClick={() => handleDelete(p.id)} 
                         className="p-2.5 bg-white/5 hover:bg-rose-500 text-gray-500 hover:text-white rounded-xl border border-white/10 transition-all active:scale-90"
                       >
                         <Trash2 size={16}/>
@@ -158,7 +210,12 @@ export default function Inventory() {
               ))}
               {filtered.length === 0 && !loading && (
                 <tr>
-                  <td colSpan={7} className="py-20 text-center text-gray-700 font-black uppercase text-[10px] tracking-widest">{t('no_data')}</td>
+                  <td colSpan={7} className="py-32 text-center">
+                    <div className="flex flex-col items-center gap-4 opacity-20">
+                      <Search size={48} />
+                      <p className="font-black uppercase text-xs tracking-widest">{t('no_data')}</p>
+                    </div>
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -166,12 +223,13 @@ export default function Inventory() {
         </div>
       </div>
 
+      {/* ZOOM MODAL */}
       <AnimatePresence>
         {zoomImage && (
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={() => setZoomImage(null)}
-            className="fixed inset-0 z-1000 flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl cursor-zoom-out"
+            className="fixed inset-0 z-[1001] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl cursor-zoom-out"
           >
             <motion.img 
               initial={{ scale: 0.8, opacity: 0 }} 

@@ -14,10 +14,12 @@ import Settings from './components/Settings';
 import LowStock from './components/LowStock';
 import KP from './components/KP';
 import Login from './components/Login'; 
+import ReloadPrompt from './components/ReloadPrompt'; // 🟢 QO'SHILDI
 import { useAuthStore } from './store/useAuthStore'; 
 import { ThemeProvider } from './components/ThemeProvider';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
+import { Toaster } from 'react-hot-toast';
 
 export default function App() {
   const { user, profile, loading, checkUser } = useAuthStore(); 
@@ -25,16 +27,18 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    // 🟢 Faqat birinchi marta loadingni ko'rsatish uchun 'true' yuboramiz
     checkUser(true); 
   }, []);
 
-  const renderContent = () => {
-    const role = profile?.role;
-    // Manager Dashboardni ko'rolmasligi uchun redirect
-    const currentTab = (role === 'manager' && activeTab === 'dashboard') ? 'kp' : activeTab;
+  // Manager uchun Dashboardni cheklash va redirect
+  useEffect(() => {
+    if (profile?.role === 'manager' && activeTab === 'dashboard') {
+      setActiveTab('kp');
+    }
+  }, [profile, activeTab]);
 
-    switch (currentTab) {
+  const renderContent = () => {
+    switch (activeTab) {
       case 'dashboard': return <Dashboard setActiveTab={setActiveTab} />;
       case 'kp':        return <KP />;
       case 'products':  return <Inventory />;
@@ -64,6 +68,18 @@ export default function App() {
 
   return (
     <ThemeProvider attribute="class" defaultTheme="dark">
+      {/* 🟢 GLOBAL BAFARNAMALAR */}
+      <Toaster 
+        position="top-right" 
+        toastOptions={{ 
+            duration: 4000,
+            style: { background: '#121214', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', fontSize: '12px', fontWeight: 'bold' } 
+        }} 
+      />
+
+      {/* 🟢 PWA UPDATE NOTIFICATION */}
+      <ReloadPrompt />
+
       <div className="min-h-screen bg-app-bg text-app-fg flex relative font-sans">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
         

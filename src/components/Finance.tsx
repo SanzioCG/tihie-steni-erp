@@ -35,36 +35,12 @@ export default function Finance() {
       setLoading(true);
       await fetchRates();
 
-      const { data: txs } = await supabase.from('transactions').select('*').order('created_at', { ascending: true });
-      
-      const { data: sales } = await supabase.from('sales').select('total_profit');
-      const salesProfitSum = sales?.reduce((s, x) => s + Number(x.total_profit), 0) || 0;
+      // 🟢 Barcha og'ir hisoblarni bitta RPC funksiyadan olamiz
+      const { data, error } = await supabase.rpc('get_finance_stats');
+      if (error) throw error;
 
-      if (txs) {
-        const income = txs.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
-        const expense = txs.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
-
-        const catMap = txs.filter(t => t.type === 'expense').reduce((acc: any, t) => {
-          acc[t.category] = (acc[t.category] || 0) + Number(t.amount);
-          return acc;
-        }, {});
-        const categoryStats = Object.keys(catMap).map(key => ({ name: key, value: catMap[key] }));
-
-        const chartMapped = txs.slice(-10).map(t => ({
-          name: new Date(t.created_at).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' }),
-          income: t.type === 'income' ? Number(t.amount) : 0,
-          expense: t.type === 'expense' ? Number(t.amount) : 0,
-        }));
-
-        setStats({
-          balance: income - expense,
-          totalIncome: income,
-          totalExpense: expense,
-          netProfit: salesProfitSum - expense,
-          categoryData: categoryStats,
-          chartData: chartMapped,
-          recentTransactions: txs.slice().reverse().slice(0, 10)
-        });
+      if (data) {
+        setStats(data);
       }
     } catch (err) {
       console.error(err);
@@ -75,7 +51,12 @@ export default function Finance() {
 
   useEffect(() => {
     fetchFinanceData();
-    const channel = supabase.channel('fin_sync').on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => fetchFinanceData()).subscribe();
+    
+    // Real-time yangilanish
+    const channel = supabase.channel('fin_sync')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transactions' }, () => fetchFinanceData())
+      .subscribe();
+      
     return () => { supabase.removeChannel(channel); };
   }, [i18n.language]);
 

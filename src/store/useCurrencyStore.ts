@@ -6,10 +6,11 @@ export type CurrencyType = 'USD' | 'UZS' | 'EUR' | 'RUB';
 interface CurrencyState {
   currency: CurrencyType;
   rates: {
-    USD: number; // 1 USD necha so'm (Masalan: 12850)
-    EUR: number; // 1 EUR necha so'm (Masalan: 13600)
-    RUB: number; // 1 RUB necha so'm (Masalan: 140)
+    USD: number;
+    EUR: number;
+    RUB: number;
   };
+  lastUpdated: number;
   setCurrency: (c: CurrencyType) => void;
   fetchRates: () => Promise<void>;
   convert: (amountInUSD: number) => string;
@@ -19,26 +20,50 @@ export const useCurrencyStore = create<CurrencyState>()(
   persist(
     (set, get) => ({
       currency: 'USD',
-      // Boshlang'ich kurslar (Agar bankdan yuklanmasa ishlaydi)
-      rates: { USD: 12850, EUR: 13600, RUB: 140 },
+      // Boshlang'ich (fallback) kurslar
+      rates: { USD: 12850, EUR: 13650, RUB: 145 },
+      lastUpdated: 0,
+
       setCurrency: (c) => set({ currency: c }),
       
       fetchRates: async () => {
-        try {
-          // Markaziy bank API (CORS uchun proxy bilan)
-          const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://cbu.uz/uz/arkhiv-kursov-valyut/json/')}`);
-          const raw = await res.json();
-          const data = JSON.parse(raw.contents);
-          
-          // Kurslarni izlab topish
-          const usdRate = parseFloat(data.find((i: any) => i.Ccy === 'USD').Rate);
-          const eurRate = parseFloat(data.find((i: any) => i.Ccy === 'EUR').Rate);
-          const rubRate = parseFloat(data.find((i: any) => i.Ccy === 'RUB').Rate);
+        const state = get(); // Hozirgi holatni olish
+        const now = Date.now();
+        
+        // 🟢 24 soat kesh mantiqi
+        if (now - state.lastUpdated < 24 * 60 * 60 * 1000) {
+           return;
+        }
 
-          set({ rates: { USD: usdRate, EUR: eurRate, RUB: rubRate } });
-          //console.log("Bank kurslari yangilandi:", { usdRate, eurRate, rubRate });
-        } catch (e) {
-          console.error("Bank kursini yangilashda xato!");
+        const proxies = [
+          'https://corsproxy.io/?',
+          'https://api.allorigins.win/get?url='
+        ];
+
+        for (const proxy of proxies) {
+          try {
+            const targetUrl = encodeURIComponent('https://cbu.uz/uz/arkhiv-kursov-valyut/json/');
+            const res = await fetch(`${proxy}${targetUrl}`);
+            if (!res.ok) continue;
+
+            const raw = await res.json();
+            const data = typeof raw.contents === 'string' ? JSON.parse(raw.contents) : (raw.contents || raw);
+            
+            const findRate = (code: string) => parseFloat(data.find((i: any) => i.Ccy === code)?.Rate || "0");
+            const usd = findRate('USD');
+
+            if (usd > 0) {
+              // 🟢 Store-ni yangilash
+              set({ 
+                rates: { USD: usd, EUR: findRate('EUR'), RUB: findRate('RUB') },
+                lastUpdated: now 
+              });
+              console.log("Valyuta kursi online yangilandi.");
+              return; // Muvaffaqiyatli bo'lsa, sikldan chiqamiz
+            }
+          } catch (e) {
+            console.warn(`Proxy (${proxy}) orqali kursni yuklab bo'lmadi, keyingisiga o'tilmoqda...`);
+          }
         }
       },
 
@@ -46,29 +71,21 @@ export const useCurrencyStore = create<CurrencyState>()(
         const { currency, rates } = get();
         const value = Number(amountInUSD || 0);
 
-        // 🟢 1. AGAR DOLLAR BO'LSA
         if (currency === 'USD') {
           return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
         }
-
-        // 🟢 2. AGAR SO'M BO'LSA ($ * kurs)
         if (currency === 'UZS') {
-          const result = value * rates.USD; // MASALAN: 600 * 12850 = 7,710,000
-          return new Intl.NumberFormat('uz-UZ').format(Math.round(result)) + " so'm";
+          return new Intl.NumberFormat('uz-UZ').format(Math.round(value * rates.USD)) + " so'm";
         }
 
-        // 🟢 3. AGAR EVRO BO'LSA ($ * kurs_usd / kurs_eur)
+        // Boshqa valyutalar uchun: Avval so'mga, keyin o'sha valyutaga
+        const rateInUZS = value * rates.USD;
         if (currency === 'EUR') {
-          const result = (value * rates.USD) / rates.EUR;
-          return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(result);
+          return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(rateInUZS / rates.EUR);
         }
-
-        // 🟢 4. AGAR RUBL BO'LSA ($ * kurs_usd / kurs_rub)
         if (currency === 'RUB') {
-          const result = (value * rates.USD) / rates.RUB;
-          return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(result);
+          return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(rateInUZS / rates.RUB);
         }
-
         return value.toString();
       }
     }),
