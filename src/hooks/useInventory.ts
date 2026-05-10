@@ -236,11 +236,11 @@ export function useBatches(productId?: string) {
   return useQuery({
     queryKey: ['batches', productId],
     queryFn: async () => {
-      let query = supabase.from('batches').select('*, warehouses(*)').order('created_at', { ascending: false });
+      let query = supabase.from('batches').select('*').order('created_at', { ascending: false });
       if (productId) query = query.eq('product_id', productId);
       const { data, error } = await query;
       if (error) throw error;
-      return data as (Batch & { warehouses: Warehouse })[];
+      return data as Batch[];
     },
   });
 }

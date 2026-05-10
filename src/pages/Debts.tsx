@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next'; // QO'SHILDI
-import { generatePDF } from '../utils/exportPDF';
+import { generatePDF } from '../lib/exportPDF';
 import { cn } from '../lib/utils';
 
 export default function Debts() {

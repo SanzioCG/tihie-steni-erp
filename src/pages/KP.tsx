@@ -7,7 +7,7 @@ import {
 import { useTranslation } from 'react-i18next'; // QO'SHILDI
 import { useCurrencyStore } from '../store/useCurrencyStore';
 import { useAuthStore } from '../store/useAuthStore';
-import { generatePDF } from '../utils/exportPDF';
+import { generatePDF } from '../lib/exportPDF';
 import { cn } from '../lib/utils';
 
 export default function KP() {

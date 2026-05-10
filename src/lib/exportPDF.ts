@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { robotoBase64 } from './font-base64'; // 🟢 Shrift faylini import qilamiz
+import { robotoBase64 } from '../utils/font-base64'; // 🟢 Shrift faylini import qilamiz
 
 const loadImage = (url: string): Promise<HTMLImageElement> => {
   return new Promise((resolve, reject) => {

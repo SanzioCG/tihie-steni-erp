@@ -38,6 +38,7 @@ export default function Sales() {
           clients (full_name, client_type, phone),
           products (id, name_uz, sku, categories (name_uz))
         `)
+        .gt('quantity', 0)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

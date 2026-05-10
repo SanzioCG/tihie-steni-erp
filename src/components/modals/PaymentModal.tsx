@@ -1,39 +1,64 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Banknote, Loader2, CheckCircle2, DollarSign } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '../../services/supabase';
+import { useAuthStore } from '../../store/useAuthStore';
+import toast from 'react-hot-toast';
 
-export default function PaymentModal({ isOpen, onClose, onSuccess, client }: any) {
+interface PaymentModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  client: any;
+}
+
+export default function PaymentModal({ isOpen, onClose, onSuccess, client }: PaymentModalProps) {
+  const { profile } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState('');
 
+  // Modal yopilganda state cleanup
+  useEffect(() => {
+    if (!isOpen) {
+      setAmount('');
+      setLoading(false);
+    }
+  }, [isOpen]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!amount || Number(amount) <= 0) return;
+    
+    const num = Number(amount);
+    if (!num || num <= 0) {
+      toast.error("Summa noto'g'ri!");
+      return;
+    }
+    
+    if (!client?.id) {
+      toast.error("Mijoz tanlanmagan!");
+      return;
+    }
+
     setLoading(true);
-
     try {
-      // 1. Mijoz balansini yangilash (balansga pul qo'shamiz)
-      const { error: balanceErr } = await supabase
-        .from('clients')
-        .update({ balance: Number(client.balance) + Number(amount) })
-        .eq('id', client.id);
+      const { error } = await supabase.rpc('collect_debt_secure', {
+        p_client_id: client.id,
+        p_amount: num,
+        p_user_name: profile?.full_name || 'Admin',
+        p_description: `${client.full_name} qarz to'lovi: $${num.toLocaleString()}`
+      });
 
-      if (balanceErr) throw balanceErr;
+      if (error) throw error;
 
-      // 2. Tranzaksiyalarga yozish
-      await supabase.from('transactions').insert([{
-        type: 'income',
-        amount: Number(amount),
-        category: 'debt_payment',
-        description: `${client.full_name} qarz to'lovi`
-      }]);
-
+      toast.success("To'lov muvaffaqiyatli qabul qilindi!");
       onSuccess();
       onClose();
-      setAmount('');
-    } catch (err: any) { alert(err.message); } finally { setLoading(false); }
+    } catch (err: any) { 
+      toast.error("Xatolik: " + err.message); 
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   if (!isOpen) return null;
@@ -55,19 +80,33 @@ export default function PaymentModal({ isOpen, onClose, onSuccess, client }: any
           <div>
             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1 mb-1">Mijoz</p>
             <p className="text-lg font-black text-white">{client?.full_name}</p>
-            <p className="text-xs text-rose-500 font-bold">Jami qarz: ${Math.abs(client?.balance).toLocaleString()}</p>
+            <p className="text-xs text-rose-500 font-bold">
+              Jami qarz: ${Math.abs(Number(client?.balance) || 0).toLocaleString()}
+            </p>
           </div>
 
           <div className="space-y-2">
             <label className="text-[9px] font-bold text-gray-600 uppercase tracking-widest ml-1">To'lov Summasi ($)</label>
             <div className="relative">
                 <DollarSign size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-primary" />
-                <input required type="number" value={amount} onChange={e => setAmount(e.target.value)} 
-                className="w-full pl-12 pr-5 py-5 bg-primary/5 border border-primary/20 rounded-2xl text-primary text-xl font-black outline-none focus:bg-primary/10 transition-all" placeholder="0.00" />
+                <input 
+                  required 
+                  type="number" 
+                  step="0.01"
+                  min="0.01"
+                  value={amount} 
+                  onChange={e => setAmount(e.target.value)} 
+                  className="w-full pl-12 pr-5 py-5 bg-primary/5 border border-primary/20 rounded-2xl text-primary text-xl font-black outline-none focus:bg-primary/10 transition-all" 
+                  placeholder="0.00" 
+                />
             </div>
           </div>
 
-          <button disabled={loading} type="submit" className="w-full py-5 bg-primary text-black font-black rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2">
+          <button 
+            disabled={loading || !amount} 
+            type="submit" 
+            className="w-full py-5 bg-primary text-black font-black rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2 disabled:opacity-50"
+          >
             {loading ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle2 size={18} />}
             To'lovni Tasdiqlash
           </button>
