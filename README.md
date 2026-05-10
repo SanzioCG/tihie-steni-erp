@@ -21,6 +21,5 @@ Advanced Enterprise Resource Planning (ERP) system specifically designed for Tex
 
 <img width="1902" height="1011" alt="image" src="https://github.com/user-attachments/assets/2a9d3d89-4d28-445c-93b0-86c1d56c9af3" />
 <img width="1900" height="1006" alt="image" src="https://github.com/user-attachments/assets/ce51bc0d-1476-4771-b9ce-0eb50bb4eeb6" />
-<img width="1918" height="1025" alt="image" src="https://github.com/user-attachments/assets/39c3eb0c-5f23-49db-9736-ba63ca36243e" />
 
 
