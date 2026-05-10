@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { supabase } from '../../services/supabase';
 import { useAuthStore } from '../../store/useAuthStore';
 import toast from 'react-hot-toast';
+import { sendNotification } from '../../lib/pushNotifications';
+
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -52,6 +54,11 @@ export default function PaymentModal({ isOpen, onClose, onSuccess, client }: Pay
       if (error) throw error;
 
       toast.success("To'lov muvaffaqiyatli qabul qilindi!");
+      sendNotification(
+        'Qarz to\'lovi',
+        `${client.full_name}: $${num.toLocaleString()}`,
+        { type: 'payment', amount: num }
+      );
       onSuccess();
       onClose();
     } catch (err: any) { 

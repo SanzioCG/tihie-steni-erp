@@ -12,10 +12,13 @@ export default defineConfig(({ mode }) => {
       react(),
       tailwindcss(),
       VitePWA({
-        // 🟢 'autoUpdate' dan 'prompt' ga o'zgartirdik. 
-        // Bu yangi versiya kelganda foydalanuvchiga xabar chiqarish imkonini beradi.
-        registerType: 'prompt', 
-        
+        registerType: 'prompt',
+        strategies: 'injectManifest',
+        srcDir: 'src',
+        filename: 'sw.ts',
+        injectManifest: {
+          injectionPoint: undefined,
+        },
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
         manifest: {
           name: 'Tihie Steni ERP',
@@ -46,7 +49,8 @@ export default defineConfig(({ mode }) => {
           ]
         },
         devOptions: {
-          enabled: true
+          enabled: true,
+          type: 'module',
         }
       })
     ],

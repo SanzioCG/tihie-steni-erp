@@ -14,12 +14,14 @@ import Settings from './pages/Settings';
 import LowStock from './pages/LowStock';
 import KP from './pages/KP';
 import Login from './pages/Login'; 
-import ReloadPrompt from './components/ui/ReloadPrompt'; // 🟢 QO'SHILDI
+import ReloadPrompt from './components/ui/ReloadPrompt';
 import { useAuthStore } from './store/useAuthStore'; 
 import { ThemeProvider } from './components/layout/ThemeProvider';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
+import { subscribeUserToPush, getNotificationPermission, isPushSupported } from './lib/pushNotifications';
+
 
 export default function App() {
   const { user, profile, loading, checkUser } = useAuthStore(); 
@@ -36,6 +38,20 @@ export default function App() {
       setActiveTab('kp');
     }
   }, [profile, activeTab]);
+
+  // Push notification subscribe (faqat admin/director uchun)
+  useEffect(() => {
+    if (user && profile && (profile.role === 'admin' || profile.role === 'director')) {
+      if (isPushSupported() && getNotificationPermission() === 'default') {
+        const timer = setTimeout(() => {
+          subscribeUserToPush(user.id).then(success => {
+            if (success) console.log('✅ Push notifications yoqildi');
+          });
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [user, profile]);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -68,7 +84,6 @@ export default function App() {
 
   return (
     <ThemeProvider attribute="class" defaultTheme="dark">
-      {/* 🟢 GLOBAL BAFARNAMALAR */}
       <Toaster 
         position="top-right" 
         toastOptions={{ 
@@ -77,7 +92,6 @@ export default function App() {
         }} 
       />
 
-      {/* 🟢 PWA UPDATE NOTIFICATION */}
       <ReloadPrompt />
 
       <div className="min-h-screen bg-app-bg text-app-fg flex relative font-sans">

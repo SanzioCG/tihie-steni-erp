@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { useReactToPrint } from 'react-to-print';
 import { Receipt } from '../ui/Receipt';
 import toast from 'react-hot-toast';
+import { sendNotification } from '../../lib/pushNotifications';
 
 interface POSModalProps {
   isOpen: boolean;
@@ -216,6 +217,12 @@ export default function POSModal({ isOpen, onClose, onSuccess }: POSModalProps) 
       onSuccess();
       setCart([]);
       toast.success("Sotuv bajarildi!");
+      // Push notification yuborish (admin/director'larga)
+      sendNotification(
+        'Yangi sotuv',
+        `${profile?.full_name || 'Sotuvchi'}: ${convert(totalCartSum)}`,
+        { type: 'sale', amount: totalCartSum }
+      );
     } catch (err: any) { 
       toast.error("Xatolik: " + err.message); 
     } finally { 
