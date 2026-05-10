@@ -1,6 +1,11 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../supabase';
-import { uploadProductImage } from '../storage';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '../services/supabase';
+import { uploadProductImage } from '../services/storage';
+import type { Product, Warehouse, Category, Batch } from '../types';
+
+// ============================================
+// PRODUCT + BATCH (atomik amal)
+// ============================================
 
 export interface AddProductData {
   sku: string;
@@ -25,13 +30,11 @@ export function useInventory() {
 
   const addProductWithBatch = useMutation({
     mutationFn: async (data: AddProductData) => {
-      // 1. Upload image if provided
       let imageUrl = '';
       if (data.image_file) {
         imageUrl = await uploadProductImage(data.image_file);
       }
 
-      // 2. Insert into products
       const { data: product, error: productError } = await supabase
         .from('products')
         .insert({
@@ -43,8 +46,7 @@ export function useInventory() {
           unit: data.unit,
           image_url: imageUrl,
           dimensions: data.dimensions,
-          average_cost: data.purchase_price, // Initial average cost is the first purchase price
-          // Also set legacy columns for compatibility
+          average_cost: data.purchase_price,
           width: data.dimensions.width,
           height: data.dimensions.height,
           length: data.dimensions.length,
@@ -54,7 +56,6 @@ export function useInventory() {
 
       if (productError) throw productError;
 
-      // 3. Insert into batches (referred to as product_batches in logic)
       const { error: batchError } = await supabase
         .from('batches')
         .insert({
@@ -71,7 +72,6 @@ export function useInventory() {
       return product;
     },
     onSuccess: () => {
-      // Invalidate queries to refresh Dashboard and Inventory
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['batches'] });
       queryClient.invalidateQueries({ queryKey: ['warehouses'] });
@@ -82,4 +82,181 @@ export function useInventory() {
   return {
     addProductWithBatch,
   };
+}
+
+// ============================================
+// WAREHOUSES
+// ============================================
+
+export function useWarehouses() {
+  return useQuery({
+    queryKey: ['warehouses'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('warehouses').select('*').order('name_uz');
+      if (error) throw error;
+      return data as Warehouse[];
+    },
+  });
+}
+
+export function useCreateWarehouse() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (newWarehouse: Omit<Warehouse, 'id' | 'created_at'>) => {
+      const { data, error } = await supabase.from('warehouses').insert(newWarehouse).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['warehouses'] });
+    },
+  });
+}
+
+export function useUpdateWarehouse() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: Partial<Warehouse> & { id: string }) => {
+      const { data, error } = await supabase.from('warehouses').update(updates).eq('id', id).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['warehouses'] });
+    },
+  });
+}
+
+export function useDeleteWarehouse() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('warehouses').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['warehouses'] });
+    },
+  });
+}
+
+// ============================================
+// CATEGORIES
+// ============================================
+
+export function useCategories() {
+  return useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('categories').select('*').order('name_uz');
+      if (error) throw error;
+      return data as Category[];
+    },
+  });
+}
+
+export function useCreateCategory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (newCategory: Omit<Category, 'id' | 'created_at'>) => {
+      const { data, error } = await supabase.from('categories').insert(newCategory).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    },
+  });
+}
+
+// ============================================
+// PRODUCTS
+// ============================================
+
+export function useProducts() {
+  return useQuery({
+    queryKey: ['products'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*, categories(*)')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useCreateProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (newProduct: Omit<Product, 'id' | 'created_at'>) => {
+      const { data, error } = await supabase.from('products').insert(newProduct).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+  });
+}
+
+export function useUpdateProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: Partial<Product> & { id: string }) => {
+      const { data, error } = await supabase.from('products').update(updates).eq('id', id).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+  });
+}
+
+export function useDeleteProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+  });
+}
+
+// ============================================
+// BATCHES
+// ============================================
+
+export function useBatches(productId?: string) {
+  return useQuery({
+    queryKey: ['batches', productId],
+    queryFn: async () => {
+      let query = supabase.from('batches').select('*, warehouses(*)').order('created_at', { ascending: false });
+      if (productId) query = query.eq('product_id', productId);
+      const { data, error } = await query;
+      if (error) throw error;
+      return data as (Batch & { warehouses: Warehouse })[];
+    },
+  });
+}
+
+export function useCreateBatch() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (newBatch: Omit<Batch, 'id' | 'created_at'>) => {
+      const { data, error } = await supabase.from('batches').insert(newBatch).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['batches'] });
+      queryClient.invalidateQueries({ queryKey: ['batches', variables.product_id] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+  });
 }

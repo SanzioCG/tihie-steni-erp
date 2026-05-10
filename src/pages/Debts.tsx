@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../supabase';
+import { supabase } from '../services/supabase';
 import { 
   Search, Wallet, ArrowRightCircle, 
   CheckCircle2, Loader2, User, FileDown, Banknote, X
@@ -7,7 +7,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next'; // QO'SHILDI
 import { generatePDF } from '../utils/exportPDF';
-import { cn } from '../utils';
+import { cn } from '../lib/utils';
 
 export default function Debts() {
   const { t, i18n } = useTranslation(); // QO'SHILDI

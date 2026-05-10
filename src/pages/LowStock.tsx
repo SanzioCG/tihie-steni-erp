@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../supabase';
+import { supabase } from '../services/supabase';
 import { 
   Search, Loader2, Package, AlertTriangle, 
   FileDown, CheckCircle2, Plus 
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { cn, exportToPDF } from '../utils'; 
-import InboundModal from './InboundModal';
+import { cn, exportToPDF } from '../lib/utils'; 
+import InboundModal from '../components/modals/InboundModal';
 
 export default function LowStock() {
   const { t } = useTranslation();

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Loader2, User, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '../supabase';
+import { supabase } from '../../services/supabase';
 import { useTranslation } from 'react-i18next'; // QO'SHILDI
 
 export default function AddClientModal({ isOpen, onClose, onSuccess, initialData }: any) {

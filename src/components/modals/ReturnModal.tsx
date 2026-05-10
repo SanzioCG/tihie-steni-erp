@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { X, RotateCcw, Loader2, Save, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '../supabase';
-import { useCurrencyStore } from '../store/useCurrencyStore'; 
-import { useAuthStore } from '../store/useAuthStore'; 
+import { supabase } from '../../services/supabase';
+import { useCurrencyStore } from '../../store/useCurrencyStore'; 
+import { useAuthStore } from '../../store/useAuthStore'; 
 import { useTranslation } from 'react-i18next';
 
 interface ReturnModalProps {

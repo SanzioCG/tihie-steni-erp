@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../supabase';
+import { supabase } from '../services/supabase';
 import { 
   Search, Plus, User, Phone, Loader2, Edit2, 
   Trash2, FileDown, X, History, ShoppingBag, 
   ArrowUpRight, CheckCircle2, Package 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import AddClientModal from './AddClientModal';
-import { exportToPDF, cn } from '../utils';
+import AddClientModal from '../components/modals/AddClientModal';
+import { exportToPDF, cn } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
 import { useCurrencyStore } from '../store/useCurrencyStore';
 

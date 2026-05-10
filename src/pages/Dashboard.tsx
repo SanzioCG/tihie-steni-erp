@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { supabase } from '../supabase';
+import { supabase } from '../services/supabase';
 import { 
   TrendingUp, AlertTriangle, Activity, ShoppingBag, 
   History, Wallet, Loader2, Calendar, FileText, X 
@@ -7,7 +7,7 @@ import {
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useTranslation } from 'react-i18next';
 import { useCurrencyStore } from '../store/useCurrencyStore'; 
-import { cn } from '../utils';
+import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Menu, Bell, User, Globe } from 'lucide-react';
-import { useAuthStore } from '../store/useAuthStore';
+import { useAuthStore } from '../../store/useAuthStore';
 import { useTranslation } from 'react-i18next';
-import { cn } from '../utils';
+import { cn } from '../../lib/utils';
 
 interface TopBarProps {
   onMenuClick: () => void;

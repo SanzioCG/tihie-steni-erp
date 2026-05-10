@@ -3,12 +3,12 @@ import {
   LayoutDashboard, Wallet, ShoppingCart, Users, Banknote, 
   Package, Boxes, LogOut, ShieldCheck, Settings, Receipt, X, AlertTriangle, Calculator 
 } from 'lucide-react';
-import { cn } from '../utils';
+import { cn } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
-import { useAuthStore } from '../store/useAuthStore';
-import { supabase } from '../supabase';
+import { useAuthStore } from '../../store/useAuthStore';
+import { supabase } from '../../services/supabase';
 // @ts-ignore
-import logo from '../asset/logo.png';
+import logo from '../../asset/logo.png';
 
 interface SidebarProps {
   activeTab: string;

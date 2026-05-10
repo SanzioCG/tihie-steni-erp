@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../supabase';
+import { supabase } from '../services/supabase';
 import { 
   Search, Loader2, Plus, Edit2, Trash2, 
   Package, X, Maximize2, Filter, Boxes 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import AddProductModal from './AddProductModal';
+import AddProductModal from '../components/modals/AddProductModal';
 import toast from 'react-hot-toast';
-import { cn } from '../utils';
+import { cn } from '../lib/utils';
 
 export default function Inventory() {
   const { t, i18n } = useTranslation();

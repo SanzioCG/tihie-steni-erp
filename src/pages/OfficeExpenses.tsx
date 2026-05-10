@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase } from '../supabase';
+import { supabase } from '../services/supabase';
 import { Plus, Loader2, PieChart, X, ChevronDown, DollarSign, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/useAuthStore'; // QO'SHILDI
-import { cn } from '../utils';
+import { cn } from '../lib/utils';
 
 export default function OfficeExpenses() {
   const { t } = useTranslation();

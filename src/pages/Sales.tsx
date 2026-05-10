@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../supabase';
+import { supabase } from '../services/supabase';
 import { 
   Search, FileDown, Calendar, User, 
   CheckCircle2, AlertCircle, Filter, 
   ChevronDown, Package, Plus, Loader2,
   RotateCcw, Ruler, Hash, ShoppingBag
 } from 'lucide-react';
-import { cn, exportToPDF } from '../utils';
+import { cn, exportToPDF } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
 import { useCurrencyStore } from '../store/useCurrencyStore';
 
 // MODALLARNI IMPORT QILAMIZ
-import POSModal from './POSModal'; 
-import ReturnModal from './ReturnModal';
+import POSModal from '../components/modals/POSModal'; 
+import ReturnModal from '../components/modals/ReturnModal';
 
 export default function Sales() {
   const { t, i18n } = useTranslation();

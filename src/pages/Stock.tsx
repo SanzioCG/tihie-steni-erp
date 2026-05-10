@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../supabase';
+import { supabase } from '../services/supabase';
 import { Search, Loader2, Edit3, Ruler, Package, Hash, Maximize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next'; // QO'SHILDI
 import { useCurrencyStore } from '../store/useCurrencyStore';
-import { cn } from '../utils';
-import InboundModal from './InboundModal';
+import { cn } from '../lib/utils';
+import InboundModal from '../components/modals/InboundModal';
 
 export default function Stock() {
   const { t, i18n } = useTranslation(); // QO'SHILDI

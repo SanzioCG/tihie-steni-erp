@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../supabase';
+import { supabase } from '../services/supabase';
 import { 
   Wallet, ArrowUpCircle, ArrowDownCircle, 
   FileDown, Activity, PieChart as PieIcon, 
@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 import { useTranslation } from 'react-i18next';
 import { useCurrencyStore } from '../store/useCurrencyStore';
-import { cn, exportToPDF } from '../utils';
+import { cn, exportToPDF } from '../lib/utils';
 
 const COLORS = ['#34d399', '#fbbf24', '#818cf8', '#f43f5e', '#a78bfa'];
 

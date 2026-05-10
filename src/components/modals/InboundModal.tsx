@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Save, Loader2, Search, ChevronDown, Ruler, Box, AlertCircle, Layers } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '../supabase';
-import { cn } from '../utils';
+import { supabase } from '../../services/supabase';
+import { cn } from '../../lib/utils';
 import { useTranslation } from 'react-i18next'; // QO'SHILDI
 
 export default function InboundModal({ isOpen, onClose, onSuccess, editData }: any) {

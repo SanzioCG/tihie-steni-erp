@@ -5,13 +5,13 @@ import {
   Search, Trash2, Plus, Check, Printer 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '../supabase';
-import { cn } from '../utils';
-import { useCurrencyStore } from '../store/useCurrencyStore';
-import { useAuthStore } from '../store/useAuthStore';
+import { supabase } from '../../services/supabase';
+import { cn } from '../../lib/utils';
+import { useCurrencyStore } from '../../store/useCurrencyStore';
+import { useAuthStore } from '../../store/useAuthStore';
 import { useTranslation } from 'react-i18next';
 import { useReactToPrint } from 'react-to-print';
-import { Receipt } from './Receipt';
+import { Receipt } from '../ui/Receipt';
 import toast from 'react-hot-toast'; // QO'SHILDI
 
 interface POSModalProps {

@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { User, Camera, Save, Loader2, ShieldCheck, Scissors, Users, Store, DollarSign } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '../supabase';
+import { supabase } from '../services/supabase';
 import { useAuthStore } from '../store/useAuthStore';
 import { useTranslation } from 'react-i18next';
 import Cropper from 'react-easy-crop';
-import { cn } from '../utils';
+import { cn } from '../lib/utils';
 
 export default function Settings() {
   const { t } = useTranslation();

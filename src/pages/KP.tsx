@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase } from '../supabase';
+import { supabase } from '../services/supabase';
 import { 
   Calculator, Plus, Trash2, Search, ChevronDown, 
   Check, Ruler, FileDown, Package, Save, History, User, X 
@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'; // QO'SHILDI
 import { useCurrencyStore } from '../store/useCurrencyStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { generatePDF } from '../utils/exportPDF';
-import { cn } from '../utils';
+import { cn } from '../lib/utils';
 
 export default function KP() {
   const { t, i18n } = useTranslation(); // QO'SHILDI

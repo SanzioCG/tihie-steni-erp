@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { supabase } from '../supabase';
+import { supabase } from '../services/supabase';
 
 interface AuthState {
   user: any | null;

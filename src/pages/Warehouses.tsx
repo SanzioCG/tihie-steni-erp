@@ -11,11 +11,12 @@ import {
   X
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useCreateWarehouse, useUpdateWarehouse } from '../hooks/useInventory';
+import { useWarehouses, useCreateWarehouse, useUpdateWarehouse, useDeleteWarehouse } from '../hooks/useInventory';
+
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { cn } from '../utils';
+import { cn } from '../lib/utils';
 
 const warehouseSchema = z.object({
   name_uz: z.string().min(2, 'Name (UZ) is required'),

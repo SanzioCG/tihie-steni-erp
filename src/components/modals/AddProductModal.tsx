@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Camera, Loader2, Save, Link as LinkIcon, Hash } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { supabase } from '../supabase';
-import { useAuthStore } from '../store/useAuthStore';
+import { supabase } from '../../services/supabase';
+import { useAuthStore } from '../../store/useAuthStore';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 

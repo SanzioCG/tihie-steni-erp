@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Banknote, Loader2, CheckCircle2, DollarSign } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { supabase } from '../supabase';
+import { supabase } from '../../services/supabase';
 
 export default function PaymentModal({ isOpen, onClose, onSuccess, client }: any) {
   const [loading, setLoading] = useState(false);

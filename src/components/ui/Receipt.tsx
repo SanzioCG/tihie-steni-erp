@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { useCurrencyStore } from '../store/useCurrencyStore';
+import { useCurrencyStore } from '../../store/useCurrencyStore';
 
 interface ReceiptProps {
   storeInfo: any;
