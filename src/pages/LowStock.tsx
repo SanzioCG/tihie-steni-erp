@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../services/supabase';
+import { useState } from 'react';
 import { 
   Search, Loader2, Package, AlertTriangle, 
   FileDown, CheckCircle2, Plus 
@@ -7,55 +6,25 @@ import {
 import { useTranslation } from 'react-i18next';
 import { cn, exportToPDF } from '../lib/utils'; 
 import InboundModal from '../components/modals/InboundModal';
+import { useLowStock } from '../hooks/queries/useQueries';
 
 export default function LowStock() {
   const { t } = useTranslation();
-  const [stocks, setStocks] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: stocks = [], isLoading: loading, refetch: fetchLowStock } = useLowStock();
+  
   const [search, setSearch] = useState('');
   const [isInboundOpen, setIsInboundOpen] = useState(false);
   const [editingBatch, setEditingBatch] = useState<any | null>(null);
 
-  const fetchLowStock = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('batches')
-        .select(`
-          *,
-          products (
-            id, name_uz, sku, image_url,
-            categories (name_uz)
-          )
-        `);
-
-      if (error) throw error;
-
-      if (data) {
-        // Limitdan kam qolgan yoki tugagan mahsulotlarni filtrlash
-        const filtered = data.filter((b: any) => 
-          Number(b.remaining_quantity) <= Number(b.min_limit || 0)
-        );
-        setStocks(filtered);
-      }
-    } catch (err: any) {
-      console.error("Fetch error:", err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchLowStock(); }, []);
-
   const handleExport = () => {
-    const headers = [[t('name'), t('batch'), t('qoldiq'), t('limit')]];
+    const headers = [["MAHSULOT", "PARTIYA", "QOLDIQ", "LIMIT"]];
     const rows = stocks.map((s: any) => [
       s.products?.name_uz,
       s.batch_number,
       s.remaining_quantity.toString(),
       s.min_limit.toString()
     ]);
-    exportToPDF(t('low_stock_report') || "Kam qolgan mahsulotlar", headers, rows);
+    exportToPDF("Kam_qolgan_mahsulotlar", headers, rows);
   };
 
   const filteredData = stocks.filter((s: any) => 
@@ -121,7 +90,7 @@ export default function LowStock() {
                     <td className="px-6 py-5">
                       <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 overflow-hidden">
                         {batch.products?.image_url ? (
-                          <img src={batch.products.image_url} className="w-full h-full object-cover" alt="" />
+                          <img loading="lazy" decoding="async" src={batch.products.image_url} className="w-full h-full object-cover" alt="" />
                         ) : (
                           <Package className="w-full h-full p-3 text-gray-800" />
                         )}

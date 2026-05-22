@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../services/supabase';
+import { useState } from 'react';
 import { 
-  ShieldCheck, Clock, Search, Filter, 
+  ShieldCheck, Clock, Search, 
   Loader2, ChevronDown, DownloadCloud,
   ShoppingCart, Package, ArrowDownCircle, Users, Wallet
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
+import { useAuditLogs } from '../hooks/queries/useQueries';
 
-// Entity turlari uchun ranglar va ikonkalarni belgilaymiz
 const ENTITY_CONFIG: any = {
   SOTUV: { color: 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5', icon: ShoppingCart },
   KIRIM: { color: 'text-blue-500 border-blue-500/20 bg-blue-500/5', icon: ArrowDownCircle },
@@ -19,56 +18,21 @@ const ENTITY_CONFIG: any = {
 
 export default function Audit() {
   const { t, i18n } = useTranslation();
-  const [logs, setLogs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
+  
+  const { 
+    data, 
+    isLoading: loading, 
+    fetchNextPage, 
+    hasNextPage, 
+    isFetchingNextPage 
+  } = useAuditLogs();
+
+  // Barcha sahifalardagi log'larni bitta arrayga to'plash
+  const logs = data?.pages.flatMap(page => page.logs) || [];
+
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState('ALL');
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
 
-  const ITEMS_PER_PAGE = 50;
-
-  // Ma'lumotlarni serverdan yuklash (Server-side Pagination)
-  const fetchLogs = async (isLoadMore = false) => {
-    if (isLoadMore) setLoadingMore(true);
-    else setLoading(true);
-
-    const from = isLoadMore ? (page + 1) * ITEMS_PER_PAGE : 0;
-    const to = from + ITEMS_PER_PAGE - 1;
-
-    try {
-      const { data, error } = await supabase
-        .from('audit_logs')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .range(from, to);
-
-      if (error) throw error;
-
-      if (data) {
-        if (isLoadMore) {
-          setLogs(prev => [...prev, ...data]);
-          setPage(prev => prev + 1);
-        } else {
-          setLogs(data);
-          setPage(0);
-        }
-        
-        if (data.length < ITEMS_PER_PAGE) setHasMore(false);
-        else setHasMore(true);
-      }
-    } catch (err) {
-      console.error("Audit fetch error:", err);
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  };
-
-  useEffect(() => { fetchLogs(); }, []);
-
-  // FILTRLAR RO'YXATI
   const filterTypes = [
     { id: 'ALL', name: t('all') },
     { id: 'SOTUV', name: t('sales') },
@@ -78,18 +42,17 @@ export default function Audit() {
     { id: 'XARAJAT', name: t('expenses') },
   ];
 
-  // Client-side qidiruv va filtr (Yuklangan ma'lumotlar ichida)
-  const filteredLogs = logs.filter(l => {
-    const matchesSearch = l.details?.toLowerCase().includes(search.toLowerCase()) || 
-                          l.user_name?.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter = activeFilter === 'ALL' || l.entity === activeFilter;
+  const filteredLogs = logs.filter((log: any) => {
+    const matchesSearch = !search || 
+      log.details?.toLowerCase().includes(search.toLowerCase()) ||
+      log.user_name?.toLowerCase().includes(search.toLowerCase());
+    const matchesFilter = activeFilter === 'ALL' || log.entity === activeFilter;
     return matchesSearch && matchesFilter;
   });
 
   return (
     <div className="space-y-8 text-left text-app-fg animate-in fade-in duration-500 pb-20">
       
-      {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-2">
         <div>
           <h2 className="text-3xl font-black text-white uppercase tracking-tight flex items-center gap-3 italic">
@@ -105,7 +68,6 @@ export default function Audit() {
         </button>
       </div>
 
-      {/* SEARCH VA FILTRLAR */}
       <div className="space-y-5 mx-2">
         <div className="relative group">
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-primary transition-colors" size={20} />
@@ -136,9 +98,8 @@ export default function Audit() {
         </div>
       </div>
 
-      {/* JADVAL KONTEYNERI */}
       <div className="bg-[#0c0c0e] border border-white/5 rounded-[3rem] overflow-hidden min-h-125 relative mx-2 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-        {loading && !loadingMore && (
+        {loading && (
             <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
                 <Loader2 className="animate-spin text-primary" size={48} />
             </div>
@@ -155,7 +116,7 @@ export default function Audit() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {filteredLogs.map((log) => {
+              {filteredLogs.map((log: any) => {
                 const Config = ENTITY_CONFIG[log.entity] || { color: 'text-gray-500 border-gray-500/20 bg-gray-500/5', icon: Clock };
                 const Icon = Config.icon;
 
@@ -195,7 +156,6 @@ export default function Audit() {
                 );
               })}
               
-              {/* Bo'sh holat */}
               {filteredLogs.length === 0 && !loading && (
                 <tr>
                   <td colSpan={4} className="py-32 text-center">
@@ -210,15 +170,14 @@ export default function Audit() {
           </table>
         </div>
 
-        {/* LOAD MORE TUGMASI */}
-        {hasMore && (
+        {hasNextPage && (
           <div className="p-10 text-center border-t border-white/5 bg-white/[0.01]">
             <button 
-              onClick={() => fetchLogs(true)}
-              disabled={loadingMore}
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
               className="px-12 py-4 bg-white/5 hover:bg-primary hover:text-black border border-white/10 hover:border-primary rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-3 mx-auto disabled:opacity-50"
             >
-              {loadingMore ? <Loader2 className="animate-spin" size={16} /> : <ChevronDown size={16} strokeWidth={3} />}
+              {isFetchingNextPage ? <Loader2 className="animate-spin" size={16} /> : <ChevronDown size={16} strokeWidth={3} />}
               {t('load_more') || "Yana yuklash"}
             </button>
           </div>

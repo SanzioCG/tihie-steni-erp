@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Wallet, ShoppingCart, Users, Banknote, 
   Package, Boxes, LogOut, ShieldCheck, Settings, Receipt, X, AlertTriangle, Calculator 
@@ -11,18 +12,26 @@ import { supabase } from '../../services/supabase';
 import logo from '../../asset/logo.png';
 
 interface SidebarProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 }
 
-export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen }: SidebarProps) {
+export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const { t } = useTranslation();
   const { profile, signOut } = useAuthStore();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [lowStockCount, setLowStockCount] = useState(0);
 
   const isAdmin = profile?.role === 'admin' || profile?.role === 'director';
+
+  // Hozirgi URL'ga qarab active tab ni aniqlash
+  const activeTab = location.pathname.replace('/', '') || 'dashboard';
+
+  const handleNavigate = (path: string) => {
+    navigate(`/${path}`);
+    if (window.innerWidth < 1024) setIsOpen(false);
+  };
 
   // Kam qolgan zaxirani hisoblash
   const fetchCount = async () => {
@@ -31,11 +40,25 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen }: 
     setLowStockCount(count);
   };
 
-  useEffect(() => {
-    fetchCount();
-    const ch = supabase.channel('sidebar_stock').on('postgres_changes', { event: '*', schema: 'public', table: 'batches' }, () => fetchCount()).subscribe();
-    return () => { supabase.removeChannel(ch); };
-  }, []);
+useEffect(() => {
+  fetchCount();
+  
+  let timeout: any;
+  const debouncedFetch = () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(fetchCount, 2000); // 2 sekund kutadi
+  };
+  
+  const ch = supabase
+    .channel('sidebar_stock')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'batches' }, debouncedFetch)
+    .subscribe();
+    
+  return () => { 
+    clearTimeout(timeout);
+    supabase.removeChannel(ch); 
+  };
+}, []);
 
   const menuGroups = [
     { 
@@ -105,7 +128,7 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen }: 
               {group.items.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => { setActiveTab(item.id); if (window.innerWidth < 1024) setIsOpen(false); }}
+                  onClick={() => handleNavigate(item.id)}
                   className={cn(
                     "flex items-center justify-between w-full p-3.5 rounded-2xl transition-all group mb-1",
                     activeTab === item.id ? "bg-primary text-black shadow-lg shadow-primary/20" : "text-gray-500 hover:text-white hover:bg-white/5"

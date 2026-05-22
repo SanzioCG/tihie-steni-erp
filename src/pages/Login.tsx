@@ -4,6 +4,7 @@ import { LogIn, Loader2, Mail, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 // @ts-ignore
 import logo from '../asset/logo.png'; // Logotip manzili
+import toast from 'react-hot-toast';
 
 export default function Login() {
   const signIn = useAuthStore((state) => state.signIn);
@@ -17,7 +18,7 @@ export default function Login() {
     try {
       await signIn(email, password);
     } catch (err: any) {
-      alert("Xatolik: " + err.message);
+      toast.error("Xatolik: " + err.message);;
     } finally {
       setLoading(false);
     }

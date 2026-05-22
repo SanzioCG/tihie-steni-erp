@@ -1,20 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { supabase } from '../services/supabase';
-import { Plus, Loader2, PieChart, X, ChevronDown, DollarSign, Save } from 'lucide-react';
+import { Loader2, PieChart, X, ChevronDown, DollarSign, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { useAuthStore } from '../store/useAuthStore'; // QO'SHILDI
+import { useAuthStore } from '../store/useAuthStore';
 import { cn } from '../lib/utils';
+import toast from 'react-hot-toast';
+import { useOfficeExpenses } from '../hooks/queries/useQueries';
 
 export default function OfficeExpenses() {
   const { t } = useTranslation();
-  const { profile } = useAuthStore(); // Profilni olamiz
-  const [expenses, setExpenses] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { profile } = useAuthStore();
+  
+  const { data: expenses = [], isLoading: loading, refetch: fetchExpenses } = useOfficeExpenses();
+  
+  const [saving, setSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [formData, setFormData] = useState({ title: '', category: 'Office', amount: '' });
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const CATEGORIES = [
     { id: 'Office', name: t('cat_office'), color: 'text-blue-400' },
@@ -23,22 +26,12 @@ export default function OfficeExpenses() {
     { id: 'Transport', name: t('cat_transport'), color: 'text-rose-400' },
   ];
 
-  const fetchExpenses = async () => {
-    setLoading(true);
-    const { data } = await supabase.from('office_expenses').select('*').order('created_at', { ascending: false });
-    if (data) setExpenses(data);
-    setLoading(false);
-  };
-
-  useEffect(() => { fetchExpenses(); }, []);
-
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.amount) return;
-    setLoading(true);
+    setSaving(true);
     
     try {
-      // 🟢 RPC orqali xavfsiz bitta tranzaksiya
       const { error } = await supabase.rpc('process_office_expense', {
         p_title: formData.title,
         p_category: formData.category,
@@ -52,9 +45,9 @@ export default function OfficeExpenses() {
       setFormData({ title: '', category: 'Office', amount: '' });
       fetchExpenses();
     } catch (err: any) {
-      alert("Xatolik yuz berdi: " + err.message);
+      toast.error("Xatolik yuz berdi: " + err.message);
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
@@ -71,18 +64,16 @@ export default function OfficeExpenses() {
         </button>
       </div>
 
-      {/* JAMI XARAJAT VIDJETI */}
       <div className="p-8 bg-rose-500/10 border border-rose-500/20 rounded-[2.5rem] flex items-center gap-6 mx-2 backdrop-blur-sm shadow-xl">
         <div className="p-4 bg-rose-500/20 rounded-2xl text-rose-500 shadow-inner"><PieChart size={32} /></div>
         <div>
           <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">{t('total_expenses_label')}:</p>
           <p className="text-4xl font-black text-white tracking-tighter">
-            ${expenses.reduce((sum, e) => sum + Number(e.amount), 0).toLocaleString()}
+            ${expenses.reduce((sum: number, e: any) => sum + Number(e.amount), 0).toLocaleString()}
           </p>
         </div>
       </div>
 
-      {/* JADVAL */}
       <div className="bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl relative min-h-75 mx-2">
         {loading && <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-10"><Loader2 className="animate-spin text-primary" size={40} /></div>}
         <div className="overflow-x-auto">
@@ -95,7 +86,7 @@ export default function OfficeExpenses() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {expenses.map((e) => (
+              {expenses.map((e: any) => (
                 <tr key={e.id} className="group hover:bg-white/[0.02] transition-colors">
                   <td className="px-10 py-6 text-white font-black uppercase text-sm">{e.title}</td>
                   <td className="px-10 py-6 text-center">
@@ -118,7 +109,6 @@ export default function OfficeExpenses() {
         </div>
       </div>
 
-      {/* MODAL */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
@@ -166,8 +156,8 @@ export default function OfficeExpenses() {
                  </div>
                </div>
 
-               <button onClick={handleSave} disabled={loading} className="w-full py-6 bg-primary text-black font-black rounded-[1.5rem] shadow-lg shadow-primary/10 uppercase text-[11px] tracking-[0.2em] flex items-center justify-center gap-3 active:scale-95 transition-all">
-                 {loading ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} strokeWidth={3}/>} {t('save')}
+               <button onClick={handleSave} disabled={saving} className="w-full py-6 bg-primary text-black font-black rounded-[1.5rem] shadow-lg shadow-primary/10 uppercase text-[11px] tracking-[0.2em] flex items-center justify-center gap-3 active:scale-95 transition-all">
+                 {saving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} strokeWidth={3}/>} {t('save')}
                </button>
             </motion.div>
           </div>

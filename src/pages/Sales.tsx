@@ -1,24 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../services/supabase';
+import { useState } from 'react';
 import { 
-  Search, FileDown, Calendar, User, 
-  CheckCircle2, AlertCircle, Filter, 
-  ChevronDown, Package, Plus, Loader2,
-  RotateCcw, Ruler, Hash, ShoppingBag
+  Search, FileDown, Calendar, Filter, 
+  Plus, Loader2, RotateCcw, Ruler, ShoppingBag
 } from 'lucide-react';
 import { cn, exportToPDF } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
 import { useCurrencyStore } from '../store/useCurrencyStore';
-
-// MODALLARNI IMPORT QILAMIZ
 import POSModal from '../components/modals/POSModal'; 
 import ReturnModal from '../components/modals/ReturnModal';
+import { useSales } from '../hooks/queries/useSales';
 
 export default function Sales() {
   const { t, i18n } = useTranslation();
   const { convert } = useCurrencyStore();
-  const [sales, setSales] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   
   const [isPOSOpen, setIsPOSOpen] = useState(false); 
@@ -28,46 +22,23 @@ export default function Sales() {
   const [statusFilter, setStatusFilter] = useState('ALL'); 
   const [typeFilter, setTypeFilter] = useState('ALL'); 
 
-  const fetchSales = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('sales')
-        .select(`
-          *,
-          clients (full_name, client_type, phone),
-          products (id, name_uz, sku, categories (name_uz))
-        `)
-        .gt('quantity', 0)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setSales(data || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchSales(); }, []);
+  const { data: sales = [], isLoading: loading, refetch: fetchSales } = useSales();
 
   const handleExportPDF = () => {
     if (filteredSales.length === 0) return;
-    // PDF Headerlari tarjima qilindi
-    const headers = [[t('date').toUpperCase(), t('client').toUpperCase(), t('products').toUpperCase(), t('qoldiq').toUpperCase(), t('total').toUpperCase(), t('status').toUpperCase()]];
-    const dataRows = filteredSales.map(s => [
+    const headers = [["SANA", "MIJOZ", "MAHSULOT", "MIQDOR", "JAMI", "STATUS"]];
+    const dataRows = filteredSales.map((s: any) => [
       new Date(s.created_at).toLocaleDateString(i18n.language),
-      s.clients?.full_name || t('general'),
-      s.products?.name_uz || t('products'),
+      s.clients?.full_name || 'Umumiy',
+      s.products?.name_uz || 'Mahsulot',
       `${s.quantity} ${s.products?.categories?.name_uz?.toLowerCase().includes('tekstil') ? 'm²' : 'm'}`,
       convert(s.total_amount),
-      s.status === 'completed' ? t('completed') : t('debt')
+      s.status === 'completed' ? 'Yopilgan' : 'Qarz'
     ]);
     exportToPDF("Sotuvlar_Hisoboti", headers, dataRows);
   };
 
-  const filteredSales = sales.filter(sale => {
+  const filteredSales = sales.filter((sale: any) => {
     const matchesSearch = 
       sale.clients?.full_name?.toLowerCase().includes(search.toLowerCase()) || 
       sale.products?.name_uz?.toLowerCase().includes(search.toLowerCase());
@@ -141,7 +112,7 @@ export default function Sales() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/3">
-              {filteredSales.map((sale) => {
+              {filteredSales.map((sale: any) => {
                 const isTek = sale.products?.categories?.name_uz?.toLowerCase().includes('tekstil');
                 return (
                   <tr key={sale.id} className="group hover:bg-white/1 transition-all">

@@ -1,76 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../services/supabase';
+import { useState } from 'react';
 import { 
   Search, Loader2, Plus, Edit2, Trash2, 
   Package, X, Maximize2, Filter, Boxes 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import AddProductModal from '../components/modals/AddProductModal';
 import toast from 'react-hot-toast';
 import { cn } from '../lib/utils';
+import { useProducts, useCategories, useDeleteProduct } from '../hooks/queries/useProducts';
 
 export default function Inventory() {
-  const { t, i18n } = useTranslation();
-  const [products, setProducts] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
   const [search, setSearch] = useState('');
   const [selectedCat, setSelectedCat] = useState('ALL');
-  
   const [zoomImage, setZoomImage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingData, setEditingData] = useState<any | null>(null);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      
-      // 1. Kategoriyalarni olish
-      const { data: cats } = await supabase.from('categories').select('*').order('name_uz');
-      if (cats) setCategories(cats);
-
-      // 2. Mahsulotlarni partiyalari bilan birga olish (Stock hisoblash uchun)
-      const { data: prods, error } = await supabase
-        .from('products')
-        .select(`
-          *, 
-          categories (id, name_uz),
-          batches (remaining_quantity)
-        `)
-        .order('name_uz', { ascending: true });
-      
-      if (error) throw error;
-
-      // 🟢 Har bir mahsulot uchun umumiy qoldiqni (Stock) hisoblaymiz
-      const enrichedProducts = prods?.map(p => ({
-        ...p,
-        total_stock: p.batches?.reduce((acc: number, b: any) => acc + (b.remaining_quantity || 0), 0) || 0
-      }));
-
-      setProducts(enrichedProducts || []);
-    } catch (err: any) {
-      toast.error("Ma'lumot yuklashda xato: " + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchData(); }, []);
+  const { data: products = [], isLoading: loading } = useProducts();
+  const { data: categories = [] } = useCategories();
+  const deleteProduct = useDeleteProduct();
 
   const handleDelete = async (id: string) => {
     if (!window.confirm(t('confirm_delete_prod'))) return;
     try {
-      const { error } = await supabase.from('products').delete().eq('id', id);
-      if (error) throw error;
+      await deleteProduct.mutateAsync(id);
       toast.success("Mahsulot o'chirildi");
-      fetchData();
     } catch (err: any) {
       toast.error("O'chirish imkonsiz: Mahsulotga bog'liq savdo yoki partiyalar bor");
     }
   };
 
-  const filtered = products?.filter(p => {
+  const filtered = products?.filter((p: any) => {
     const matchesSearch = p.name_uz?.toLowerCase().includes(search.toLowerCase()) || 
                           p.sku?.toLowerCase().includes(search.toLowerCase());
     const matchesCat = selectedCat === 'ALL' || p.category_id === selectedCat;
@@ -97,7 +62,7 @@ export default function Inventory() {
               className="w-full pl-10 pr-4 py-3 bg-[#0c0c0e] border border-white/5 rounded-2xl text-white text-[10px] font-black uppercase outline-none appearance-none cursor-pointer focus:border-primary/40 shadow-xl"
             >
               <option value="ALL">{t('all_categories')}</option>
-              {categories.map(c => <option key={c.id} value={c.id} className="bg-black">{c.name_uz}</option>)}
+              {categories.map((c: any) => <option key={c.id} value={c.id} className="bg-black">{c.name_uz}</option>)}
             </select>
             <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-primary" size={14} />
           </div>
@@ -136,7 +101,7 @@ export default function Inventory() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {filtered.map((p, index) => (
+              {filtered.map((p: any, index: number) => (
                 <tr key={p.id} className="group hover:bg-white/5 transition-all text-white font-medium">
                   <td className="px-6 py-5 text-gray-700 font-black text-xs text-center">{index + 1}</td>
                   
@@ -148,7 +113,8 @@ export default function Inventory() {
                       {p.image_url ? (
                         <>
                           <img 
-                            // 🟢 Keshni tozalash uchun vaqt tamg'asi qo'shildi
+                            loading="lazy"
+                            decoding="async"
                             src={`${p.image_url}${p.image_url.includes('?') ? '&' : '?'}v=${new Date(p.updated_at).getTime()}`} 
                             className="w-full h-full object-cover transition-transform group-hover/img:scale-110" 
                             alt="" 
@@ -177,7 +143,6 @@ export default function Inventory() {
 
                   <td className="px-6 py-5 text-center font-mono text-[10px] text-gray-500 font-black uppercase tracking-tighter">{p.sku}</td>
                   
-                  {/* 🟢 OMBORE QOLDIG'I USTUNI */}
                   <td className="px-6 py-5 text-center">
                     <div className={cn(
                       "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border font-black text-xs",
@@ -245,7 +210,7 @@ export default function Inventory() {
       <AddProductModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        onSuccess={fetchData} 
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ['products'] })} 
         initialData={editingData} 
       />
     </div>

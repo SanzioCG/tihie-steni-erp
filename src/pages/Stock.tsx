@@ -1,29 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../services/supabase';
-import { Search, Loader2, Edit3, Ruler, Package, Hash, Maximize2 } from 'lucide-react';
+import { useState } from 'react';
+import { Loader2, Edit3, Package } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslation } from 'react-i18next'; // QO'SHILDI
+import { useTranslation } from 'react-i18next';
 import { useCurrencyStore } from '../store/useCurrencyStore';
-import { cn } from '../lib/utils';
 import InboundModal from '../components/modals/InboundModal';
+import { useStock } from '../hooks/queries/useQueries';
 
 export default function Stock() {
-  const { t, i18n } = useTranslation(); // QO'SHILDI
+  const { t } = useTranslation();
   const { convert } = useCurrencyStore();
-  const [stocks, setStocks] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  const { data: stocks = [], isLoading: loading, refetch: fetchStock } = useStock();
+  
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isInboundOpen, setIsInboundOpen] = useState(false);
   const [editingBatch, setEditingBatch] = useState<any | null>(null);
-
-  const fetchStock = async () => {
-    setLoading(true);
-    const { data } = await supabase.from('batches').select(`*, products(*, categories(name_uz))`).order('created_at', { ascending: false });
-    if (data) setStocks(data);
-    setLoading(false);
-  };
-
-  useEffect(() => { fetchStock(); }, []);
 
   return (
     <div className="space-y-6 text-left p-2 animate-in fade-in duration-500">
@@ -56,7 +47,7 @@ export default function Stock() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/3">
-              {stocks.map((batch, index) => {
+              {stocks.map((batch: any, index: number) => {
                 const isTek = batch.products?.categories?.name_uz?.toLowerCase().includes('tekstil');
                 return (
                   <tr key={batch.id} className="group hover:bg-white/1 transition-all text-white font-medium">
@@ -111,7 +102,7 @@ export default function Stock() {
         {selectedImage && (
           <div className="fixed inset-0 z-2000 flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl" onClick={() => setSelectedImage(null)}>
             <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }}>
-              <img src={selectedImage} className="max-w-full max-h-[90vh] rounded-3xl shadow-2xl border border-white/10" alt="Zoomed" />
+              <img loading="lazy" decoding="async" src={selectedImage} className="max-w-full max-h-[90vh] rounded-3xl shadow-2xl border border-white/10" alt="Zoomed" />
             </motion.div>
           </div>
         )}

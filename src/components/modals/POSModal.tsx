@@ -1,9 +1,6 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { 
-  X, ShoppingCart, Loader2, CheckCircle2, 
-  Search, Trash2, Plus, Printer 
-} from 'lucide-react';
+import { X, ShoppingCart, CheckCircle2, Printer } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../services/supabase';
 import { useCurrencyStore } from '../../store/useCurrencyStore';
@@ -13,6 +10,11 @@ import { useReactToPrint } from 'react-to-print';
 import { Receipt } from '../ui/Receipt';
 import toast from 'react-hot-toast';
 import { sendNotification } from '../../lib/pushNotifications';
+
+import ClientSelector from './pos/ClientSelector';
+import ProductPicker from './pos/ProductPicker';
+import Cart from './pos/Cart';
+import PaymentSection from './pos/PaymentSection';
 
 interface POSModalProps {
   isOpen: boolean;
@@ -29,7 +31,7 @@ export default function POSModal({ isOpen, onClose, onSuccess }: POSModalProps) 
   const [categories, setCategories] = useState<any[]>([]);
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
-  const [productStock, setProductStock] = useState<{ totalStock: number; suggestedPrice: number; isTekstil: boolean; firstBatch: any } | null>(null);
+  const [productStock, setProductStock] = useState<any>(null);
   const [cart, setCart] = useState<any[]>([]);
   
   const [showSuccess, setShowSuccess] = useState(false);
@@ -37,7 +39,6 @@ export default function POSModal({ isOpen, onClose, onSuccess }: POSModalProps) 
   const [storeSettings, setStoreSettings] = useState<any>(null);
   const receiptRef = useRef<HTMLDivElement>(null);
 
-  // Form
   const [clientId, setClientId] = useState('');
   const [selectedCatId, setSelectedCatId] = useState('');
   const [selectedProdId, setSelectedProdId] = useState('');
@@ -51,7 +52,6 @@ export default function POSModal({ isOpen, onClose, onSuccess }: POSModalProps) 
 
   const handlePrint = useReactToPrint({ contentRef: receiptRef });
 
-  // Initial data
   useEffect(() => {
     const fetchData = async () => {
       const [c, p, cl, sett] = await Promise.all([
@@ -68,7 +68,6 @@ export default function POSModal({ isOpen, onClose, onSuccess }: POSModalProps) 
     if (isOpen) fetchData();
   }, [isOpen]);
 
-  // Modal yopilganda cleanup
   useEffect(() => {
     if (!isOpen) {
       setCart([]);
@@ -85,14 +84,6 @@ export default function POSModal({ isOpen, onClose, onSuccess }: POSModalProps) 
     }
   }, [isOpen]);
 
-  const filteredProducts = useMemo(() => {
-    if (!selectedCatId) return [];
-    return allProducts.filter(p => 
-      p.category_id === selectedCatId && 
-      p.name_uz.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [selectedCatId, searchTerm, allProducts]);
-
   const handleProductSelect = async (prod: any) => {
     setSelectedProdId(prod.id);
     setSearchTerm(prod.name_uz);
@@ -101,7 +92,6 @@ export default function POSModal({ isOpen, onClose, onSuccess }: POSModalProps) 
     const cat = categories.find(c => c.id === prod.category_id);
     const isTek = cat?.name_uz?.toLowerCase().includes('tekstil');
     
-    // Eng eski partiyani topish (FIFO uchun preview)
     const { data: batches } = await supabase
       .from('batches')
       .select('*')
@@ -151,7 +141,7 @@ export default function POSModal({ isOpen, onClose, onSuccess }: POSModalProps) 
     }
     
     setCart([...cart, {
-      id: crypto.randomUUID(),
+      id: `cart-${Date.now()}-${Math.random().toString(36).slice(2)}`,
       product_id: selectedProdId,
       product_name: searchTerm,
       total_qty: qtyToSell,
@@ -187,7 +177,6 @@ export default function POSModal({ isOpen, onClose, onSuccess }: POSModalProps) 
     
     setLoading(true);
     try {
-      // Cart items'ni RPC formatiga moslashtirish
       const items = cart.map(item => ({
         product_id: item.product_id,
         total_qty: item.total_qty,
@@ -217,7 +206,6 @@ export default function POSModal({ isOpen, onClose, onSuccess }: POSModalProps) 
       onSuccess();
       setCart([]);
       toast.success("Sotuv bajarildi!");
-      // Push notification yuborish (admin/director'larga)
       sendNotification(
         'Yangi sotuv',
         `${profile?.full_name || 'Sotuvchi'}: ${convert(totalCartSum)}`,
@@ -248,178 +236,51 @@ export default function POSModal({ isOpen, onClose, onSuccess }: POSModalProps) 
           </button>
         </div>
 
-        {/* Mijoz */}
-        <select 
-          className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white outline-none font-bold uppercase text-sm" 
+        <ClientSelector 
+          clients={clients} 
           value={clientId} 
-          onChange={e => setClientId(e.target.value)}
-        >
-          <option value="" className="bg-black">Mijozni tanlang...</option>
-          {clients.map(c => <option key={c.id} value={c.id} className="bg-black">{c.full_name}</option>)}
-        </select>
+          onChange={setClientId} 
+        />
 
-        {/* Mahsulot tanlash */}
-        <div className="p-6 bg-white/5 border border-white/5 rounded-[2rem] space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <select 
-              className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-white text-[11px] font-black uppercase outline-none" 
-              value={selectedCatId} 
-              onChange={e => { setSelectedCatId(e.target.value); setSelectedProdId(''); setProductStock(null); }}
-            >
-              <option value="" className="bg-black">Kategoriya...</option>
-              {categories.map(c => <option key={c.id} value={c.id} className="bg-black">{c.name_uz}</option>)}
-            </select>
-            <div 
-              onClick={() => selectedCatId && setIsDropdownOpen(!isDropdownOpen)} 
-              className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-white flex justify-between items-center cursor-pointer text-[11px] font-black uppercase relative"
-            >
-              <span className="truncate">{selectedProdId ? searchTerm : "Mahsulot..."}</span>
-              <Search size={14} />
-              {isDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-[#121214] border border-white/10 rounded-xl z-50 max-h-48 overflow-y-auto">
-                  {filteredProducts.map(p => (
-                    <div 
-                      key={p.id} 
-                      onClick={(e) => { e.stopPropagation(); handleProductSelect(p); }}
-                      className="px-4 py-3 hover:bg-primary/10 text-xs text-white font-black border-b border-white/5"
-                    >
-                      {p.name_uz}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+        <ProductPicker 
+          categories={categories}
+          allProducts={allProducts}
+          productStock={productStock}
+          selectedCatId={selectedCatId}
+          selectedProdId={selectedProdId}
+          searchTerm={searchTerm}
+          isDropdownOpen={isDropdownOpen}
+          sellLength={sellLength}
+          sellCount={sellCount}
+          sellWidth={sellWidth}
+          sellPrice={sellPrice}
+          onCatChange={(id) => { setSelectedCatId(id); setSelectedProdId(''); setProductStock(null); }}
+          onProductSelect={handleProductSelect}
+          onSearchTermChange={setSearchTerm}
+          onDropdownToggle={() => setIsDropdownOpen(!isDropdownOpen)}
+          onLengthChange={setSellLength}
+          onCountChange={setSellCount}
+          onWidthChange={setSellWidth}
+          onPriceChange={setSellPrice}
+          calculateQty={calculateQty}
+          onAddToCart={addToCart}
+        />
 
-          {/* Stock info */}
-          {productStock && (
-            <div className="text-[10px] text-primary font-black uppercase tracking-widest">
-              Omborda: {productStock.totalStock.toFixed(2)} {productStock.isTekstil ? 'm²' : 'm'}
-            </div>
-          )}
+        <Cart items={cart} onRemove={removeFromCart} />
 
-          {/* O'lchovlar */}
-          {productStock && productStock.isTekstil && (
-            <div className="grid grid-cols-2 gap-3">
-              <input 
-                type="number" 
-                step="0.01"
-                placeholder="Eni (m)" 
-                className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-black outline-none" 
-                value={sellWidth} 
-                onChange={e => setSellWidth(e.target.value)} 
-              />
-              <input 
-                type="number" 
-                step="0.01"
-                placeholder="Bo'yi (m)" 
-                className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-black outline-none" 
-                value={sellLength} 
-                onChange={e => setSellLength(e.target.value)} 
-              />
-            </div>
-          )}
-          
-          {productStock && !productStock.isTekstil && (
-            <div className="grid grid-cols-2 gap-3">
-              <input 
-                type="number" 
-                step="0.01"
-                placeholder="Uzunlik (m)" 
-                className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-black outline-none" 
-                value={sellLength} 
-                onChange={e => setSellLength(e.target.value)} 
-              />
-              <input 
-                type="number" 
-                placeholder="Dona" 
-                className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-black outline-none" 
-                value={sellCount} 
-                onChange={e => setSellCount(e.target.value)} 
-              />
-            </div>
-          )}
+        <PaymentSection 
+          totalCartSum={totalCartSum}
+          paidAmount={paidAmount}
+          onPaidChange={setPaidAmount}
+          onSubmit={handleSubmit}
+          loading={loading}
+          cartLength={cart.length}
+        />
 
-          {productStock && (
-            <input 
-              type="number" 
-              step="0.01"
-              placeholder="Narx ($)" 
-              className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-primary font-black outline-none" 
-              value={sellPrice} 
-              onChange={e => setSellPrice(e.target.value)} 
-            />
-          )}
-
-          {productStock && calculateQty() > 0 && (
-            <div className="text-center text-[10px] text-gray-500 font-black uppercase">
-              Jami: {calculateQty().toFixed(2)} {productStock.isTekstil ? 'm²' : 'm'} × {sellPrice}$ = {(calculateQty() * Number(sellPrice || 0)).toLocaleString()}$
-            </div>
-          )}
-
-          <button 
-            type="button" 
-            onClick={addToCart} 
-            disabled={!productStock || calculateQty() <= 0}
-            className="w-full py-4 bg-primary text-black font-black rounded-2xl uppercase text-[10px] tracking-widest disabled:opacity-30"
-          >
-            <Plus size={14} className="inline mr-1" /> Savatga qo'shish
-          </button>
-        </div>
-
-        {/* Cart */}
-        {cart.length > 0 && (
-          <div className="space-y-2 max-h-40 overflow-y-auto">
-            {cart.map(item => (
-              <div key={item.id} className="flex justify-between items-center p-3 bg-white/3 border border-white/5 rounded-xl">
-                <div className="flex-1">
-                  <p className="text-xs font-black text-white">{item.product_name}</p>
-                  <p className="text-[9px] text-gray-500">{item.details} = {item.total_qty.toFixed(2)} {item.isTekstil ? 'm²' : 'm'}</p>
-                </div>
-                <div className="text-sm font-black text-primary">{item.total_price.toLocaleString()}$</div>
-                <button onClick={() => removeFromCart(item.id)} className="p-2 text-gray-500 hover:text-rose-500">
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Total + Submit */}
-        <div className="pt-4 border-t border-white/5 space-y-4">
-          <div className="flex justify-between items-center px-2">
-            <span className="text-[10px] font-black text-gray-500 uppercase">Jami:</span>
-            <span className="text-3xl font-black text-white italic">{convert(totalCartSum)}</span>
-          </div>
-          <input 
-            type="number" 
-            step="0.01"
-            className="w-full px-5 py-5 bg-emerald-500/5 border border-emerald-500/10 rounded-3xl text-emerald-500 text-2xl font-black outline-none text-center" 
-            placeholder="To'langan summa..." 
-            value={paidAmount} 
-            onChange={e => setPaidAmount(e.target.value)} 
-          />
-          {debtAmount > 0 && (
-            <div className="text-center text-rose-500 text-xs font-black uppercase">
-              Qarz: {debtAmount.toLocaleString()}$
-            </div>
-          )}
-          <button 
-            disabled={loading || cart.length === 0} 
-            onClick={handleSubmit} 
-            className="w-full py-5 bg-primary text-black font-black rounded-2xl uppercase text-xs tracking-widest flex justify-center items-center gap-3 disabled:opacity-50"
-          >
-            {loading ? <Loader2 className="animate-spin" /> : <CheckCircle2 />} 
-            SOTUVNI YAKUNLASH
-          </button>
-        </div>
-
-        {/* Receipt (hidden) */}
         <div style={{ display: 'none' }}>
           {receiptData && <Receipt ref={receiptRef} storeInfo={storeSettings} {...receiptData} />}
         </div>
 
-        {/* Success */}
         <AnimatePresence>
           {showSuccess && (
             <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4">

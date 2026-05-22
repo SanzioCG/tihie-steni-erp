@@ -10,7 +10,7 @@ interface TopBarProps {
 
 export default function TopBar({ onMenuClick }: TopBarProps) {
   const { profile } = useAuthStore();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
@@ -29,7 +29,7 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
         </button>
         <div className="hidden md:block">
            <p className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em]">
-             Operations Control
+             {t('operations_control')}
            </p>
         </div>
       </div>

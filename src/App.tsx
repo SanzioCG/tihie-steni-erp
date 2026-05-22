@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useState } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
 import TopBar from './components/layout/TopBar';
 import Dashboard from './pages/Dashboard';
@@ -13,36 +15,28 @@ import OfficeExpenses from './pages/OfficeExpenses';
 import Settings from './pages/Settings';
 import LowStock from './pages/LowStock';
 import KP from './pages/KP';
-import Login from './pages/Login'; 
+import Login from './pages/Login';
 import ReloadPrompt from './components/ui/ReloadPrompt';
-import { useAuthStore } from './store/useAuthStore'; 
+import { useAuthStore } from './store/useAuthStore';
 import { ThemeProvider } from './components/layout/ThemeProvider';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 import { subscribeUserToPush, getNotificationPermission, isPushSupported } from './lib/pushNotifications';
 
-
 export default function App() {
-  const { user, profile, loading, checkUser } = useAuthStore(); 
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const { user, profile, loading, checkUser } = useAuthStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
-    checkUser(true); 
+    checkUser(true);
   }, []);
-
-  // Manager uchun Dashboardni cheklash va redirect
-  useEffect(() => {
-    if (profile?.role === 'manager' && activeTab === 'dashboard') {
-      setActiveTab('kp');
-    }
-  }, [profile, activeTab]);
 
   // Push notification subscribe (faqat admin/director uchun)
   useEffect(() => {
     if (user && profile && (profile.role === 'admin' || profile.role === 'director')) {
-      if (isPushSupported() && getNotificationPermission() === 'default') {
+      if (isPushSupported() && getNotificationPermission() !== 'denied') {
         const timer = setTimeout(() => {
           subscribeUserToPush(user.id).then(success => {
             if (success) console.log('✅ Push notifications yoqildi');
@@ -52,24 +46,6 @@ export default function App() {
       }
     }
   }, [user, profile]);
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'dashboard': return <Dashboard setActiveTab={setActiveTab} />;
-      case 'kp':        return <KP />;
-      case 'products':  return <Inventory />;
-      case 'stock':     return <Stock />;
-      case 'lowstock':  return <LowStock />;
-      case 'finance':   return <Finance />;
-      case 'sales':     return <Sales />;
-      case 'clients':   return <Clients />;
-      case 'debts':     return <Debts />;
-      case 'audit':     return <Audit />;
-      case 'expenses':  return <OfficeExpenses />;
-      case 'settings':  return <Settings />;
-      default: return <Inventory />;
-    }
-  };
 
   if (loading) {
     return (
@@ -82,20 +58,23 @@ export default function App() {
 
   if (!user) return <Login />;
 
+  // Manager uchun dashboard cheklash — default route'ni belgilash
+  const defaultRoute = profile?.role === 'manager' ? '/kp' : '/dashboard';
+
   return (
     <ThemeProvider attribute="class" defaultTheme="dark">
       <Toaster 
         position="top-right" 
         toastOptions={{ 
-            duration: 4000,
-            style: { background: '#121214', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', fontSize: '12px', fontWeight: 'bold' } 
+          duration: 4000,
+          style: { background: '#121214', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', fontSize: '12px', fontWeight: 'bold' } 
         }} 
       />
 
       <ReloadPrompt />
 
       <div className="min-h-screen bg-app-bg text-app-fg flex relative font-sans">
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+        <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
         
         <AnimatePresence>
           {isSidebarOpen && (
@@ -107,8 +86,23 @@ export default function App() {
           <TopBar onMenuClick={() => setIsSidebarOpen(true)} />
           <main className="p-4 md:p-8 flex-1 relative">
             <AnimatePresence mode="wait">
-              <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-                {renderContent()}
+              <motion.div key={location.pathname} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+                <Routes>
+                  <Route path="/" element={<Navigate to={defaultRoute} replace />} />
+                  <Route path="/dashboard" element={profile?.role === 'manager' ? <Navigate to="/kp" replace /> : <Dashboard />} />
+                  <Route path="/kp" element={<KP />} />
+                  <Route path="/products" element={<Inventory />} />
+                  <Route path="/stock" element={<Stock />} />
+                  <Route path="/lowstock" element={<LowStock />} />
+                  <Route path="/finance" element={<Finance />} />
+                  <Route path="/sales" element={<Sales />} />
+                  <Route path="/clients" element={<Clients />} />
+                  <Route path="/debts" element={<Debts />} />
+                  <Route path="/audit" element={<Audit />} />
+                  <Route path="/expenses" element={<OfficeExpenses />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="*" element={<Navigate to={defaultRoute} replace />} />
+                </Routes>
               </motion.div>
             </AnimatePresence>
           </main>

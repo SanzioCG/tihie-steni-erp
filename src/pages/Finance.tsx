@@ -1,82 +1,113 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../services/supabase';
+import { useState, useEffect } from 'react';
+import { useCurrencyStore } from '../store/useCurrencyStore';
 import { 
-  Wallet, ArrowUpCircle, ArrowDownCircle, 
   FileDown, Activity, PieChart as PieIcon, 
-  Loader2, TrendingUp, History
+  Loader2, TrendingUp, History, Filter
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell 
 } from 'recharts';
 import { useTranslation } from 'react-i18next';
-import { useCurrencyStore } from '../store/useCurrencyStore';
 import { cn, exportToPDF } from '../lib/utils';
+import { useFinanceStats, useTransactionCategories } from '../hooks/queries/useQueries';
 
 const COLORS = ['#34d399', '#fbbf24', '#818cf8', '#f43f5e', '#a78bfa'];
+
+type DateRange = 'today' | 'week' | 'month' | 'all';
 
 export default function Finance() {
   const { t, i18n } = useTranslation();
   const { convert, fetchRates } = useCurrencyStore();
-  const [loading, setLoading] = useState(true);
   
-  const [stats, setStats] = useState<any>({
-    balance: 0,
-    totalIncome: 0,
-    totalExpense: 0,
-    netProfit: 0,
-    chartData: [],
-    categoryData: [],
-    recentTransactions: []
-  });
+  const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
+  const [dateRange, setDateRange] = useState<DateRange>('all');
 
-  const fetchFinanceData = async () => {
-    try {
-      setLoading(true);
-      await fetchRates();
-
-      // 🟢 Barcha og'ir hisoblarni bitta RPC funksiyadan olamiz
-      const { data, error } = await supabase.rpc('get_finance_stats');
-      if (error) throw error;
-
-      if (data) {
-        setStats(data);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+  const getDateFromRange = (range: DateRange) => {
+    const now = new Date();
+    if (range === 'today') {
+      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      return { from: start.toISOString(), to: null };
     }
+    if (range === 'week') {
+      const start = new Date(now);
+      start.setDate(start.getDate() - 7);
+      return { from: start.toISOString(), to: null };
+    }
+    if (range === 'month') {
+      const start = new Date(now);
+      start.setMonth(start.getMonth() - 1);
+      return { from: start.toISOString(), to: null };
+    }
+    return { from: null, to: null };
   };
 
+  const { from, to } = getDateFromRange(dateRange);
+  
+  const { data: stats = {
+    balance: 0, totalIncome: 0, totalExpense: 0, netProfit: 0,
+    chartData: [], categoryData: [], recentTransactions: []
+  }, isLoading: loading } = useFinanceStats({
+    p_category: categoryFilter === 'ALL' ? null : categoryFilter,
+    p_date_from: from,
+    p_date_to: to,
+  });
+
+  const { data: availableCategories = [] } = useTransactionCategories();
+
   useEffect(() => {
-    fetchFinanceData();
-    
-    // Real-time yangilanish
-    const channel = supabase.channel('fin_sync')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transactions' }, () => fetchFinanceData())
-      .subscribe();
-      
-    return () => { supabase.removeChannel(channel); };
-  }, [i18n.language]);
+    fetchRates();
+  }, []);
 
   if (loading) return <div className="h-screen flex items-center justify-center bg-app-bg"><Loader2 className="animate-spin text-primary" size={48} /></div>;
 
   return (
     <div className="space-y-6 text-left font-sans pb-24 md:pb-10">
-      {/* HEADER */}
       <div className="flex justify-between items-center px-4">
         <div>
           <h2 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter">{t('finance_analysis')}</h2>
           <p className="text-[9px] text-gray-500 font-black uppercase tracking-[0.3em]">Real-time Financial Status</p>
         </div>
-        <button onClick={() => exportToPDF("Moliya_Hisoboti", [[t('category'), t('amount')]], stats.categoryData.map((c:any) => [c.name, convert(c.value)]))} 
+        <button onClick={() => exportToPDF("Moliya_Hisoboti", [["KATEGORIYA", "SUMMA"]], stats.categoryData.map((c:any) => [c.name, convert(c.value)]))} 
           className="p-3 bg-white/5 border border-white/10 rounded-2xl text-white hover:bg-white/10 transition-all">
           <FileDown size={20} />
         </button>
       </div>
 
-      {/* KPI KARTALARI */}
+      <div className="mx-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="relative">
+          <Filter className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600" size={16} />
+          <select 
+            value={categoryFilter} 
+            onChange={e => setCategoryFilter(e.target.value)}
+            className="w-full pl-14 pr-5 py-4 bg-[#0c0c0e] border border-white/5 rounded-2xl text-white font-black text-[11px] uppercase tracking-widest outline-none appearance-none cursor-pointer"
+          >
+            <option value="ALL" className="bg-black">Barcha kategoriyalar</option>
+            {availableCategories.map((c: string) => (
+              <option key={c} value={c} className="bg-black">{c}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex gap-2 bg-[#0c0c0e] border border-white/5 rounded-2xl p-2">
+          {(['today', 'week', 'month', 'all'] as DateRange[]).map(r => (
+            <button
+              key={r}
+              onClick={() => setDateRange(r)}
+              className={cn(
+                "flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                dateRange === r ? "bg-primary text-black shadow-lg" : "text-gray-500 hover:text-white"
+              )}
+            >
+              {r === 'today' && 'Bugun'}
+              {r === 'week' && 'Hafta'}
+              {r === 'month' && 'Oy'}
+              {r === 'all' && 'Hammasi'}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mx-4">
         <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-4xl shadow-xl relative overflow-hidden group">
            <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full blur-3xl" />
@@ -100,7 +131,6 @@ export default function Finance() {
         </div>
       </div>
 
-      {/* GRAFIKLAR */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mx-4">
         <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl h-100">
           <h4 className="text-[10px] font-black text-gray-500 uppercase mb-10 flex items-center gap-2">
@@ -155,7 +185,6 @@ export default function Finance() {
         </div>
       </div>
 
-      {/* OXIRGI AMALLAR */}
       <div className="mx-4 p-8 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl">
          <h4 className="text-[10px] font-black text-gray-500 uppercase mb-8 flex items-center gap-2">
            <History size={14} className="text-primary"/> {t('recent_transactions')}

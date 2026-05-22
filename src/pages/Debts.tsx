@@ -1,31 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { supabase } from '../services/supabase';
 import { 
   Search, Wallet, ArrowRightCircle, 
-  CheckCircle2, Loader2, User, FileDown, Banknote, X
+  CheckCircle2, Loader2, User, FileDown, X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslation } from 'react-i18next'; // QO'SHILDI
-import { generatePDF } from '../lib/exportPDF';
-import { cn } from '../lib/utils';
+import { useTranslation } from 'react-i18next';
+import { exportToPDF } from '../lib/utils';
+import toast from 'react-hot-toast';
+import { useDebtors } from '../hooks/queries/useQueries';
 
 export default function Debts() {
-  const { t, i18n } = useTranslation(); // QO'SHILDI
-  const [clients, setClients] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
+  
+  const { data: clients = [], isLoading: loading, refetch: fetchDebtors } = useDebtors();
+  
   const [search, setSearch] = useState('');
   const [selectedClient, setSelectedClient] = useState<any | null>(null);
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paying, setPaying] = useState(false);
-
-  const fetchDebtors = async () => {
-    setLoading(true);
-    const { data } = await supabase.from('clients').select('*').lt('balance', 0).order('balance', { ascending: true });
-    if (data) setClients(data);
-    setLoading(false);
-  };
-
-  useEffect(() => { fetchDebtors(); }, []);
 
   const handlePayment = async () => {
     if (!selectedClient || !paymentAmount) return;
@@ -39,9 +32,9 @@ export default function Debts() {
 
       await supabase.from('transactions').insert([{
         type: 'income',
-        category: t('debt_payment_category'), // Tarjima qilindi
+        category: t('debt_payment_category'),
         amount: amount,
-        description: `${selectedClient.full_name} ${t('paid_debt_desc')}`, // Tarjima qilindi
+        description: `${selectedClient.full_name} ${t('paid_debt_desc')}`,
         created_at: new Date().toISOString()
       }]);
 
@@ -56,28 +49,26 @@ export default function Debts() {
       setPaymentAmount('');
       fetchDebtors();
     } catch (err: any) {
-      alert(err.message);
+      toast.error("Xatolik: " + err.message);
     } finally {
       setPaying(false);
     }
   };
 
   const exportDebtsPDF = () => {
-    // PDF Headerlari tarjima qilindi
-    const headers = [[t('client'), t('phone'), t('debts_label')]];
-    const dataRows = clients.map(c => [
+    const headers = [["MIJOZ", "TELEFON", "QARZ"]];
+    const dataRows = clients.map((c: any) => [
       c.full_name,
       c.phone || '-',
       `$${Math.abs(c.balance).toLocaleString()}`
     ]);
-    generatePDF(t('debts_control'), headers, dataRows);
+    exportToPDF("Qarzdorlar_Hisoboti", headers, dataRows);
   };
 
-  const totalDebt = clients.reduce((sum, c) => sum + Math.abs(c.balance), 0);
+  const totalDebt = clients.reduce((sum: number, c: any) => sum + Math.abs(c.balance), 0);
 
   return (
     <div className="space-y-8 text-left animate-in fade-in duration-500">
-      {/* HEADER */}
       <div className="flex justify-between items-center px-2">
         <div>
           <h2 className="text-3xl font-black text-white uppercase ">{t('debts_control')}</h2>
@@ -90,7 +81,6 @@ export default function Debts() {
         </div>
       </div>
 
-      {/* JAMI QARZ VIDJETI */}
       <div className="p-8 bg-rose-500/10 border border-rose-500/20 rounded-[2.5rem] backdrop-blur-md flex items-center justify-between mx-2">
         <div className="flex items-center gap-6">
           <div className="p-4 bg-rose-500/20 rounded-2xl text-rose-500"><Wallet size={32} /></div>
@@ -105,7 +95,6 @@ export default function Debts() {
         </div>
       </div>
 
-      {/* SEARCH */}
       <div className="relative mx-2">
         <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
         <input 
@@ -115,9 +104,8 @@ export default function Debts() {
         />
       </div>
 
-      {/* DEBTORS GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mx-2">
-        {clients.filter(c => c.full_name.toLowerCase().includes(search.toLowerCase())).map((client) => (
+        {clients.filter((c: any) => c.full_name.toLowerCase().includes(search.toLowerCase())).map((client: any) => (
           <div key={client.id} className="p-6 bg-[#0c0c0e] border border-white/5 rounded-4xl shadow-2xl hover:border-rose-500/30 transition-all group">
             <div className="flex justify-between items-start mb-6">
                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform">
@@ -144,7 +132,6 @@ export default function Debts() {
         )}
       </div>
 
-      {/* PAYMENT MODAL */}
       <AnimatePresence>
         {selectedClient && (
           <div className="fixed inset-0 z-200 flex items-center justify-center p-4">

@@ -1,6 +1,15 @@
-import { ThemeProvider as NextThemesProvider } from "next-themes";
+import React from 'react';
 
-// TypeScript xatosini yo'qotish uchun props turini vaqtincha 'any' qilib belgilaymiz
-export function ThemeProvider({ children, ...props }: any) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+interface ThemeProviderProps {
+  children: React.ReactNode;
+  attribute?: string;
+  defaultTheme?: string;
+}
+
+export function ThemeProvider({ children }: ThemeProviderProps) {
+  return (
+    <div className="dark">
+      {children}
+    </div>
+  );
 }

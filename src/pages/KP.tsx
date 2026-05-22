@@ -1,19 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../services/supabase';
 import { 
-  Calculator, Plus, Trash2, Search, ChevronDown, 
-  Check, Ruler, FileDown, Package, Save, History, User, X 
+  Calculator, Plus, Trash2, Search, 
+  FileDown, Save, History 
 } from 'lucide-react';
-import { useTranslation } from 'react-i18next'; // QO'SHILDI
+import { useTranslation } from 'react-i18next';
 import { useCurrencyStore } from '../store/useCurrencyStore';
 import { useAuthStore } from '../store/useAuthStore';
-import { generatePDF } from '../lib/exportPDF';
-import { cn } from '../lib/utils';
+import { exportToPDF, cn } from '../lib/utils';
+import toast from 'react-hot-toast';
+import { useCommercialOffers } from '../hooks/queries/useQueries';
 
 export default function KP() {
-  const { t, i18n } = useTranslation(); // QO'SHILDI
+  const { t, i18n } = useTranslation();
   const { convert } = useCurrencyStore();
   const { profile } = useAuthStore();
+  
+  const { data: kpHistory = [], refetch: fetchKpHistory } = useCommercialOffers();
+  
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [allProducts, setAllProducts] = useState<any[]>([]);
@@ -22,8 +26,7 @@ export default function KP() {
   const [batches, setBatches] = useState<any[]>([]);
   const [cart, setCart] = useState<any[]>([]);
   const [showHistory, setShowHistory] = useState(false);
-  const [kpHistory, setKpHistory] = useState<any[]>([]);
-
+  
   const [clientId, setClientId] = useState('');
   const [selectedCatId, setSelectedCatId] = useState('');
   const [selectedProdId, setSelectedProdId] = useState('');
@@ -37,17 +40,17 @@ export default function KP() {
     const { data: c } = await supabase.from('categories').select('*').order('name_uz');
     const { data: p } = await supabase.from('products').select('*');
     const { data: cl } = await supabase.from('clients').select('*').order('full_name');
-    const { data: h } = await supabase.from('commercial_offers').select('*, clients(full_name, phone)').order('created_at', { ascending: false });
     
     if (c) setCategories(c);
     if (p) setAllProducts(p);
     if (cl) setClients(cl);
-    if (h) setKpHistory(h);
   };
 
   useEffect(() => { 
     fetchData(); 
-    const handleClick = (e: MouseEvent) => { if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setIsDropdownOpen(false); };
+    const handleClick = (e: MouseEvent) => { 
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setIsDropdownOpen(false); 
+    };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
@@ -58,6 +61,7 @@ export default function KP() {
     setFilteredProducts(allProducts.filter(p => p.category_id === id));
     setSearchTerm('');
     setBatches([]);
+    setDims({ width_m: '', length_m: '', item_count: '1', price: '' });
   };
 
   const handleProductSelect = async (prod: any) => {
@@ -74,7 +78,7 @@ export default function KP() {
   };
 
   const addToCart = () => {
-    if (!selectedProdId || !dims.length_m) return alert(t('fill_fields'));
+    if (!selectedProdId || !dims.length_m) return toast.error(t('fill_fields'));
     const isTek = categories.find(c => c.id === selectedCatId)?.name_uz?.toLowerCase().includes('tekstil');
     const qty = isTek ? (Number(dims.width_m) * Number(dims.length_m)) : (Number(dims.length_m) * Number(dims.item_count));
     
@@ -87,12 +91,13 @@ export default function KP() {
       details: isTek ? `E: ${dims.width_m}m x B: ${dims.length_m}m` : `L: ${dims.length_m}m x ${dims.item_count}ta`,
       unit: isTek ? 'm²' : 'm'
     }]);
-    setDims({ ...dims, length_m: '', price: '' });
-    setSelectedProdId(''); setSearchTerm('');
+    setDims({ width_m: '', length_m: '', item_count: '1', price: '' });
+    setSelectedProdId(''); 
+    setSearchTerm('');
   };
 
   const saveAndExport = async () => {
-    if (cart.length === 0 || !clientId) return alert(t('select_client_err'));
+    if (cart.length === 0 || !clientId) return toast.error(t('select_client_err'));
     setLoading(true);
     const totalSum = cart.reduce((sum, item) => sum + item.total, 0);
     const selectedClient = clients.find(c => c.id === clientId);
@@ -100,14 +105,18 @@ export default function KP() {
     const { error } = await supabase.from('commercial_offers').insert([{ items: cart, total_amount: totalSum, client_id: clientId }]);
     
     if (!error) {
-      await generatePDF(
-        t('offer_title'), 
-        [[t('products'), t('details'), t('qoldiq'), t('amount')]], 
+      await exportToPDF(
+        "Tijorat_Taklifi",
+        [["MAHSULOT", "TAFSILOT", "MIQDOR", "JAMI"]],
         cart.map(i => [i.product_name, i.details, `${i.qty.toFixed(2)} ${i.unit}`, convert(i.total)]),
-        { name: selectedClient.full_name, phone: selectedClient.phone, total: convert(totalSum) }
+        { name: selectedClient?.full_name, phone: selectedClient?.phone, total: convert(totalSum) }
       );
-      setCart([]); setClientId(''); fetchData();
-      alert(t('offer_saved'));
+      setCart([]); 
+      setClientId('');
+      fetchKpHistory();
+      toast.success(t('offer_saved'));
+    } else {
+      toast.error("Xatolik: " + error.message);
     }
     setLoading(false);
   };
@@ -127,6 +136,7 @@ export default function KP() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mx-2">
           <div className="lg:col-span-4 space-y-6">
             <div className="bg-[#0c0c0e] border border-white/5 rounded-4xl p-8 shadow-2xl space-y-6">
+              
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-primary uppercase tracking-widest ml-2">1. {t('select_client')}</label>
                 <select className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-black outline-none text-sm cursor-pointer" value={clientId} onChange={e => setClientId(e.target.value)}>
@@ -145,20 +155,50 @@ export default function KP() {
 
               <div className="space-y-1 relative" ref={dropdownRef}>
                 <label className="text-[10px] font-black text-gray-500 uppercase ml-2">3. {t('search_product')}</label>
-                <div onClick={() => selectedCatId && setIsDropdownOpen(!isDropdownOpen)} className={cn("w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white flex justify-between items-center cursor-pointer font-bold text-sm mt-1", !selectedCatId && "opacity-20")}>
-                  <span className="truncate">{selectedProdId ? searchTerm : t('search_product')}</span>
-                  <Search size={18} className="text-primary" />
+                <div className="relative">
+                  <input 
+                    value={searchTerm}
+                    onChange={e => { 
+                      setSearchTerm(e.target.value); 
+                      setIsDropdownOpen(true);
+                      if (selectedProdId) {
+                        setSelectedProdId('');
+                        setDims({ width_m: '', length_m: '', item_count: '1', price: '' });
+                      }
+                    }}
+                    onFocus={() => selectedCatId && setIsDropdownOpen(true)}
+                    disabled={!selectedCatId}
+                    placeholder={t('search_product')}
+                    className={cn(
+                      "w-full px-5 py-4 pr-12 bg-white/5 border border-white/5 rounded-2xl text-white outline-none font-bold text-sm uppercase",
+                      !selectedCatId && "opacity-20 cursor-not-allowed"
+                    )}
+                  />
+                  <Search size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-primary pointer-events-none" />
+                  
+                  {isDropdownOpen && selectedCatId && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#121214] border border-white/10 rounded-2xl z-50 overflow-hidden shadow-2xl max-h-48 overflow-y-auto">
+                      {allProducts.filter(p => 
+                        p.name_uz.toLowerCase().includes(searchTerm.toLowerCase()) && 
+                        p.category_id === selectedCatId
+                      ).map(p => (
+                        <div 
+                          key={p.id} 
+                          onClick={() => handleProductSelect(p)} 
+                          className="px-6 py-4 hover:bg-primary/10 text-xs text-white font-black cursor-pointer border-b border-white/2 uppercase"
+                        >
+                          {p.name_uz}
+                        </div>
+                      ))}
+                      {allProducts.filter(p => 
+                        p.name_uz.toLowerCase().includes(searchTerm.toLowerCase()) && 
+                        p.category_id === selectedCatId
+                      ).length === 0 && (
+                        <div className="px-6 py-4 text-xs text-gray-600 font-black uppercase">Topilmadi</div>
+                      )}
+                    </div>
+                  )}
                 </div>
-                {isDropdownOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#121214] border border-white/10 rounded-2xl z-50 overflow-hidden shadow-2xl">
-                     <input autoFocus className="w-full p-4 bg-white/5 border-b border-white/10 outline-none text-white text-xs font-black" onChange={e => setSearchTerm(e.target.value)} placeholder={t('search_product')} />
-                     <div className="max-h-48 overflow-y-auto">
-                       {allProducts.filter(p => p.name_uz.toLowerCase().includes(searchTerm.toLowerCase()) && p.category_id === selectedCatId).map(p => (
-                         <div key={p.id} onClick={() => handleProductSelect(p)} className="px-6 py-4 hover:bg-primary/10 text-xs text-white font-black cursor-pointer border-b border-white/2 uppercase">{p.name_uz}</div>
-                       ))}
-                     </div>
-                  </div>
-                )}
               </div>
 
               {selectedProdId && (
@@ -219,13 +259,13 @@ export default function KP() {
                  <tr><th className="px-8 py-6 text-[10px] font-black uppercase">{t('date')}</th><th className="px-8 py-6 text-[10px] font-black uppercase">{t('client')}</th><th className="px-8 py-6 text-[10px] font-black uppercase text-right">{t('total')}</th><th className="px-8 py-6 text-[10px] font-black uppercase text-center">{t('actions')}</th></tr>
               </thead>
               <tbody className="divide-y divide-white/3">
-                 {kpHistory.map(h => (
+                 {kpHistory.map((h: any) => (
                    <tr key={h.id} className="group hover:bg-white/1">
                       <td className="px-8 py-6 text-gray-500 font-bold text-xs uppercase">{new Date(h.created_at).toLocaleString(i18n.language)}</td>
                       <td className="px-8 py-6 text-white font-black text-sm uppercase">{h.clients?.full_name}</td>
                       <td className="px-8 py-6 text-right text-emerald-500 font-black text-lg tracking-tighter">{convert(h.total_amount)}</td>
                       <td className="px-8 py-6 text-center">
-                         <button onClick={() => generatePDF(t('offer_title'), [[t('products'), t('total')]], h.items.map((i:any) => [i.product_name, convert(i.total)]), {name: h.clients?.full_name, phone: h.clients?.phone, total: convert(h.total_amount)})} className="p-3 bg-white/5 rounded-xl hover:bg-primary/20 text-primary transition-all active:scale-90"><FileDown size={18}/></button>
+                         <button onClick={() => exportToPDF("Tijorat_Taklifi", [["MAHSULOT", "JAMI"]], h.items.map((i:any) => [i.product_name, convert(i.total)]), {name: h.clients?.full_name, phone: h.clients?.phone, total: convert(h.total_amount)})} className="p-3 bg-white/5 rounded-xl hover:bg-primary/20 text-primary transition-all active:scale-90"><FileDown size={18}/></button>
                       </td>
                    </tr>
                  ))}

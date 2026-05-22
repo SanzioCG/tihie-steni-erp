@@ -5,6 +5,7 @@ import { supabase } from '../../services/supabase';
 import { useCurrencyStore } from '../../store/useCurrencyStore'; 
 import { useAuthStore } from '../../store/useAuthStore'; 
 import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast';
 
 interface ReturnModalProps {
   isOpen: boolean;
@@ -39,7 +40,7 @@ export default function ReturnModal({ isOpen, onClose, onSuccess, saleData }: Re
 
     // Tekshiruv: Sotilgan miqdordan ko'p qaytarib bo'lmaydi
     if (qty <= 0 || qty > saleData.quantity) {
-      return alert(t('error_qty_limit') || "Xato: Qaytarish miqdori noto'g'ri!");
+      return toast.error(t('error_qty_limit') || "Xato: Qaytarish miqdori noto'g'ri!");
     }
     
     setLoading(true);
@@ -61,12 +62,12 @@ export default function ReturnModal({ isOpen, onClose, onSuccess, saleData }: Re
 
       if (error) throw error;
 
-      alert(t('return_success') || "Mahsulot muvaffaqiyatli qaytarildi!");
+      toast.success(t('return_success') || "Mahsulot muvaffaqiyatli qaytarildi!");
       onSuccess();
       onClose();
     } catch (err: any) { 
       console.error("Return error:", err);
-      alert(t('no_data') + ": " + err.message); 
+      toast.error(t('no_data') + ": " + err.message); 
     } finally { 
       setLoading(false); 
     }

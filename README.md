@@ -1,25 +1,67 @@
 # 🏛️ Silent Walls ERP (ТИХИЕ СТЕНЫ)
 
-Advanced Enterprise Resource Planning (ERP) system specifically designed for Textile and Construction Materials business.
+Tekstil va qurilish materiallari biznesi uchun ERP tizim.
 
-## 🚀 Key Features
-- **📏 Smart Metrology Logic:** Automated calculation for Textile ($m^2 = Width \times Length$) and Profiles (Linear meters).
-- **🛒 Multi-item POS Terminal:** Basket-based checkout system with real-time stock deduction.
-- **💰 Real-time Currency:** Integrated with Central Bank of Uzbekistan (CBU) API for live USD to UZS/EUR/RUB conversion.
-- **👥 Deep CRM:** Customer purchase history, debt tracking (Debitor), and automated balance management.
-- **🛡️ Security:** Role-based access control (Admin, Director, Manager).
-- **📊 Analytics:** Interactive financial charts (Area, Line, Bar) and expense distribution (Donut chart).
+## 🚀 Asosiy xususiyatlar
+
+- **📏 Metrologik mantiq:** Tekstil (m²) va profil (m) uchun avtomatik hisoblash
+- **🛒 Multi-item POS:** Savatli kassa, FIFO bo'yicha batch'larni kamaytirish
+- **💰 Real-time valyuta:** CBU API orqali USD/UZS/EUR/RUB konversiyasi
+- **👥 CRM:** Mijoz tarixi, qarz nazorati, balans
+- **🛡️ RBAC:** Admin, Director, Manager rollari + RLS
+- **📊 Analitika:** Moliya grafigi, kategoriya bo'yicha xarajatlar
 
 ## 🛠️ Tech Stack
-- **Frontend:** React.js, TypeScript, Tailwind CSS v4, Framer Motion.
-- **Backend/Database:** Supabase (PostgreSQL), Auth, Storage.
-- **State Management:** Zustand.
-- **Visualization:** Recharts.
-- **Deployment:** Vercel (PWA enabled).
 
-## 📸 Screenshots
+- **Frontend:** React 19, TypeScript, Vite, Tailwind v4, Framer Motion
+- **Routing:** React Router v6
+- **Data:** TanStack Query (React Query)
+- **Backend:** Supabase (PostgreSQL, Auth, Storage, Edge Functions)
+- **State:** Zustand (auth, currency)
+- **Monitoring:** Sentry
+- **PDF:** jsPDF + autoTable
+- **PWA:** Workbox + Vite PWA Plugin
 
-<img width="1902" height="1011" alt="image" src="https://github.com/user-attachments/assets/2a9d3d89-4d28-445c-93b0-86c1d56c9af3" />
-<img width="1900" height="1006" alt="image" src="https://github.com/user-attachments/assets/ce51bc0d-1476-4771-b9ce-0eb50bb4eeb6" />
+## ⚙️ O'rnatish
 
+```bash
+git clone <repo-url>
+cd tihie-steni-erp
+npm install
+cp .env.example .env
+# .env ichidagi qiymatlarni o'z Supabase loyihangizdan to'ldiring
+npm run dev
+```
 
+## 🔐 Environment variables
+
+Quyidagi sirlar `.env` faylida bo'lishi kerak (`.env.example` ga qarang):
+
+- `VITE_SUPABASE_URL` — Supabase loyiha URL
+- `VITE_SUPABASE_ANON_KEY` — Supabase anon kalit
+- `VITE_VAPID_PUBLIC_KEY` — Push notifications uchun
+- `VAPID_PRIVATE_KEY` — Supabase Edge Function secrets'ga qo'yiladi
+- `VITE_SENTRY_DSN` — Error monitoring
+
+## 🗄️ Database
+
+Sxema `db/schema.sql` da. RPC funksiyalar Supabase ichida saqlanadi (asosiylari: `process_sale_secure_v2`, `process_product_return`, `collect_debt_secure`).
+
+## 📦 Build
+
+```bash
+npm run build
+```
+
+`dist/` papkasini Vercel/Netlify/o'zingiz xohlagan hostingga deploy qiling.
+
+## 🆘 Disaster recovery
+
+Bazaviy baxtsiz hodisalar uchun:
+1. **DB tushib qolsa:** Supabase Dashboard → Database → Backups → Restore
+2. **VAPID kalitlar oshkor bo'lsa:** `npx web-push generate-vapid-keys` → `.env` va Supabase secrets'ni yangilang, keyin `DELETE FROM push_subscriptions;`
+3. **Build buzilsa:** Oldingi commit'ga `git revert` qiling
+
+## 📄 Litsenziya
+
+Private.
