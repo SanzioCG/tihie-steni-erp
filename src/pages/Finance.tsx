@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useCurrencyStore } from '../store/useCurrencyStore';
 import { 
   FileDown, Activity, PieChart as PieIcon, 
-  Loader2, TrendingUp, History, Filter
+  TrendingUp, History, Filter
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, 
@@ -23,43 +23,42 @@ export default function Finance() {
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const [dateRange, setDateRange] = useState<DateRange>('all');
 
-  const getDateFromRange = (range: DateRange) => {
+  const { from, to } = useMemo(() => {
     const now = new Date();
-    if (range === 'today') {
+    if (dateRange === 'today') {
       const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       return { from: start.toISOString(), to: null };
     }
-    if (range === 'week') {
+    if (dateRange === 'week') {
       const start = new Date(now);
       start.setDate(start.getDate() - 7);
       return { from: start.toISOString(), to: null };
     }
-    if (range === 'month') {
+    if (dateRange === 'month') {
       const start = new Date(now);
       start.setMonth(start.getMonth() - 1);
       return { from: start.toISOString(), to: null };
     }
     return { from: null, to: null };
-  };
-
-  const { from, to } = getDateFromRange(dateRange);
+  }, [dateRange]);
   
-  const { data: stats = {
-    balance: 0, totalIncome: 0, totalExpense: 0, netProfit: 0,
-    chartData: [], categoryData: [], recentTransactions: []
-  }, isLoading: loading } = useFinanceStats({
+  const queryParams = useMemo(() => ({
     p_category: categoryFilter === 'ALL' ? null : categoryFilter,
     p_date_from: from,
     p_date_to: to,
-  });
+  }), [categoryFilter, from, to]);
+
+  const { data: stats = {
+    balance: 0, totalIncome: 0, totalExpense: 0, netProfit: 0,
+    grossProfit: 0, profitMargin: 0,
+    chartData: [], categoryData: [], recentTransactions: []
+  } } = useFinanceStats(queryParams);
 
   const { data: availableCategories = [] } = useTransactionCategories();
 
   useEffect(() => {
     fetchRates();
   }, []);
-
-  if (loading) return <div className="h-screen flex items-center justify-center bg-app-bg"><Loader2 className="animate-spin text-primary" size={48} /></div>;
 
   return (
     <div className="space-y-6 text-left font-sans pb-24 md:pb-10">
@@ -82,7 +81,7 @@ export default function Finance() {
             onChange={e => setCategoryFilter(e.target.value)}
             className="w-full pl-14 pr-5 py-4 bg-[#0c0c0e] border border-white/5 rounded-2xl text-white font-black text-[11px] uppercase tracking-widest outline-none appearance-none cursor-pointer"
           >
-            <option value="ALL" className="bg-black">Barcha kategoriyalar</option>
+            <option value="ALL" className="bg-black">{t('all')} {t('category').toLowerCase()}</option>
             {availableCategories.map((c: string) => (
               <option key={c} value={c} className="bg-black">{c}</option>
             ))}
@@ -99,35 +98,39 @@ export default function Finance() {
                 dateRange === r ? "bg-primary text-black shadow-lg" : "text-gray-500 hover:text-white"
               )}
             >
-              {r === 'today' && 'Bugun'}
-              {r === 'week' && 'Hafta'}
-              {r === 'month' && 'Oy'}
-              {r === 'all' && 'Hammasi'}
+              {r === 'today' && t('today')}
+              {r === 'week' && t('week')}
+              {r === 'month' && t('month')}
+              {r === 'all' && t('all')}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mx-4">
-        <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-4xl shadow-xl relative overflow-hidden group">
-           <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full blur-3xl" />
-           <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">{t('total_balance')}</p>
-           <h3 className="text-3xl font-black text-white tracking-tighter">{convert(stats.balance)}</h3>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mx-4">
+        <div className="p-6 bg-[#0c0c0e] border border-white/5 rounded-4xl shadow-xl">
+          <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-3">{t('total_balance')}</p>
+          <h3 className="text-2xl font-black text-white tracking-tighter">{convert(stats.balance)}</h3>
         </div>
 
-        <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-4xl shadow-xl flex justify-between items-center relative overflow-hidden">
-           <div>
-              <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2">{t('net_profit_label')}</p>
-              <h3 className="text-3xl font-black text-white tracking-tighter">{convert(stats.netProfit)}</h3>
-           </div>
-           <div className="p-4 bg-emerald-500/10 rounded-2xl text-emerald-500 shadow-lg shadow-emerald-500/5">
-              <TrendingUp size={24} strokeWidth={3} />
-           </div>
+        <div className="p-6 bg-[#0c0c0e] border border-emerald-500/10 rounded-4xl shadow-xl">
+          <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-3">{t('gross_profit')}</p>
+          <h3 className="text-2xl font-black text-white tracking-tighter">{convert(stats.grossProfit || 0)}</h3>
         </div>
 
-        <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-4xl shadow-xl">
-           <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-3">{t('total_expenses')}</p>
-           <h3 className="text-3xl font-black text-white tracking-tighter">-{convert(stats.totalExpense)}</h3>
+        <div className="p-6 bg-[#0c0c0e] border border-emerald-500/20 rounded-4xl shadow-xl">
+          <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-3">{t('net_profit_label')}</p>
+          <h3 className="text-2xl font-black text-white tracking-tighter">{convert(stats.netProfit || 0)}</h3>
+        </div>
+
+        <div className="p-6 bg-[#0c0c0e] border border-amber-500/10 rounded-4xl shadow-xl">
+          <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest mb-3">{t('profit_margin')}</p>
+          <h3 className="text-2xl font-black text-white tracking-tighter">{stats.profitMargin || 0}%</h3>
+        </div>
+
+        <div className="p-6 bg-[#0c0c0e] border border-rose-500/10 rounded-4xl shadow-xl">
+          <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest mb-3">{t('total_expenses')}</p>
+          <h3 className="text-2xl font-black text-white tracking-tighter">-{convert(stats.totalExpense)}</h3>
         </div>
       </div>
 

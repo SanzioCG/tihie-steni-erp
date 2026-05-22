@@ -62,6 +62,11 @@ const resources = {
       recent_transactions: "Oxirgi tranzaksiyalar",
       income: "Kirim",
       expense: "Chiqim",
+      gross_profit: "Yalpi foyda",
+      profit_margin: "Marja %",
+      today: "Bugun",
+      week: "Hafta",
+      month: "Oy",
 
       // Sales
       sales_history: "Sotuvlar Tarixi",
@@ -484,7 +489,12 @@ const resources = {
       returned: "Возврат",
       sales_count: "Количество продаж",
       avg_check: "Средний чек",
-      top_product: "Топ продукт"
+      top_product: "Топ продукт",
+      gross_profit: "Валовая прибыль",
+      profit_margin: "Маржа %",
+      today: "Сегодня",
+      week: "Неделя",
+      month: "Месяц",
     }
   },
   en: {
@@ -712,6 +722,11 @@ const resources = {
       sales_count: "Sales Count",
       avg_check: "Avg Check",
       top_product: "Top Product",
+      gross_profit: "Gross Profit",
+      profit_margin: "Margin %",
+      today: "Today",
+      week: "Week",
+      month: "Month",
     }
   }
 };
