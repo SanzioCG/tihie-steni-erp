@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import { 
   TrendingUp, AlertTriangle, Activity, ShoppingBag, 
-  History, Wallet, Loader2, Calendar, FileText 
+  History, Wallet, Loader2, Calendar, FileText,
+  DollarSign, Award, User, Percent
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useTranslation } from 'react-i18next';
@@ -18,9 +19,8 @@ export default function Dashboard() {
   const { t, i18n } = useTranslation();
   const { currency, setCurrency, fetchRates, convert, rates } = useCurrencyStore();
   
-  const { data: dbStats, isLoading: loading } = useDashboardStats();
+  const { data: stats } = useDashboardStats();
   const { data: recentActivity = [] } = useRecentActivity();
-  const stats = dbStats ? { ...dbStats, recentActivity } : null;
   
   const [showZReport, setShowZReport] = useState(false);
   const [zData, setZData] = useState<any>(null);
@@ -32,7 +32,7 @@ export default function Dashboard() {
       setZData(data);
       setShowZReport(true);
     } catch (err) {
-      toast.error("Hisobotni yuklab bo'lmadi");
+      toast.error(t('error_loading_report') || "Hisobotni yuklab bo'lmadi");
     }
   };
 
@@ -43,13 +43,13 @@ export default function Dashboard() {
   const chartData = useMemo(() => {
     if (!stats?.chartData) return [];
     return stats.chartData.map((d: any) => {
-      let convertedValue = Number(d.total);
+      let convertedValue = Number(d.sales);
       if (currency === 'UZS') {
-        convertedValue = d.total * rates.USD;
+        convertedValue = d.sales * rates.USD;
       } else if (currency === 'EUR') {
-        convertedValue = (d.total * rates.USD) / rates.EUR;
+        convertedValue = (d.sales * rates.USD) / rates.EUR;
       } else if (currency === 'RUB') {
-        convertedValue = (d.total * rates.USD) / rates.RUB;
+        convertedValue = (d.sales * rates.USD) / rates.RUB;
       }
       return {
         name: new Date(d.day).toLocaleDateString(i18n.language, { weekday: 'short' }),
@@ -58,7 +58,12 @@ export default function Dashboard() {
     });
   }, [stats, currency, rates, i18n.language]);
 
-  if (loading || !stats) {
+  // Marja % hisobi
+  const profitMargin = stats && stats.todaySales > 0 
+    ? ((stats.todayProfit / stats.todaySales) * 100).toFixed(1)
+    : '0';
+
+  if (!stats) {
     return (
       <div className="h-[80vh] flex items-center justify-center">
         <Loader2 className="animate-spin text-primary" size={48} />
@@ -80,7 +85,7 @@ export default function Dashboard() {
                onClick={openZReport} 
                className="px-4 py-1.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-emerald-500 hover:text-black transition-all shadow-lg shadow-emerald-500/5"
              >
-                Bugungi Hisobot (Z)
+                {t('daily_z_report') || "Bugungi Hisobot (Z)"}
              </button>
           </div>
         </div>
@@ -101,13 +106,48 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mx-2">
-        <KPIItem label={t('total_revenue')} value={convert(stats.totalRevenue)} icon={TrendingUp} color="text-emerald-500" />
-        <div onClick={() => navigate('/stock')} className="cursor-pointer">
-          <KPIItem label={t('inventory_value')} value={convert(stats.inventoryValue)} icon={ShoppingBag} color="text-blue-400" trend="STOCK" />
-        </div>
+      {/* 1-qator: Bugungi ko'rsatkichlar */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mx-2">
+        <KPIItem 
+          label={t('today_sales') || "Bugungi sotuv"} 
+          value={convert(stats.todaySales)} 
+          icon={TrendingUp} 
+          color="text-emerald-500" 
+        />
+        <KPIItem 
+          label={t('today_profit') || "Bugungi foyda"} 
+          value={convert(stats.todayProfit)} 
+          icon={DollarSign} 
+          color="text-emerald-500" 
+          trend={`${profitMargin}%`}
+        />
+        <KPIItem 
+          label={t('cash_balance') || "Naqd pul"} 
+          value={convert(stats.cashBalance)} 
+          icon={Wallet} 
+          color="text-blue-400" 
+        />
         <div onClick={() => navigate('/debts')} className="cursor-pointer">
-          <KPIItem label={t('debts_label')} value={convert(stats.totalDebts)} icon={Wallet} color="text-rose-500" trend="DEBITS" />
+          <KPIItem 
+            label={t('debts_label')} 
+            value={convert(stats.totalDebt)} 
+            icon={Wallet} 
+            color="text-rose-500" 
+            trend="DEBT" 
+          />
+        </div>
+      </div>
+
+      {/* 2-qator: Ombor va top */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mx-2">
+        <div onClick={() => navigate('/stock')} className="cursor-pointer">
+          <KPIItem 
+            label={t('inventory_value')} 
+            value={convert(stats.inventoryValue)} 
+            icon={ShoppingBag} 
+            color="text-blue-400" 
+            trend="STOCK" 
+          />
         </div>
         <div onClick={() => navigate('/lowstock')} className="cursor-pointer">
           <KPIItem 
@@ -118,8 +158,23 @@ export default function Dashboard() {
             trend="LIMIT" 
           />
         </div>
+        <KPIItem 
+          label={t('top_product') || "Top mahsulot"} 
+          value={stats.topProduct || '—'} 
+          icon={Award} 
+          color="text-amber-500" 
+          isText
+        />
+        <KPIItem 
+          label={t('top_client') || "Top mijoz"} 
+          value={stats.topClient || '—'} 
+          icon={User} 
+          color="text-purple-400" 
+          isText
+        />
       </div>
 
+      {/* Grafik va Recent activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mx-2">
           <div className="lg:col-span-2 p-10 bg-[#0c0c0e] border border-white/5 rounded-[3.5rem] shadow-2xl relative overflow-hidden h-[480px]">
              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] -mr-32 -mt-32" />
@@ -159,7 +214,7 @@ export default function Dashboard() {
                <History className="text-primary"/> {t('recent_activity')}
              </h3>
              <div className="space-y-6 flex-1 overflow-y-auto no-scrollbar pr-2">
-                {stats.recentActivity.map((log: any) => (
+                {recentActivity.map((log: any) => (
                   <div key={log.id} className="flex items-start gap-4 group">
                     <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shadow-[0_0_8px_#34d399] group-hover:scale-150 transition-all" />
                     <div>
@@ -172,7 +227,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                 ))}
-                {stats.recentActivity.length === 0 && (
+                {recentActivity.length === 0 && (
                   <div className="h-full flex flex-col items-center justify-center opacity-20 py-20">
                      <History size={48} />
                      <p className="text-[10px] font-black uppercase tracking-[0.3em] mt-4">{t('no_data')}</p>
@@ -195,21 +250,21 @@ export default function Dashboard() {
                   <div className="w-16 h-16 bg-emerald-500/10 rounded-3xl flex items-center justify-center mx-auto text-emerald-500 mb-4">
                     <FileText size={32} />
                   </div>
-                  <h3 className="text-2xl font-black text-white uppercase tracking-tighter italic">Kunlik Yopilish</h3>
+                  <h3 className="text-2xl font-black text-white uppercase tracking-tighter italic">{t('daily_closing') || "Kunlik Yopilish"}</h3>
                   <p className="text-gray-600 text-[10px] font-black uppercase tracking-widest">
                     {new Date().toLocaleDateString()} — Z-REPORT
                   </p>
                </div>
                
                <div className="space-y-4">
-                  <ReportRow label="Umumiy Savdo" value={convert(zData.total_sales)} />
-                  <ReportRow label="Nasiya (Qarz)" value={convert(zData.debt_given)} color="text-rose-500" />
-                  <ReportRow label="Xarajatlar" value={convert(zData.expenses)} />
-                  <ReportRow label="Vozvratlar" value={convert(zData.returns)} />
+                  <ReportRow label={t('total_sales_z') || "Umumiy Savdo"} value={convert(zData.total_sales)} />
+                  <ReportRow label={t('debt_given') || "Nasiya (Qarz)"} value={convert(zData.debt_given)} color="text-rose-500" />
+                  <ReportRow label={t('expenses') || "Xarajatlar"} value={convert(zData.expenses)} />
+                  <ReportRow label={t('returns_label') || "Vozvratlar"} value={convert(zData.returns)} />
                   
                   <div className="pt-6 border-t border-white/5">
                      <div className="p-8 bg-emerald-500/5 border border-emerald-500/10 rounded-[2rem] text-center">
-                        <p className="text-[10px] text-gray-500 font-black uppercase mb-1 tracking-widest">Kassadagi Naqd Pul:</p>
+                        <p className="text-[10px] text-gray-500 font-black uppercase mb-1 tracking-widest">{t('cash_in_hand') || "Kassadagi Naqd Pul"}:</p>
                         <h2 className="text-4xl font-black text-emerald-500 italic">
                           {convert(zData.cash_in_hand)}
                         </h2>
@@ -221,7 +276,7 @@ export default function Dashboard() {
                  onClick={() => setShowZReport(false)} 
                  className="w-full py-5 bg-white/5 text-white font-black rounded-2xl uppercase text-[10px] tracking-[0.2em] hover:bg-white/10 transition-all border border-white/5"
                >
-                 Yopish
+                 {t('close') || "Yopish"}
                </button>
             </motion.div>
           </div>
@@ -231,7 +286,7 @@ export default function Dashboard() {
   );
 }
 
-function KPIItem({ label, value, icon: Icon, color, trend }: any) {
+function KPIItem({ label, value, icon: Icon, color, trend, isText }: any) {
   return (
     <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
       <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-3xl -mr-12 -mt-12 group-hover:bg-primary/10 transition-all duration-700" />
@@ -247,7 +302,10 @@ function KPIItem({ label, value, icon: Icon, color, trend }: any) {
       </div>
       <div className="relative z-10">
         <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-2">{label}</p>
-        <h3 className="text-3xl font-black text-white tracking-tighter uppercase">{value}</h3>
+        <h3 className={cn(
+          "font-black text-white tracking-tighter uppercase",
+          isText ? "text-base truncate" : "text-3xl"
+        )}>{value}</h3>
       </div>
     </div>
   );
