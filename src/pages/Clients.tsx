@@ -1,11 +1,13 @@
 import { useState, useMemo } from 'react';
 import { supabase } from '../services/supabase';
-import { 
-  Search, Plus, User, Loader2, Edit2, 
-  Trash2, FileDown, X, History, ShoppingBag, 
-  RotateCcw, Banknote, Filter, TrendingUp, Package, Award
+import {
+  Search, Plus, User, Loader2, Edit2,
+  Trash2, FileDown, X, History, ShoppingBag,
+  RotateCcw, Banknote, Filter, TrendingUp, Package, Award,
+  MessageSquarePlus, MessageSquare, CheckSquare, Send
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
 import AddClientModal from '../components/modals/AddClientModal';
 import { exportToPDF, cn } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
@@ -27,22 +29,61 @@ export default function Clients() {
   const [summary, setSummary] = useState<any>(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
 
+  const EMPTY_INTERACTION = { type: 'call', direction: 'outgoing', subject: '', notes: '', outcome: '', followup_title: '', followup_due: '' };
+  const [showInteractionForm, setShowInteractionForm] = useState(false);
+  const [savingInteraction, setSavingInteraction] = useState(false);
+  const [interactionForm, setInteractionForm] = useState(EMPTY_INTERACTION);
+
   const { data: clients = [], isLoading: loading, refetch: fetchClients } = useClients();
   const { data: clientStats = {} } = useClientStats();
 
   const openHistory = async (client: any) => {
     setViewingHistory(client);
+    setShowInteractionForm(false);
+    setInteractionForm(EMPTY_INTERACTION);
     setSummaryLoading(true);
     setSummary(null);
-    
-    const { data, error } = await supabase.rpc('get_client_summary', { 
-      p_client_id: client.id 
+
+    const { data, error } = await supabase.rpc('get_client_summary', {
+      p_client_id: client.id
     });
-    
+
     if (!error && data) {
       setSummary(data);
     }
     setSummaryLoading(false);
+  };
+
+  const refreshSummary = async (clientId: string) => {
+    const { data, error } = await supabase.rpc('get_client_summary', { p_client_id: clientId });
+    if (!error && data) setSummary(data);
+  };
+
+  const logInteraction = async () => {
+    if (!viewingHistory) return;
+    setSavingInteraction(true);
+    try {
+      const { error } = await supabase.rpc('log_interaction', {
+        p_client_id: viewingHistory.id,
+        p_type: interactionForm.type,
+        p_direction: interactionForm.direction || null,
+        p_subject: interactionForm.subject || null,
+        p_notes: interactionForm.notes || null,
+        p_outcome: interactionForm.outcome || null,
+        p_followup_title: interactionForm.followup_title || null,
+        p_followup_due: interactionForm.followup_due ? new Date(interactionForm.followup_due).toISOString() : null,
+      });
+      if (error) throw error;
+
+      toast.success(t('interaction_saved'));
+      setInteractionForm(EMPTY_INTERACTION);
+      setShowInteractionForm(false);
+      await refreshSummary(viewingHistory.id);
+    } catch (err: any) {
+      toast.error("Xatolik: " + err.message);
+    } finally {
+      setSavingInteraction(false);
+    }
   };
 
   const handleExportPDF = () => {
@@ -226,6 +267,55 @@ export default function Clients() {
                     <InfoItem icon={Award} label={t('top_product')} value={summary.stats.topProduct || '—'} />
                   </div>
 
+                  {/* MULOQOT QO'SHISH (CRM) */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2">
+                        <MessageSquare size={14} strokeWidth={3} /> {t('add_interaction')}
+                      </h4>
+                      <button onClick={() => setShowInteractionForm(v => !v)} className="p-2 bg-white/5 rounded-xl text-gray-400 hover:text-primary transition-all">
+                        {showInteractionForm ? <X size={16} /> : <MessageSquarePlus size={16} />}
+                      </button>
+                    </div>
+
+                    <AnimatePresence>
+                      {showInteractionForm && (
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                          <div className="p-5 bg-white/3 border border-white/5 rounded-3xl space-y-4">
+                            <div className="grid grid-cols-2 gap-3">
+                              <SelectField label={t('interaction_type')} value={interactionForm.type} onChange={(v) => setInteractionForm({ ...interactionForm, type: v })} options={[['call', t('type_call')], ['meeting', t('type_meeting')], ['message', t('type_message')], ['note', t('type_note')], ['visit', t('type_visit')]]} />
+                              <SelectField label={t('interaction_direction')} value={interactionForm.direction} onChange={(v) => setInteractionForm({ ...interactionForm, direction: v })} options={[['outgoing', t('dir_outgoing')], ['incoming', t('dir_incoming')]]} />
+                            </div>
+
+                            <TextField label={t('interaction_subject')} value={interactionForm.subject} onChange={(v) => setInteractionForm({ ...interactionForm, subject: v })} />
+
+                            <div className="space-y-1.5">
+                              <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">{t('interaction_note')}</label>
+                              <textarea rows={2} value={interactionForm.notes} onChange={(e) => setInteractionForm({ ...interactionForm, notes: e.target.value })} className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-2xl text-white text-xs font-bold outline-none focus:border-primary/30 resize-none" />
+                            </div>
+
+                            <SelectField label={t('outcome_label')} value={interactionForm.outcome} onChange={(v) => setInteractionForm({ ...interactionForm, outcome: v })} options={[['', '—'], ['answered', t('outcome_answered')], ['no_answer', t('outcome_no_answer')], ['callback', t('outcome_callback')], ['deal', t('outcome_deal')], ['rejected', t('outcome_rejected')], ['info', t('outcome_info')]]} />
+
+                            <div className="pt-3 border-t border-white/5 space-y-3">
+                              <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">{t('follow_up')}</p>
+                              <div className="grid grid-cols-2 gap-3">
+                                <TextField label={t('follow_up_title')} value={interactionForm.followup_title} onChange={(v) => setInteractionForm({ ...interactionForm, followup_title: v })} />
+                                <div className="space-y-1.5">
+                                  <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">{t('follow_up_date')}</label>
+                                  <input type="datetime-local" value={interactionForm.followup_due} onChange={(e) => setInteractionForm({ ...interactionForm, followup_due: e.target.value })} className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-2xl text-white text-xs font-bold outline-none focus:border-primary/30" />
+                                </div>
+                              </div>
+                            </div>
+
+                            <button onClick={logInteraction} disabled={savingInteraction || !interactionForm.type} className="w-full py-4 bg-primary text-black font-black rounded-2xl uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 disabled:opacity-50">
+                              {savingInteraction ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />} {t('save_interaction')}
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
                   <div>
                     <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
                       <History size={14} strokeWidth={3} /> Operatsiyalar tarixi
@@ -288,24 +378,32 @@ function InfoItem({ icon: Icon, label, value }: any) {
 
 function TimelineItem({ event, convert, language }: any) {
   const config = {
-    sale: { 
+    sale: {
       icon: ShoppingBag, color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20',
       label: event.status === 'completed' ? 'Sotuv' : 'Qarzga sotuv',
-      statusLabel: event.status === 'completed' ? "TO'LANGAN" : "QARZ"
+      statusLabel: event.status === 'completed' ? "TO'LANGAN" : "QARZ", sign: '+', showAmount: true,
     },
-    return: { 
-      icon: RotateCcw, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20',
-      label: 'Qaytarish', statusLabel: 'VOZVRAT'
-    },
-    payment: { 
+    income: {
       icon: Banknote, color: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20',
-      label: 'Qarz to\'lovi', statusLabel: "TO'LANDI"
+      label: 'Kirim', statusLabel: "TO'LANDI", sign: '+', showAmount: true,
     },
-  }[event.event_type as 'sale' | 'return' | 'payment'];
-  
+    expense: {
+      icon: RotateCcw, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20',
+      label: 'Chiqim', statusLabel: 'CHIQIM', sign: '-', showAmount: true,
+    },
+    interaction: {
+      icon: MessageSquare, color: 'text-indigo-400', bg: 'bg-indigo-400/10', border: 'border-indigo-400/20',
+      label: 'Muloqot', statusLabel: String(event.status || '').toUpperCase(), sign: '', showAmount: false,
+    },
+    task: {
+      icon: CheckSquare, color: 'text-cyan-400', bg: 'bg-cyan-400/10', border: 'border-cyan-400/20',
+      label: 'Vazifa', statusLabel: String(event.status || '').toUpperCase(), sign: '', showAmount: false,
+    },
+  }[event.event_type as 'sale' | 'income' | 'expense' | 'interaction' | 'task'];
+
   if (!config) return null;
   const Icon = config.icon;
-  
+
   return (
     <div className={cn("flex justify-between items-center p-4 rounded-2xl border", config.bg, config.border)}>
       <div className="flex items-center gap-4">
@@ -320,14 +418,40 @@ function TimelineItem({ event, convert, language }: any) {
         </div>
       </div>
       <div className="text-right">
-        <p className={cn("text-base font-black tracking-tighter", config.color)}>
-          {event.event_type === 'return' ? '-' : '+'}
-          {convert(Math.abs(Number(event.amount)))}
-        </p>
-        <span className={cn("inline-block text-[8px] font-black uppercase px-2 py-0.5 rounded mt-1", config.color, 'bg-white/5')}>
-          {config.statusLabel}
-        </span>
+        {config.showAmount && (
+          <p className={cn("text-base font-black tracking-tighter", config.color)}>
+            {config.sign}
+            {convert(Math.abs(Number(event.amount)))}
+          </p>
+        )}
+        {config.statusLabel && (
+          <span className={cn("inline-block text-[8px] font-black uppercase px-2 py-0.5 rounded mt-1 max-w-[140px] truncate", config.color, 'bg-white/5')}>
+            {config.statusLabel}
+          </span>
+        )}
       </div>
+    </div>
+  );
+}
+
+function SelectField({ label, value, onChange, options }: any) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">{label}</label>
+      <select value={value} onChange={(e) => onChange(e.target.value)} className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-2xl text-white text-xs font-bold outline-none focus:border-primary/30 appearance-none">
+        {options.map(([val, name]: [string, string]) => (
+          <option key={val} value={val} className="bg-[#0c0c0e]">{name}</option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function TextField({ label, value, onChange }: any) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">{label}</label>
+      <input value={value} onChange={(e) => onChange(e.target.value)} className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-2xl text-white text-xs font-bold outline-none focus:border-primary/30" />
     </div>
   );
 }

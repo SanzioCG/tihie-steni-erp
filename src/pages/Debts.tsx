@@ -9,10 +9,12 @@ import { useTranslation } from 'react-i18next';
 import { exportToPDF } from '../lib/utils';
 import toast from 'react-hot-toast';
 import { useDebtors } from '../hooks/queries/useQueries';
+import { useAuthStore } from '../store/useAuthStore';
 
 export default function Debts() {
   const { t } = useTranslation();
-  
+  const { profile } = useAuthStore();
+
   const { data: clients = [], isLoading: loading, refetch: fetchDebtors } = useDebtors();
   
   const [search, setSearch] = useState('');
@@ -26,28 +28,22 @@ export default function Debts() {
 
     try {
       const amount = Number(paymentAmount);
-      const newBalance = selectedClient.balance + amount;
 
-      await supabase.from('clients').update({ balance: newBalance }).eq('id', selectedClient.id);
+      // Yangi RLS: transactions'ga to'g'ridan-to'g'ri insert bloklangan.
+      // clients update + transactions insert + audit_logs insert — hammasi
+      // server tomonda atomik bajariladi.
+      const { error } = await supabase.rpc('collect_debt_secure', {
+        p_client_id: selectedClient.id,
+        p_amount: amount,
+        p_user_name: profile?.full_name || 'Admin',
+        p_description: `${selectedClient.full_name} ${t('paid_debt_desc')}`,
+      });
+      if (error) throw error;
 
-      await supabase.from('transactions').insert([{
-        type: 'income',
-        category: t('debt_payment_category'),
-        amount: amount,
-        description: `${selectedClient.full_name} ${t('paid_debt_desc')}`,
-        created_at: new Date().toISOString()
-      }]);
-
-      await supabase.from('audit_logs').insert([{
-        action: 'UPDATED',
-        entity: 'MIJOZ',
-        details: `${selectedClient.full_name} $${amount} ${t('paid_debt_desc')}.`,
-        user_name: 'Admin'
-      }]);
-
+      toast.success(t('save_payment'));
       setSelectedClient(null);
       setPaymentAmount('');
-      fetchDebtors();
+      await fetchDebtors();
     } catch (err: any) {
       toast.error("Xatolik: " + err.message);
     } finally {

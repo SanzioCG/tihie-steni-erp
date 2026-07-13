@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, Wallet, ShoppingCart, Users, Banknote, 
-  Package, Boxes, LogOut, ShieldCheck, Settings, Receipt, X, AlertTriangle, Calculator 
+import {
+  LayoutDashboard, Wallet, ShoppingCart, Users, Banknote,
+  Package, Boxes, LogOut, ShieldCheck, Settings, Receipt, X, AlertTriangle, Calculator, CalendarClock
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
@@ -74,6 +74,7 @@ useEffect(() => {
       items: [
         { id: 'sales', icon: ShoppingCart, label: t('sales') },
         { id: 'clients', icon: Users, label: t('clients') },
+        { id: 'tasks', icon: CalendarClock, label: t('tasks') },
         { id: 'debts', icon: Banknote, label: t('debts') },
       ]
     },

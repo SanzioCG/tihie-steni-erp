@@ -9,6 +9,7 @@ import Stock from './pages/Stock';
 import Finance from './pages/Finance';
 import Sales from './pages/Sales';
 import Clients from './pages/Clients';
+import Tasks from './pages/Tasks';
 import Debts from './pages/Debts';
 import Audit from './pages/Audit';
 import OfficeExpenses from './pages/OfficeExpenses';
@@ -97,6 +98,7 @@ export default function App() {
                   <Route path="/finance" element={<Finance />} />
                   <Route path="/sales" element={<Sales />} />
                   <Route path="/clients" element={<Clients />} />
+                  <Route path="/tasks" element={<Tasks />} />
                   <Route path="/debts" element={<Debts />} />
                   <Route path="/audit" element={<Audit />} />
                   <Route path="/expenses" element={<OfficeExpenses />} />

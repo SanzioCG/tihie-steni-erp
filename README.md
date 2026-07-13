@@ -45,7 +45,7 @@ Quyidagi sirlar `.env` faylida bo'lishi kerak (`.env.example` ga qarang):
 
 ## 🗄️ Database
 
-Sxema `db/schema.sql` da. RPC funksiyalar Supabase ichida saqlanadi (asosiylari: `process_sale_secure_v2`, `process_product_return`, `collect_debt_secure`).
+Sxema va RPC funksiyalar "source of truth" — `supabase/migrations/` (001_schema, 002_rpc_functions, 003_seed, 004_crm). Asosiy RPC'lar: `process_sale_secure_v2`, `process_product_return`, `collect_debt_secure`, `log_interaction`, `complete_task`, `get_crm_overview`.
 
 ## 📦 Build
 

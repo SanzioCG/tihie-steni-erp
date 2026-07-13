@@ -12,6 +12,23 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Supabase client (service role — RLS bypass)
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
+    // Auth: faqat tizimga kirgan foydalanuvchi push yubora oladi
+    const authHeader = req.headers.get('Authorization')
+    const token = authHeader?.replace('Bearer ', '') ?? ''
+    const { data: { user } } = await supabase.auth.getUser(token)
+    if (!user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const { title, body, data } = await req.json()
 
     if (!title || !body) {
@@ -26,12 +43,6 @@ Deno.serve(async (req) => {
       Deno.env.get('VAPID_SUBJECT') ?? 'mailto:admin@example.com',
       Deno.env.get('VAPID_PUBLIC_KEY') ?? '',
       Deno.env.get('VAPID_PRIVATE_KEY') ?? ''
-    )
-
-    // Supabase client (service role — RLS bypass)
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
     // Admin va director rolidagi foydalanuvchilarni topish

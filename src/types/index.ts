@@ -77,7 +77,40 @@ export interface Client {
   phone: string;
   client_type: ClientType;
   balance: number;
+  source?: string;
+  address?: string;
+  notes?: string;
+  responsible_id?: string;
+  status?: string;
+  last_contact_at?: string;
   created_at: string;
+}
+
+export type InteractionType = 'call' | 'meeting' | 'message' | 'note' | 'visit';
+export type InteractionDirection = 'incoming' | 'outgoing';
+
+export interface ClientInteraction {
+  id: string;
+  client_id: string;
+  type: InteractionType;
+  direction?: InteractionDirection;
+  subject?: string;
+  note?: string;
+  outcome?: string;
+  created_by?: string;
+  created_at: string;
+}
+
+export interface ClientTask {
+  id: string;
+  client_id: string;
+  title: string;
+  due_date?: string;
+  status: 'pending' | 'done' | 'cancelled';
+  completed_at?: string;
+  created_by?: string;
+  created_at: string;
+  clients?: Client;
 }
 
 export type SaleStatus = 'pending' | 'completed' | 'cancelled';
