@@ -90,9 +90,9 @@ export default function Sales() {
 
         <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="w-full h-full px-6 py-4 bg-[#0c0c0e] border border-white/5 rounded-3xl text-white outline-none font-black text-[10px] uppercase tracking-widest appearance-none cursor-pointer">
           <option value="ALL">{t('client_types')}</option>
-          <option value="Chakana">{t('retail')}</option>
-          <option value="VIP">{t('vip')}</option>
-          <option value="Ulgurji">{t('wholesale')}</option>
+          <option value="retail">{t('retail')}</option>
+          <option value="vip">{t('vip')}</option>
+          <option value="wholesale">{t('wholesale')}</option>
         </select>
       </div>
 
@@ -126,7 +126,7 @@ export default function Sales() {
                         <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-primary font-black text-xs">{sale.clients?.full_name?.charAt(0)}</div>
                         <div>
                           <p className="text-sm font-black text-white uppercase">{sale.clients?.full_name || t('general')}</p>
-                          <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded border border-gray-800 text-gray-500">{sale.clients?.client_type}</span>
+                          <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded border border-gray-800 text-gray-500">{sale.clients?.client_type ? t(sale.clients.client_type) : ''}</span>
                         </div>
                       </div>
                     </td>

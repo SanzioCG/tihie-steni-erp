@@ -16,6 +16,23 @@ export function useClients() {
   });
 }
 
+export function useContactCounts() {
+  return useQuery({
+    queryKey: ['contact-counts'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('contacts').select('client_id');
+      if (error) throw error;
+
+      const counts: Record<string, number> = {};
+      data?.forEach(c => {
+        if (c.client_id) counts[c.client_id] = (counts[c.client_id] || 0) + 1;
+      });
+      return counts;
+    },
+    staleTime: 60_000,
+  });
+}
+
 export function useClientStats() {
   return useQuery({
     queryKey: ['client-stats'],

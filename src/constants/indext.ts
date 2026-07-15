@@ -1,4 +1,4 @@
-import type { Role, SaleStatus, ClientType } from '../types';
+import type { Role, SaleStatus, ClientType, ClientKind } from '../types';
 
 // ============================================
 // ROLES (foydalanuvchi rollari)
@@ -36,9 +36,18 @@ export const SALE_STATUS: Record<string, SaleStatus> = {
 // ============================================
 
 export const CLIENT_TYPES: Record<string, ClientType> = {
-  RETAIL: 'Chakana',
-  VIP: 'VIP',
-  WHOLESALE: 'Ulgurji',
+  RETAIL: 'retail',
+  VIP: 'vip',
+  WHOLESALE: 'wholesale',
+};
+
+// ============================================
+// CLIENT KIND (kontragent turi)
+// ============================================
+
+export const CLIENT_KINDS: Record<string, ClientKind> = {
+  PERSON: 'person',
+  COMPANY: 'company',
 };
 
 // ============================================

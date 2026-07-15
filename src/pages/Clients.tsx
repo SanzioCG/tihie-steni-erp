@@ -4,17 +4,19 @@ import {
   Search, Plus, User, Loader2, Edit2,
   Trash2, FileDown, X, History, ShoppingBag,
   RotateCcw, Banknote, Filter, TrendingUp, Package, Award,
-  MessageSquarePlus, MessageSquare, CheckSquare, Send
+  MessageSquarePlus, MessageSquare, CheckSquare, Send,
+  Building2, Star, Users, Briefcase
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import AddClientModal from '../components/modals/AddClientModal';
+import ContactModal from '../components/modals/ContactModal';
 import { exportToPDF, cn } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
 import { useCurrencyStore } from '../store/useCurrencyStore';
-import { useClients, useClientStats } from '../hooks/queries/useClients';
+import { useClients, useClientStats, useContactCounts } from '../hooks/queries/useClients';
 
-type FilterMode = 'all' | 'debtors' | 'top';
+type FilterMode = 'all' | 'debtors' | 'top' | 'companies' | 'individuals';
 
 export default function Clients() {
   const { t, i18n } = useTranslation();
@@ -29,13 +31,17 @@ export default function Clients() {
   const [summary, setSummary] = useState<any>(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
 
-  const EMPTY_INTERACTION = { type: 'call', direction: 'outgoing', subject: '', notes: '', outcome: '', followup_title: '', followup_due: '' };
+  const EMPTY_INTERACTION = { type: 'call', direction: 'outgoing', subject: '', notes: '', outcome: '', followup_title: '', followup_due: '', contact_id: '' };
   const [showInteractionForm, setShowInteractionForm] = useState(false);
   const [savingInteraction, setSavingInteraction] = useState(false);
   const [interactionForm, setInteractionForm] = useState(EMPTY_INTERACTION);
 
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [editingContact, setEditingContact] = useState<any>(null);
+
   const { data: clients = [], isLoading: loading, refetch: fetchClients } = useClients();
   const { data: clientStats = {} } = useClientStats();
+  const { data: contactCounts = {}, refetch: refetchContactCounts } = useContactCounts();
 
   const openHistory = async (client: any) => {
     setViewingHistory(client);
@@ -59,6 +65,20 @@ export default function Clients() {
     if (!error && data) setSummary(data);
   };
 
+  const deleteContact = async (id: string) => {
+    if (!window.confirm(t('confirm_delete'))) return;
+    const { error } = await supabase.from('contacts').delete().eq('id', id);
+    if (error) return toast.error("Xatolik: " + error.message);
+    toast.success(t('contact_deleted'));
+    await refreshSummary(viewingHistory.id);
+    refetchContactCounts();
+  };
+
+  const onContactSaved = async () => {
+    await refreshSummary(viewingHistory.id);
+    refetchContactCounts();
+  };
+
   const logInteraction = async () => {
     if (!viewingHistory) return;
     setSavingInteraction(true);
@@ -66,12 +86,14 @@ export default function Clients() {
       const { error } = await supabase.rpc('log_interaction', {
         p_client_id: viewingHistory.id,
         p_type: interactionForm.type,
-        p_direction: interactionForm.direction || null,
+        // type='note' bo'lsa direction'ni backend o'zi 'internal' qiladi
+        p_direction: interactionForm.type === 'note' ? null : (interactionForm.direction || null),
         p_subject: interactionForm.subject || null,
         p_notes: interactionForm.notes || null,
         p_outcome: interactionForm.outcome || null,
         p_followup_title: interactionForm.followup_title || null,
         p_followup_due: interactionForm.followup_due ? new Date(interactionForm.followup_due).toISOString() : null,
+        p_contact_id: interactionForm.contact_id || null,
       });
       if (error) throw error;
 
@@ -89,9 +111,9 @@ export default function Clients() {
   const handleExportPDF = () => {
     const headers = [["MIJOZ", "TELEFON", "TURI", t('turnover'), "BALANS"]];
     const dataRows = filteredClients.map((c: any) => [
-      c.full_name, 
-      c.phone || '-', 
-      c.client_type, 
+      c.full_name,
+      c.phone || '-',
+      t(c.client_type),
       convert(clientStats[c.id] || 0),
       convert(c.balance)
     ]);
@@ -106,7 +128,15 @@ export default function Clients() {
     if (filterMode === 'debtors') {
       result = result.filter((c: any) => Number(c.balance) < 0);
     }
-    
+
+    if (filterMode === 'companies') {
+      result = result.filter((c: any) => c.kind === 'company');
+    }
+
+    if (filterMode === 'individuals') {
+      result = result.filter((c: any) => c.kind !== 'company');
+    }
+
     if (filterMode === 'top') {
       result = result
         .filter((c: any) => clientStats[c.id] > 0)
@@ -147,9 +177,11 @@ export default function Clients() {
           />
         </div>
 
-        <div className="flex gap-2 bg-[#0c0c0e] border border-white/5 rounded-2xl p-2">
+        <div className="flex gap-2 bg-[#0c0c0e] border border-white/5 rounded-2xl p-2 overflow-x-auto no-scrollbar">
           {([
             { id: 'all', label: t('all'), icon: Filter },
+            { id: 'companies', label: t('companies'), icon: Building2 },
+            { id: 'individuals', label: t('individuals'), icon: User },
             { id: 'debtors', label: t('debtors'), icon: Banknote },
             { id: 'top', label: t('top'), icon: TrendingUp },
           ] as const).map(f => {
@@ -190,12 +222,19 @@ export default function Clients() {
                 <tr key={c.id} className="group hover:bg-white/1 transition-all cursor-pointer">
                   <td onClick={() => openHistory(c)} className="px-8 py-5">
                     <div className="flex items-center gap-4">
-                      <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-primary font-black text-sm group-hover:bg-primary group-hover:text-black transition-all">
-                        {c.full_name.charAt(0)}
+                      <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all shrink-0">
+                        {c.kind === 'company' ? <Building2 size={18} strokeWidth={2.5} /> : <User size={18} strokeWidth={2.5} />}
                       </div>
                       <div>
                         <p className="font-black text-sm text-white uppercase tracking-tight group-hover:text-primary transition-colors">{c.full_name}</p>
-                        <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest mt-0.5">{c.client_type}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest">{t(c.client_type)}</p>
+                          {c.kind === 'company' && contactCounts[c.id] > 0 && (
+                            <span className="flex items-center gap-1 text-[9px] text-gray-600 font-black">
+                              <Users size={10} /> {contactCounts[c.id]}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -239,10 +278,12 @@ export default function Clients() {
               <button onClick={() => setViewingHistory(null)} className="absolute right-8 top-8 p-2 bg-white/5 rounded-xl text-gray-500 hover:text-white transition-all z-10"><X size={24}/></button>
               
               <div className="flex items-center gap-6 mb-8">
-                 <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary"><User size={32} strokeWidth={3} /></div>
+                 <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                   {viewingHistory.kind === 'company' ? <Building2 size={32} strokeWidth={2.5} /> : <User size={32} strokeWidth={3} />}
+                 </div>
                  <div>
                     <h3 className="text-2xl font-black text-white uppercase tracking-tighter">{viewingHistory.full_name}</h3>
-                    <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em]">{viewingHistory.phone || t('unknown_phone')} • {viewingHistory.client_type}</p>
+                    <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em]">{viewingHistory.phone || t('unknown_phone')} • {t(viewingHistory.client_type)}</p>
                  </div>
               </div>
 
@@ -262,10 +303,62 @@ export default function Clients() {
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-5 bg-white/3 border border-white/5 rounded-3xl">
-                    <InfoItem icon={ShoppingBag} label={t('sales_count')} value={`${summary.stats.salesCount} ta`} />
+                    <InfoItem icon={ShoppingBag} label={t('sales_count')} value={`${summary.stats.salesCount} ${t('unit_pcs')}`} />
                     <InfoItem icon={TrendingUp} label={t('avg_check')} value={convert(summary.stats.avgCheck)} />
                     <InfoItem icon={Award} label={t('top_product')} value={summary.stats.topProduct || '—'} />
                   </div>
+
+                  {/* KONTAKTLAR — faqat kompaniya uchun */}
+                  {viewingHistory.kind === 'company' && (
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2">
+                          <Users size={14} strokeWidth={3} /> {t('contacts')}
+                        </h4>
+                        <button
+                          onClick={() => { setEditingContact(null); setContactModalOpen(true); }}
+                          className="px-4 py-2 bg-white/5 rounded-xl text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-primary transition-all flex items-center gap-1.5"
+                        >
+                          <Plus size={13} strokeWidth={3} /> {t('add_contact')}
+                        </button>
+                      </div>
+
+                      {(summary.contacts || []).length > 0 ? (
+                        <div className="space-y-2">
+                          {summary.contacts.map((ct: any) => (
+                            <div key={ct.id} className="group/ct flex items-center justify-between gap-3 p-4 bg-white/3 border border-white/5 rounded-2xl">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className="p-2 rounded-lg bg-white/5 text-primary shrink-0"><User size={15} /></div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-xs font-black text-white uppercase truncate">{ct.full_name}</p>
+                                    {ct.is_primary && (
+                                      <span className="flex items-center gap-1 text-[8px] font-black uppercase px-2 py-0.5 rounded bg-primary/15 text-primary shrink-0">
+                                        <Star size={9} fill="currentColor" /> {t('primary_contact')}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-3 mt-0.5 text-[10px] text-gray-500 font-bold">
+                                    {ct.position && <span className="flex items-center gap-1 truncate"><Briefcase size={10} /> {ct.position}</span>}
+                                    {ct.phone && <span className="font-mono shrink-0">{ct.phone}</span>}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex gap-1.5 opacity-0 group-hover/ct:opacity-100 transition-all shrink-0">
+                                <button onClick={() => { setEditingContact(ct); setContactModalOpen(true); }} className="p-2 bg-white/5 text-gray-500 hover:text-primary rounded-lg"><Edit2 size={13} /></button>
+                                <button onClick={() => deleteContact(ct.id)} className="p-2 bg-white/5 text-gray-500 hover:text-rose-500 rounded-lg"><Trash2 size={13} /></button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 opacity-20">
+                          <Users size={32} className="mx-auto mb-2" />
+                          <p className="text-[10px] font-black uppercase tracking-[0.2em]">{t('no_contacts')}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* MULOQOT QO'SHISH (CRM) */}
                   <div>
@@ -284,8 +377,26 @@ export default function Clients() {
                           <div className="p-5 bg-white/3 border border-white/5 rounded-3xl space-y-4">
                             <div className="grid grid-cols-2 gap-3">
                               <SelectField label={t('interaction_type')} value={interactionForm.type} onChange={(v) => setInteractionForm({ ...interactionForm, type: v })} options={[['call', t('type_call')], ['meeting', t('type_meeting')], ['message', t('type_message')], ['note', t('type_note')], ['visit', t('type_visit')]]} />
-                              <SelectField label={t('interaction_direction')} value={interactionForm.direction} onChange={(v) => setInteractionForm({ ...interactionForm, direction: v })} options={[['outgoing', t('dir_outgoing')], ['incoming', t('dir_incoming')]]} />
+                              {/* Eslatma ichki yozuv — yo'nalishni backend 'internal' qiladi */}
+                              {interactionForm.type !== 'note' && (
+                                <SelectField label={t('interaction_direction')} value={interactionForm.direction} onChange={(v) => setInteractionForm({ ...interactionForm, direction: v })} options={[['outgoing', t('dir_outgoing')], ['incoming', t('dir_incoming')]]} />
+                              )}
                             </div>
+
+                            {viewingHistory.kind === 'company' && (summary.contacts || []).length > 0 && (
+                              <SelectField
+                                label={t('spoke_with')}
+                                value={interactionForm.contact_id}
+                                onChange={(v) => setInteractionForm({ ...interactionForm, contact_id: v })}
+                                options={[
+                                  ['', t('no_contact_selected')],
+                                  ...summary.contacts.map((ct: any) => [
+                                    ct.id,
+                                    ct.position ? `${ct.full_name} (${ct.position})` : ct.full_name,
+                                  ]),
+                                ]}
+                              />
+                            )}
 
                             <TextField label={t('interaction_subject')} value={interactionForm.subject} onChange={(v) => setInteractionForm({ ...interactionForm, subject: v })} />
 
@@ -318,7 +429,7 @@ export default function Clients() {
 
                   <div>
                     <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                      <History size={14} strokeWidth={3} /> Operatsiyalar tarixi
+                      <History size={14} strokeWidth={3} /> {t('operations_history')}
                     </h4>
                     
                     {summary.timeline.length > 0 ? (
@@ -335,14 +446,14 @@ export default function Clients() {
                     ) : (
                       <div className="text-center py-12 opacity-20">
                         <Package size={48} className="mx-auto mb-4" />
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em]">Operatsiyalar yo'q</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em]">{t('no_operations')}</p>
                       </div>
                     )}
                   </div>
                 </div>
               ) : (
                 <div className="text-center py-20 opacity-30">
-                  <p className="text-sm font-black uppercase">Ma'lumot yo'q</p>
+                  <p className="text-sm font-black uppercase">{t('no_info')}</p>
                 </div>
               )}
             </motion.div>
@@ -351,6 +462,16 @@ export default function Clients() {
       </AnimatePresence>
 
       <AddClientModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSuccess={fetchClients} initialData={selectedClient} />
+
+      {viewingHistory && (
+        <ContactModal
+          isOpen={contactModalOpen}
+          clientId={viewingHistory.id}
+          initialData={editingContact}
+          onClose={() => setContactModalOpen(false)}
+          onSuccess={onContactSaved}
+        />
+      )}
     </div>
   );
 }
@@ -377,27 +498,32 @@ function InfoItem({ icon: Icon, label, value }: any) {
 }
 
 function TimelineItem({ event, convert, language }: any) {
+  const { t } = useTranslation();
   const config = {
     sale: {
       icon: ShoppingBag, color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20',
-      label: event.status === 'completed' ? 'Sotuv' : 'Qarzga sotuv',
-      statusLabel: event.status === 'completed' ? "TO'LANGAN" : "QARZ", sign: '+', showAmount: true,
+      label: event.status === 'completed' ? t('timeline_sale') : t('timeline_debt_sale'),
+      statusLabel: event.status === 'completed' ? t('paid') : t('debt'), sign: '+', showAmount: true,
     },
     income: {
       icon: Banknote, color: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20',
-      label: 'Kirim', statusLabel: "TO'LANDI", sign: '+', showAmount: true,
+      label: t('income'), statusLabel: t('paid'), sign: '+', showAmount: true,
     },
     expense: {
       icon: RotateCcw, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20',
-      label: 'Chiqim', statusLabel: 'CHIQIM', sign: '-', showAmount: true,
+      label: t('expense'), statusLabel: t('expense'), sign: '-', showAmount: true,
     },
     interaction: {
       icon: MessageSquare, color: 'text-indigo-400', bg: 'bg-indigo-400/10', border: 'border-indigo-400/20',
-      label: 'Muloqot', statusLabel: String(event.status || '').toUpperCase(), sign: '', showAmount: false,
+      label: t('timeline_interaction'),
+      statusLabel: event.status ? t(`outcome_${event.status}`, { defaultValue: String(event.status).toUpperCase() }) : '',
+      sign: '', showAmount: false,
     },
     task: {
       icon: CheckSquare, color: 'text-cyan-400', bg: 'bg-cyan-400/10', border: 'border-cyan-400/20',
-      label: 'Vazifa', statusLabel: String(event.status || '').toUpperCase(), sign: '', showAmount: false,
+      label: t('timeline_task'),
+      statusLabel: event.status ? t(`status_${event.status}`, { defaultValue: String(event.status).toUpperCase() }) : '',
+      sign: '', showAmount: false,
     },
   }[event.event_type as 'sale' | 'income' | 'expense' | 'interaction' | 'task'];
 
@@ -414,6 +540,7 @@ function TimelineItem({ event, convert, language }: any) {
           <p className="text-sm font-black text-white uppercase tracking-tight">{event.title}</p>
           <p className="text-[10px] text-gray-500 font-bold uppercase mt-0.5">
             {config.label} • {new Date(event.created_at).toLocaleString(language)}
+            {event.contact_name ? ` — ${event.contact_name}` : ''}
           </p>
         </div>
       </div>

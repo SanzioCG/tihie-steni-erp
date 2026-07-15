@@ -21,16 +21,6 @@ export interface Category {
   created_at: string;
 }
 
-export interface Warehouse {
-  id: string;
-  name_uz: string;
-  name_ru: string;
-  name_en: string;
-  type: 'textile' | 'profile' | 'other';
-  location?: string;
-  created_at: string;
-}
-
 export interface Product {
   id: string;
   sku: string;
@@ -53,7 +43,6 @@ export interface Product {
 export interface Batch {
   id: string;
   product_id: string;
-  warehouse_id?: string;
   batch_number: string;
   quantity: number;
   remaining_quantity: number;
@@ -65,14 +54,15 @@ export interface Batch {
   color_name?: string;
   created_at: string;
   products?: Product;
-  warehouses?: Warehouse;
 }
 
 // Sales & CRM
-export type ClientType = 'Chakana' | 'VIP' | 'Ulgurji';
+export type ClientType = 'retail' | 'vip' | 'wholesale';
+export type ClientKind = 'person' | 'company';
 
 export interface Client {
   id: string;
+  kind: ClientKind;
   full_name: string;
   phone: string;
   client_type: ClientType;
@@ -84,19 +74,42 @@ export interface Client {
   status?: string;
   last_contact_at?: string;
   created_at: string;
+  // Rekvizitlar — faqat kind='company' uchun to'ldiriladi
+  inn?: string;
+  bank_name?: string;
+  bank_account?: string;
+  mfo?: string;
+  legal_address?: string;
+  director_name?: string;
+  email?: string;
+}
+
+export interface Contact {
+  id: string;
+  client_id: string;
+  full_name: string;
+  position?: string;
+  phone?: string;
+  email?: string;
+  telegram?: string;
+  is_primary: boolean;
+  notes?: string;
+  created_at: string;
 }
 
 export type InteractionType = 'call' | 'meeting' | 'message' | 'note' | 'visit';
-export type InteractionDirection = 'incoming' | 'outgoing';
+export type InteractionDirection = 'incoming' | 'outgoing' | 'internal';
+export type InteractionOutcome = 'answered' | 'no_answer' | 'callback' | 'deal' | 'rejected' | 'info';
 
 export interface ClientInteraction {
   id: string;
   client_id: string;
+  contact_id?: string;
   type: InteractionType;
   direction?: InteractionDirection;
   subject?: string;
-  note?: string;
-  outcome?: string;
+  notes?: string;
+  outcome?: InteractionOutcome;
   created_by?: string;
   created_at: string;
 }
@@ -106,14 +119,14 @@ export interface ClientTask {
   client_id: string;
   title: string;
   due_date?: string;
-  status: 'pending' | 'done' | 'cancelled';
+  status: 'pending' | 'completed' | 'cancelled';
   completed_at?: string;
   created_by?: string;
   created_at: string;
   clients?: Client;
 }
 
-export type SaleStatus = 'pending' | 'completed' | 'cancelled';
+export type SaleStatus = 'pending' | 'completed' | 'cancelled' | 'returned' | 'partial_return';
 
 export interface Sale {
   id: string;
@@ -121,6 +134,8 @@ export interface Sale {
   product_id?: string;
   batch_id?: string;
   quantity: number;
+  unit_price: number;
+  cost_price: number;
   total_amount: number;
   status: SaleStatus;
   created_by?: string;

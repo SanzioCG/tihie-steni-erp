@@ -113,9 +113,9 @@ export default function Tasks() {
             {recentInteractions.map((it: any) => (
               <div key={it.id} className="p-4 bg-[#0c0c0e] border border-white/5 rounded-2xl flex items-center justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-sm font-black text-white truncate">{it.subject || it.type}</p>
+                  <p className="text-sm font-black text-white truncate">{it.subject || t(`type_${it.type}`)}</p>
                   <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5 truncate">
-                    {it.client_name} • {it.type}{it.outcome ? ` · ${it.outcome}` : ''}
+                    {it.client_name} • {t(`type_${it.type}`)}{it.outcome ? ` · ${t(`outcome_${it.outcome}`)}` : ''}
                   </p>
                 </div>
                 <span className="text-[9px] text-gray-600 font-bold shrink-0">{new Date(it.occurred_at).toLocaleDateString(i18n.language)}</span>
@@ -176,7 +176,7 @@ function TaskCard({ task, accent, onComplete, completing, language }: any) {
           )}
         </div>
         {task.priority === 'high' && (
-          <span className="text-[8px] font-black uppercase px-2 py-1 rounded-lg bg-rose-500/15 text-rose-500 shrink-0">HIGH</span>
+          <span className="text-[8px] font-black uppercase px-2 py-1 rounded-lg bg-rose-500/15 text-rose-500 shrink-0">{t('priority_high')}</span>
         )}
       </div>
 

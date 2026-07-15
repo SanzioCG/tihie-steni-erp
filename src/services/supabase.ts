@@ -6,7 +6,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Siz yozgan barcha Interfeyslar (Profile, Category, Warehouse, Product, Batch...) 
+// Siz yozgan barcha Interfeyslar (Profile, Category, Product, Batch...)
 // shu yerda o'zgarishsiz qoladi. 
 
 // ... (Siz yozgan helper funksiyalar ham shu yerda qoladi)
