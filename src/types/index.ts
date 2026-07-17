@@ -144,6 +144,29 @@ export interface Sale {
   products?: Product;
 }
 
+// Deals — savdo voronkasi (Bitrix uslubi)
+export type DealStage = 'new' | 'contacted' | 'offer_sent' | 'negotiation' | 'won' | 'lost';
+
+export interface Deal {
+  id: string;
+  client_id?: string;
+  contact_id?: string;      // Faza 1: kompaniya ichidagi odam (ixtiyoriy)
+  title: string;
+  stage: DealStage;
+  expected_amount: number;
+  probability: number;
+  expected_close_date?: string;
+  offer_id?: string;
+  sale_id?: string;
+  owner_id?: string;
+  lost_reason?: string;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+  clients?: Client;
+  contacts?: Contact;       // join uchun
+}
+
 // Finance
 export interface Transaction {
   id: string;

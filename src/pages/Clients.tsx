@@ -5,12 +5,13 @@ import {
   Trash2, FileDown, X, History, ShoppingBag,
   RotateCcw, Banknote, Filter, TrendingUp, Package, Award,
   MessageSquarePlus, MessageSquare, CheckSquare, Send,
-  Building2, Star, Users, Briefcase
+  Building2, Star, Users, Briefcase, GitBranch
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import AddClientModal from '../components/modals/AddClientModal';
 import ContactModal from '../components/modals/ContactModal';
+import DealModal from '../components/modals/DealModal';
 import { exportToPDF, cn } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
 import { useCurrencyStore } from '../store/useCurrencyStore';
@@ -38,6 +39,7 @@ export default function Clients() {
 
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<any>(null);
+  const [dealModalOpen, setDealModalOpen] = useState(false);
 
   const { data: clients = [], isLoading: loading, refetch: fetchClients } = useClients();
   const { data: clientStats = {} } = useClientStats();
@@ -276,15 +278,21 @@ export default function Clients() {
               className="relative w-full max-w-4xl bg-[#0c0c0e] border border-white/5 rounded-[3rem] p-8 md:p-10 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
             >
               <button onClick={() => setViewingHistory(null)} className="absolute right-8 top-8 p-2 bg-white/5 rounded-xl text-gray-500 hover:text-white transition-all z-10"><X size={24}/></button>
-              
-              <div className="flex items-center gap-6 mb-8">
+
+              <div className="flex items-center gap-6 mb-8 pr-16">
                  <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
                    {viewingHistory.kind === 'company' ? <Building2 size={32} strokeWidth={2.5} /> : <User size={32} strokeWidth={3} />}
                  </div>
-                 <div>
-                    <h3 className="text-2xl font-black text-white uppercase tracking-tighter">{viewingHistory.full_name}</h3>
+                 <div className="min-w-0">
+                    <h3 className="text-2xl font-black text-white uppercase tracking-tighter truncate">{viewingHistory.full_name}</h3>
                     <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em]">{viewingHistory.phone || t('unknown_phone')} • {t(viewingHistory.client_type)}</p>
                  </div>
+                 <button
+                   onClick={() => setDealModalOpen(true)}
+                   className="ml-auto shrink-0 px-4 py-2.5 bg-primary/10 border border-primary/20 text-primary font-black rounded-xl uppercase text-[9px] tracking-widest flex items-center gap-1.5 hover:bg-primary/20 transition-all"
+                 >
+                   <GitBranch size={13} strokeWidth={3} /> {t('new_deal')}
+                 </button>
               </div>
 
               {summaryLoading ? (
@@ -470,6 +478,15 @@ export default function Clients() {
           initialData={editingContact}
           onClose={() => setContactModalOpen(false)}
           onSuccess={onContactSaved}
+        />
+      )}
+
+      {viewingHistory && (
+        <DealModal
+          isOpen={dealModalOpen}
+          lockedClientId={viewingHistory.id}
+          onClose={() => setDealModalOpen(false)}
+          onSuccess={() => toast.success(t('deal_saved'))}
         />
       )}
     </div>

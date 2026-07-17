@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Wallet, ShoppingCart, Users, Banknote,
-  Package, Boxes, LogOut, ShieldCheck, Settings, Receipt, X, AlertTriangle, Calculator, CalendarClock
+  Package, Boxes, LogOut, ShieldCheck, Settings, Receipt, X, AlertTriangle, Calculator, CalendarClock, GitBranch
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
@@ -73,6 +73,7 @@ useEffect(() => {
       title: t('sales_crm', 'Savdo va CRM'), 
       items: [
         { id: 'sales', icon: ShoppingCart, label: t('sales') },
+        { id: 'deals', icon: GitBranch, label: t('deals_funnel') },
         { id: 'clients', icon: Users, label: t('clients') },
         { id: 'tasks', icon: CalendarClock, label: t('tasks') },
         { id: 'debts', icon: Banknote, label: t('debts') },

@@ -102,9 +102,44 @@ export default function KP() {
     const totalSum = cart.reduce((sum, item) => sum + item.total, 0);
     const selectedClient = clients.find(c => c.id === clientId);
 
-    const { error } = await supabase.from('commercial_offers').insert([{ items: cart, total_amount: totalSum, client_id: clientId }]);
-    
+    const { data: offer, error } = await supabase
+      .from('commercial_offers')
+      .insert([{ items: cart, total_amount: totalSum, client_id: clientId }])
+      .select('id')
+      .single();
+
     if (!error) {
+      // KP saqlanganda voronkada bitim: ochiq bitim bo'lsa uni offer_sent'ga
+      // ko'chir, aks holda yangi bitim yarat (stage=offer_sent)
+      try {
+        const { data: openDeal } = await supabase
+          .from('deals')
+          .select('id')
+          .eq('client_id', clientId)
+          .not('stage', 'in', '(won,lost)')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (openDeal) {
+          await supabase.rpc('move_deal_stage', { p_deal_id: openDeal.id, p_stage: 'offer_sent' });
+          await supabase.from('deals').update({ offer_id: offer?.id, expected_amount: totalSum }).eq('id', openDeal.id);
+        } else {
+          await supabase.from('deals').insert([{
+            client_id: clientId,
+            title: `KP — ${selectedClient?.full_name || ''}`.trim(),
+            stage: 'offer_sent',
+            expected_amount: totalSum,
+            offer_id: offer?.id,
+            owner_id: profile?.id || null,
+            created_by: profile?.id || null,
+          }]);
+        }
+      } catch (dealErr) {
+        // Bitim yaratilmasa ham KP saqlangan — jarayonni to'xtatmaymiz
+        console.error('Deal sync failed:', dealErr);
+      }
+
       await exportToPDF(
         "Tijorat_Taklifi",
         [["MAHSULOT", "TAFSILOT", "MIQDOR", "JAMI"]],
