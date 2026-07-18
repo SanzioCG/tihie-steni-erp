@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useCurrencyStore } from '../store/useCurrencyStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { exportToPDF, cn } from '../lib/utils';
+import { unitLabel } from '../lib/units';
 import toast from 'react-hot-toast';
 import { useCommercialOffers } from '../hooks/queries/useQueries';
 
@@ -81,7 +82,9 @@ export default function KP() {
     if (!selectedProdId || !dims.length_m) return toast.error(t('fill_fields'));
     const isTek = categories.find(c => c.id === selectedCatId)?.name_uz?.toLowerCase().includes('tekstil');
     const qty = isTek ? (Number(dims.width_m) * Number(dims.length_m)) : (Number(dims.length_m) * Number(dims.item_count));
-    
+    // Birlik ko'rsatuvi product.unit'dan (o'lcham hisobи esa kenglik/uzunlik bo'yicha)
+    const product = allProducts.find(p => p.id === selectedProdId);
+
     setCart([...cart, {
       id: Math.random().toString(),
       product_name: searchTerm,
@@ -89,7 +92,7 @@ export default function KP() {
       price: Number(dims.price),
       total: qty * Number(dims.price),
       details: isTek ? `E: ${dims.width_m}m x B: ${dims.length_m}m` : `L: ${dims.length_m}m x ${dims.item_count}ta`,
-      unit: isTek ? 'm²' : 'm'
+      unit: unitLabel(product?.unit, t)
     }]);
     setDims({ width_m: '', length_m: '', item_count: '1', price: '' });
     setSelectedProdId(''); 

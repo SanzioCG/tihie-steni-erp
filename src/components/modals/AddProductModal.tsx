@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Camera, Loader2, Save, Link as LinkIcon, Hash } from 'lucide-react';
+import { X, Camera, Loader2, Save, Link as LinkIcon, Hash, Ruler } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '../../services/supabase';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
+import { cn } from '../../lib/utils';
+import { PRODUCT_UNITS, defaultUnitForCategory, unitLabel } from '../../lib/units';
 
 export default function AddProductModal({ isOpen, onClose, onSuccess, initialData }: any) {
   const { t } = useTranslation();
@@ -20,7 +22,7 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, initialDat
   const [imageUrl, setImageUrl] = useState('');
 
   const [formData, setFormData] = useState({
-    category_id: '', series: '', name_uz: '', sku: '', min_stock: '10'
+    category_id: '', series: '', name_uz: '', sku: '', min_stock: '10', unit: 'm2'
   });
 
   const BUCKET_NAME = 'products';
@@ -41,14 +43,16 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, initialDat
           series: initialData.series || '',
           name_uz: initialData.name_uz || '',
           sku: initialData.sku || '',
-          min_stock: initialData.min_stock?.toString() || '10'
+          min_stock: initialData.min_stock?.toString() || '10',
+          unit: initialData.unit || 'm2',
         });
         setImagePreview(initialData.image_url || null);
         if (initialData.image_url && !initialData.image_url.includes('supabase')) {
             setImageUrl(initialData.image_url);
         }
       } else {
-        setFormData({ category_id: cats?.[0]?.id || '', series: '', name_uz: '', sku: '', min_stock: '10' });
+        const firstCat = cats?.[0];
+        setFormData({ category_id: firstCat?.id || '', series: '', name_uz: '', sku: '', min_stock: '10', unit: defaultUnitForCategory(firstCat?.name_uz) });
         setImagePreview(null); setImageUrl(''); setImageFile(null);
       }
     };
@@ -67,6 +71,13 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, initialDat
     } catch (e) {
       console.error("Cleanup error:", e);
     }
+  };
+
+  // Kategoriya o'zgarsa — yangi mahsulotда birlikni aqlli default'ga moslaymiz
+  // (tahrirlashда tegmaymiz, foydalanuvchi tanlovини saqlaймиз)
+  const handleCategory = (id: string) => {
+    const cat = categories.find(c => c.id === id);
+    setFormData(f => ({ ...f, category_id: id, ...(initialData ? {} : { unit: defaultUnitForCategory(cat?.name_uz) }) }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,7 +140,8 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, initialDat
         name_en: formData.name_uz,
         sku: formData.sku,
         image_url: finalImageUrl,
-        min_stock: Number(formData.min_stock)
+        min_stock: Number(formData.min_stock),
+        unit: formData.unit,
       };
 
       const { error } = initialData 
@@ -194,7 +206,7 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, initialDat
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide ml-2">1. Kategoriya</label>
-              <select required value={formData.category_id} onChange={(e) => setFormData({...formData, category_id: e.target.value})} className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-bold outline-none appearance-none uppercase text-sm focus:border-primary/20">
+              <select required value={formData.category_id} onChange={(e) => handleCategory(e.target.value)} className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-bold outline-none appearance-none uppercase text-sm focus:border-primary/20">
                 <option value="" className="bg-black">Tanlang...</option>
                 {categories.map(c => <option key={c.id} value={c.id} className="bg-black">{c.name_uz}</option>)}
               </select>
@@ -214,6 +226,28 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, initialDat
                 <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
                 <input required value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value})} className="w-full pl-12 pr-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-mono font-bold outline-none focus:border-primary/30 uppercase text-sm" />
               </div>
+            </div>
+          </div>
+
+          {/* O'lchov birligi — products.unit ga saqlanadi (taxmin yo'q) */}
+          <div className="space-y-2 text-left">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide ml-2 flex items-center gap-1.5">
+              <Ruler size={12} /> 5. O'lchov birligi
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {PRODUCT_UNITS.map(u => (
+                <button
+                  key={u}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, unit: u })}
+                  className={cn(
+                    "py-3 rounded-2xl text-sm font-bold uppercase border transition-all",
+                    formData.unit === u ? "bg-primary/10 border-primary/30 text-primary" : "bg-white/5 border-white/5 text-gray-400 hover:text-white"
+                  )}
+                >
+                  {unitLabel(u, t)}
+                </button>
+              ))}
             </div>
           </div>
 

@@ -167,6 +167,25 @@ export interface Deal {
   contacts?: Contact;       // join uchun
 }
 
+// Deal items — bitim mahsulotlari (Faza 2)
+export interface DealItem {
+  id: string;
+  deal_id: string;
+  product_id?: string;
+  product_name?: string;
+  quantity: number;
+  unit_price: number;
+  created_at: string;
+}
+
+export interface DealDetail {
+  items: (DealItem & { line_total: number; in_stock: number })[];
+  revenue: number;
+  est_cost: number;
+  est_margin: number;
+  est_margin_pct: number;
+}
+
 // Finance
 export interface Transaction {
   id: string;

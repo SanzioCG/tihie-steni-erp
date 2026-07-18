@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Loader2, Plus, GitBranch, Building2, User, CalendarClock,
-  MoreVertical, X, Inbox
+  MoreVertical, X, Inbox, Pencil
 } from 'lucide-react';
 import {
   DndContext, DragOverlay, PointerSensor, TouchSensor, useSensor, useSensors,
@@ -15,6 +15,7 @@ import {
   type DragStartEvent, type DragEndEvent,
 } from '@dnd-kit/core';
 import DealModal from '../components/modals/DealModal';
+import DealDetailDrawer from '../components/modals/DealDetailDrawer';
 import { DEAL_STAGES, STAGE_MAP } from '../constants/dealStages';
 import type { DealStage } from '../types';
 
@@ -31,6 +32,10 @@ export default function Deals() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingDeal, setEditingDeal] = useState<any>(null);
   const [modalStage, setModalStage] = useState<DealStage>('new');
+
+  // Bitim kartochkasi (drawer) — array'dan jonli olamiz, header yangilanib tursin
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const detailDeal = detailId ? deals.find(d => d.id === detailId) || null : null;
 
   // lost sababi modali
   const [lostTarget, setLostTarget] = useState<string | null>(null);
@@ -126,7 +131,8 @@ export default function Deals() {
   };
 
   const openNew = (stage: DealStage) => { setEditingDeal(null); setModalStage(stage); setModalOpen(true); };
-  const openEdit = (deal: any) => { setEditingDeal(deal); setModalOpen(true); };
+  const openDetail = (deal: any) => setDetailId(deal.id);
+  const openEditModal = (deal: any) => { setEditingDeal(deal); setModalStage(deal.stage); setModalOpen(true); };
 
   // Mobil menyudan bosqich tanlash
   const pickStage = (dealId: string, toStage: DealStage) => {
@@ -170,7 +176,8 @@ export default function Deals() {
               language={i18n.language}
               ownerNames={ownerNames}
               onAdd={() => openNew(stage.id)}
-              onEdit={openEdit}
+              onOpen={openDetail}
+              onEditDeal={openEditModal}
               onPickStage={pickStage}
             />
           ))}
@@ -180,6 +187,19 @@ export default function Deals() {
           {activeDeal ? <Card deal={activeDeal} convert={convert} language={i18n.language} ownerNames={ownerNames} overlay /> : null}
         </DragOverlay>
       </DndContext>
+
+      {/* BITIM KARTOCHKASI (DRAWER) */}
+      <AnimatePresence>
+        {detailDeal && (
+          <DealDetailDrawer
+            deal={detailDeal}
+            ownerNames={ownerNames}
+            onClose={() => setDetailId(null)}
+            onChanged={fetchAll}
+            onEdit={() => { setEditingDeal(detailDeal); setModalStage(detailDeal.stage); setModalOpen(true); }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* DEAL MODAL */}
       <DealModal
@@ -221,7 +241,7 @@ export default function Deals() {
   );
 }
 
-function Column({ stage, totals, deals, convert, language, ownerNames, onAdd, onEdit, onPickStage }: any) {
+function Column({ stage, totals, deals, convert, language, ownerNames, onAdd, onOpen, onEditDeal, onPickStage }: any) {
   const { t } = useTranslation();
   const cfg = STAGE_MAP[stage as DealStage];
   const { setNodeRef, isOver } = useDroppable({ id: stage });
@@ -243,7 +263,7 @@ function Column({ stage, totals, deals, convert, language, ownerNames, onAdd, on
       {/* Kartalar zonasi (droppable) */}
       <div ref={setNodeRef} className={cn("flex-1 min-h-32 space-y-2 p-1.5 rounded-2xl transition-colors", isOver ? "bg-primary/5 ring-1 ring-primary/20" : "bg-transparent")}>
         {deals.map((d: any) => (
-          <DraggableCard key={d.id} deal={d} convert={convert} language={language} ownerNames={ownerNames} onEdit={() => onEdit(d)} onPickStage={onPickStage} />
+          <DraggableCard key={d.id} deal={d} convert={convert} language={language} ownerNames={ownerNames} onOpen={() => onOpen(d)} onEditDeal={() => onEditDeal(d)} onPickStage={onPickStage} />
         ))}
         {deals.length === 0 && (
           <div className="py-8 text-center text-gray-700 opacity-40">
@@ -256,16 +276,16 @@ function Column({ stage, totals, deals, convert, language, ownerNames, onAdd, on
   );
 }
 
-function DraggableCard({ deal, convert, language, ownerNames, onEdit, onPickStage }: any) {
+function DraggableCard({ deal, convert, language, ownerNames, onOpen, onEditDeal, onPickStage }: any) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: deal.id });
   return (
     <div ref={setNodeRef} className={cn(isDragging && "opacity-30")}>
-      <Card deal={deal} convert={convert} language={language} ownerNames={ownerNames} onEdit={onEdit} onPickStage={onPickStage} dragHandle={{ ...listeners, ...attributes }} />
+      <Card deal={deal} convert={convert} language={language} ownerNames={ownerNames} onOpen={onOpen} onEditDeal={onEditDeal} onPickStage={onPickStage} dragHandle={{ ...listeners, ...attributes }} />
     </div>
   );
 }
 
-function Card({ deal, convert, language, ownerNames, onEdit, onPickStage, dragHandle, overlay }: any) {
+function Card({ deal, convert, language, ownerNames, onOpen, onEditDeal, onPickStage, dragHandle, overlay }: any) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const isCompany = deal.clients?.kind === 'company';
@@ -276,9 +296,9 @@ function Card({ deal, convert, language, ownerNames, onEdit, onPickStage, dragHa
       "relative group bg-[#121214] border border-white/5 rounded-xl p-2.5 select-none",
       overlay ? "shadow-2xl rotate-2 cursor-grabbing" : "cursor-grab hover:border-white/10"
     )}>
-      {/* Sudrash zonasi + tahrirlash uchun bosish */}
-      <div {...(dragHandle || {})} onClick={() => !overlay && onEdit?.()}>
-        <div className="flex items-start justify-between gap-2">
+      {/* Karta tanasi: sudrash zonasi + bosilганда kartochka (drawer) ochiladi */}
+      <div {...(dragHandle || {})} onClick={() => !overlay && onOpen?.()}>
+        <div className="flex items-start justify-between gap-2 pr-11">
           <p className="text-[13px] font-bold text-white leading-tight truncate flex-1">{deal.title}</p>
           <p className="text-[13px] font-bold text-primary tracking-tighter shrink-0">{convert(deal.expected_amount || 0)}</p>
         </div>
@@ -304,14 +324,25 @@ function Card({ deal, convert, language, ownerNames, onEdit, onPickStage, dragHa
         </div>
       </div>
 
-      {/* Mobil / alternativ: bosqich menyusi */}
+      {/* Boshqaruv tugmalari — karta drawer'ini ochмаsligи uchun stopPropagation.
+          Qalam → DealModal (tahrirlash), "..." → bosqich menyusi (mobil/alt) */}
       {!overlay && (
-        <button
-          onClick={(e) => { e.stopPropagation(); setMenuOpen(v => !v); }}
-          className="absolute top-2 right-2 p-1 rounded-md bg-black/40 text-gray-500 opacity-0 group-hover:opacity-100 lg:opacity-0 max-lg:opacity-100 transition-opacity"
-        >
-          <MoreVertical size={13} />
-        </button>
+        <div className="absolute top-1.5 right-1.5 flex items-center gap-0.5">
+          <button
+            onClick={(e) => { e.stopPropagation(); onEditDeal?.(); }}
+            className="p-1 rounded-md text-gray-600 hover:text-primary hover:bg-white/5 transition-colors"
+            title={t('edit_deal')}
+          >
+            <Pencil size={12} />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); setMenuOpen(v => !v); }}
+            className="p-1 rounded-md text-gray-600 hover:text-white hover:bg-white/5 transition-colors"
+            title={t('change_stage')}
+          >
+            <MoreVertical size={13} />
+          </button>
+        </div>
       )}
       {menuOpen && !overlay && (
         <>
