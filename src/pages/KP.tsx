@@ -12,6 +12,18 @@ import { unitLabel } from '../lib/units';
 import toast from 'react-hot-toast';
 import { useCommercialOffers } from '../hooks/queries/useQueries';
 
+// Miqdor hisobи mahsulot birligиdan (kategoriyadan emas):
+//   m2  → kenglik × uzunlik ;  p.m → uzunlik × soni ;  pcs → soni
+type Dims = { width_m: string; length_m: string; item_count: string; price: string };
+const calcQty = (unit: string, d: Dims): number => {
+  const w = Number(d.width_m || 0);
+  const l = Number(d.length_m || 0);
+  const c = Number(d.item_count || 0);
+  if (unit === 'm2') return w * l;
+  if (unit === 'pcs') return c;
+  return l * c; // p.m
+};
+
 export default function KP() {
   const { t, i18n } = useTranslation();
   const { convert } = useCurrencyStore();
@@ -79,11 +91,22 @@ export default function KP() {
   };
 
   const addToCart = () => {
-    if (!selectedProdId || !dims.length_m) return toast.error(t('fill_fields'));
-    const isTek = categories.find(c => c.id === selectedCatId)?.name_uz?.toLowerCase().includes('tekstil');
-    const qty = isTek ? (Number(dims.width_m) * Number(dims.length_m)) : (Number(dims.length_m) * Number(dims.item_count));
-    // Birlik ko'rsatuvi product.unit'dan (o'lcham hisobи esa kenglik/uzunlik bo'yicha)
+    if (!selectedProdId) return toast.error(t('fill_fields'));
     const product = allProducts.find(p => p.id === selectedProdId);
+    const u = product?.unit || 'm2';
+
+    // Birlikка qarab majburiy maydonlar
+    if (u === 'm2' && (!dims.width_m || !dims.length_m)) return toast.error(t('fill_fields'));
+    if (u === 'p.m' && !dims.length_m) return toast.error(t('fill_fields'));
+    if (u === 'pcs' && !dims.item_count) return toast.error(t('fill_fields'));
+
+    const qty = calcQty(u, dims);
+    if (!(qty > 0)) return toast.error(t('fill_fields'));
+
+    const details =
+      u === 'm2' ? `E: ${dims.width_m}m x B: ${dims.length_m}m`
+      : u === 'pcs' ? `${dims.item_count} ${unitLabel('pcs', t)}`
+      : `L: ${dims.length_m}m x ${dims.item_count}ta`;
 
     setCart([...cart, {
       id: Math.random().toString(),
@@ -91,8 +114,8 @@ export default function KP() {
       qty: qty,
       price: Number(dims.price),
       total: qty * Number(dims.price),
-      details: isTek ? `E: ${dims.width_m}m x B: ${dims.length_m}m` : `L: ${dims.length_m}m x ${dims.item_count}ta`,
-      unit: unitLabel(product?.unit, t)
+      details,
+      unit: unitLabel(u, t)
     }]);
     setDims({ width_m: '', length_m: '', item_count: '1', price: '' });
     setSelectedProdId(''); 
@@ -160,6 +183,9 @@ export default function KP() {
   };
 
   const totalSum = cart.reduce((sum, item) => sum + item.total, 0);
+
+  // Tanlangan mahsulot birligi — forma maydonlari va hisob shundan (fallback m2)
+  const selectedUnit = allProducts.find(p => p.id === selectedProdId)?.unit || 'm2';
 
   return (
     <div className="space-y-5 text-left animate-in fade-in duration-500 max-w-7xl mx-auto pb-20 font-sans">
@@ -241,8 +267,22 @@ export default function KP() {
 
               {selectedProdId && (
                 <div className="grid grid-cols-2 gap-4 p-6 bg-white/2 border border-white/5 rounded-3xl">
-                  <input type="number" placeholder={t('width_m')} value={dims.width_m} onChange={e => setDims({...dims, width_m: e.target.value})} className="w-full bg-transparent border-b border-white/10 py-2 text-white text-lg font-bold outline-none" />
-                  <input type="number" placeholder={t('length_m')} value={dims.length_m} onChange={e => setDims({...dims, length_m: e.target.value})} className="w-full bg-transparent border-b border-white/10 py-2 text-white text-lg font-bold outline-none" />
+                  {/* Maydonlar mahsulot birligiga qarab (kategoriyadан emas) */}
+                  {selectedUnit === 'm2' && (
+                    <>
+                      <input type="number" placeholder={t('width_m')} value={dims.width_m} onChange={e => setDims({...dims, width_m: e.target.value})} className="w-full bg-transparent border-b border-white/10 py-2 text-white text-lg font-bold outline-none" />
+                      <input type="number" placeholder={t('length_m')} value={dims.length_m} onChange={e => setDims({...dims, length_m: e.target.value})} className="w-full bg-transparent border-b border-white/10 py-2 text-white text-lg font-bold outline-none" />
+                    </>
+                  )}
+                  {selectedUnit === 'p.m' && (
+                    <>
+                      <input type="number" placeholder={t('length_m')} value={dims.length_m} onChange={e => setDims({...dims, length_m: e.target.value})} className="w-full bg-transparent border-b border-white/10 py-2 text-white text-lg font-bold outline-none" />
+                      <input type="number" placeholder={t('count_pcs')} value={dims.item_count} onChange={e => setDims({...dims, item_count: e.target.value})} className="w-full bg-transparent border-b border-white/10 py-2 text-white text-lg font-bold outline-none" />
+                    </>
+                  )}
+                  {selectedUnit === 'pcs' && (
+                    <input type="number" placeholder={t('count_pcs')} value={dims.item_count} onChange={e => setDims({...dims, item_count: e.target.value})} className="col-span-2 w-full bg-transparent border-b border-white/10 py-2 text-white text-lg font-bold outline-none" />
+                  )}
                   <input type="number" placeholder={t('price_label')} value={dims.price} onChange={e => setDims({...dims, price: e.target.value})} className="col-span-2 mt-2 w-full bg-transparent border-b border-white/10 py-2 text-emerald-500 text-xl font-bold outline-none" />
                 </div>
               )}
