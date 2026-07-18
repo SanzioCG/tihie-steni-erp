@@ -228,10 +228,10 @@ export default function POSModal({ isOpen, onClose, onSuccess }: POSModalProps) 
         className="relative w-full max-w-lg bg-[#0c0c0e] border border-white/5 rounded-4xl shadow-2xl p-6 md:p-8 space-y-6 my-auto max-h-[95vh] no-scrollbar overflow-y-auto"
       >
         <div className="flex justify-between items-center">
-          <h3 className="text-xl font-black text-white uppercase flex items-center gap-2 italic">
+          <h3 className="text-xl font-bold text-white uppercase flex items-center gap-2 italic">
             <ShoppingCart className="text-primary" size={20} /> {t('new_sale')}
           </h3>
-          <button onClick={onClose} className="p-2 bg-white/5 rounded-xl text-gray-500 hover:text-white">
+          <button onClick={onClose} className="p-2 bg-white/5 rounded-xl text-gray-400 hover:text-white">
             <X size={20}/>
           </button>
         </div>
@@ -288,12 +288,12 @@ export default function POSModal({ isOpen, onClose, onSuccess }: POSModalProps) 
                 <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto text-primary animate-bounce">
                   <CheckCircle2 size={56} strokeWidth={3} />
                 </div>
-                <h3 className="text-2xl font-black text-white uppercase italic">Sotuv bajarildi!</h3>
+                <h3 className="text-2xl font-bold text-white uppercase italic">Sotuv bajarildi!</h3>
                 <div className="flex flex-col gap-3">
-                  <button onClick={handlePrint} className="w-full py-5 bg-primary text-black font-black rounded-2xl flex items-center justify-center gap-3 uppercase text-xs tracking-widest">
+                  <button onClick={handlePrint} className="w-full py-5 bg-primary text-black font-bold rounded-2xl flex items-center justify-center gap-3 uppercase text-xs tracking-wide">
                     <Printer size={20} /> Chekni chiqarish
                   </button>
-                  <button onClick={() => { setShowSuccess(false); onClose(); }} className="w-full py-5 bg-white/5 text-gray-400 font-black rounded-2xl uppercase text-xs tracking-widest hover:text-white">
+                  <button onClick={() => { setShowSuccess(false); onClose(); }} className="w-full py-5 bg-white/5 text-gray-400 font-bold rounded-2xl uppercase text-xs tracking-wide hover:text-white">
                     Yopish
                   </button>
                 </div>

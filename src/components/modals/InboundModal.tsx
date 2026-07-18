@@ -198,13 +198,13 @@ export default function InboundModal({ isOpen, onClose, onSuccess, editData }: I
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
         className="relative w-full max-w-137.5 bg-[#0c0c0e] border border-white/5 rounded-[3rem] p-10 shadow-2xl space-y-8 max-h-[95vh] overflow-y-auto no-scrollbar"
       >
-        <button onClick={onClose} className="absolute right-8 top-8 p-2 bg-white/5 rounded-xl text-gray-500 hover:text-white">
+        <button onClick={onClose} className="absolute right-8 top-8 p-2 bg-white/5 rounded-xl text-gray-400 hover:text-white">
           <X size={20} />
         </button>
 
         <div className="flex items-center gap-3">
           <Layers className="text-white" size={28} />
-          <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">
+          <h2 className="text-2xl font-bold text-white uppercase italic tracking-tighter">
             {editData ? "Partiyani Tahrirlash" : t('inbound_control')}
           </h2>
         </div>
@@ -213,13 +213,13 @@ export default function InboundModal({ isOpen, onClose, onSuccess, editData }: I
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-2">1. {t('category')}</label>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide ml-2">1. {t('category')}</label>
               <select 
                 required 
                 value={formData.category_id} 
                 onChange={e => handleCategoryChange(e.target.value)} 
                 disabled={!!editData}
-                className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-black outline-none uppercase text-sm disabled:opacity-50"
+                className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-bold outline-none uppercase text-sm disabled:opacity-50"
               >
                 <option value="" className="bg-black">{t('select_placeholder')}</option>
                 {categories.map(c => <option key={c.id} value={c.id} className="bg-black">{c.name_uz}</option>)}
@@ -227,7 +227,7 @@ export default function InboundModal({ isOpen, onClose, onSuccess, editData }: I
             </div>
 
             <div className="space-y-2 relative" ref={dropdownRef}>
-              <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-2">2. {t('products')}</label>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide ml-2">2. {t('products')}</label>
               <div className="relative">
                 <input
                   type="text"
@@ -241,11 +241,11 @@ export default function InboundModal({ isOpen, onClose, onSuccess, editData }: I
                   onFocus={() => formData.category_id && !editData && setIsDropdownOpen(true)}
                   placeholder={t('search_placeholder')}
                   className={cn(
-                    "w-full px-5 py-4 pr-12 bg-white/5 border border-white/5 rounded-2xl text-white font-black outline-none uppercase text-sm placeholder:text-gray-600",
+                    "w-full px-5 py-4 pr-12 bg-white/5 border border-white/5 rounded-2xl text-white font-bold outline-none uppercase text-sm placeholder:text-gray-500",
                     (!formData.category_id || editData) ? "opacity-30 cursor-not-allowed" : "focus:border-primary/40"
                   )}
                 />
-                <Search size={16} className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
+                <Search size={16} className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
               </div>
               {isDropdownOpen && formData.category_id && !editData && (
                 <div className="absolute top-full left-0 right-0 mt-2 bg-[#121214] border border-white/10 rounded-2xl z-160 max-h-48 overflow-y-auto">
@@ -255,13 +255,13 @@ export default function InboundModal({ isOpen, onClose, onSuccess, editData }: I
                       <div
                         key={p.id}
                         onClick={() => selectProduct(p)}
-                        className="px-6 py-4 hover:bg-primary/10 text-sm text-white font-black cursor-pointer border-b border-white/2 uppercase"
+                        className="px-6 py-4 hover:bg-primary/10 text-sm text-white font-bold cursor-pointer border-b border-white/2 uppercase"
                       >
                         {p.name_uz}
                       </div>
                     ))}
                   {filteredProducts.filter(p => p.name_uz.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
-                    <div className="px-6 py-4 text-xs text-gray-600 font-black uppercase">{t('not_found', 'Topilmadi')}</div>
+                    <div className="px-6 py-4 text-xs text-gray-500 font-bold uppercase">{t('not_found', 'Topilmadi')}</div>
                   )}
                 </div>
               )}
@@ -273,7 +273,7 @@ export default function InboundModal({ isOpen, onClose, onSuccess, editData }: I
               {isTekstil ? (
                 <>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black text-primary uppercase flex items-center gap-1 tracking-widest">
+                    <label className="text-[9px] font-bold text-primary uppercase flex items-center gap-1 tracking-wide">
                       <Ruler size={10}/> {t('width_m')}
                     </label>
                     <input 
@@ -282,12 +282,12 @@ export default function InboundModal({ isOpen, onClose, onSuccess, editData }: I
                       step="0.01" 
                       value={formData.width_m} 
                       onChange={e => setFormData({...formData, width_m: e.target.value})} 
-                      className="w-full bg-transparent border-b border-white/10 py-2 text-white text-xl font-black outline-none focus:border-primary" 
+                      className="w-full bg-transparent border-b border-white/10 py-2 text-white text-xl font-bold outline-none focus:border-primary" 
                       placeholder="0.00" 
                     />
                   </div>
                   <div className="space-y-1 pl-4 border-l border-white/5">
-                    <label className="text-[9px] font-black text-primary uppercase flex items-center gap-1 tracking-widest">
+                    <label className="text-[9px] font-bold text-primary uppercase flex items-center gap-1 tracking-wide">
                       <Ruler size={10}/> {t('length_m')}
                     </label>
                     <input 
@@ -296,7 +296,7 @@ export default function InboundModal({ isOpen, onClose, onSuccess, editData }: I
                       step="0.01" 
                       value={formData.length_m} 
                       onChange={e => setFormData({...formData, length_m: e.target.value})} 
-                      className="w-full bg-transparent border-b border-white/10 py-2 text-white text-xl font-black outline-none focus:border-primary" 
+                      className="w-full bg-transparent border-b border-white/10 py-2 text-white text-xl font-bold outline-none focus:border-primary" 
                       placeholder="0.00" 
                     />
                   </div>
@@ -304,25 +304,25 @@ export default function InboundModal({ isOpen, onClose, onSuccess, editData }: I
               ) : (
                 <>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black text-blue-400 uppercase tracking-widest">{t('length_m')}</label>
+                    <label className="text-[9px] font-bold text-blue-400 uppercase tracking-wide">{t('length_m')}</label>
                     <input 
                       required 
                       type="number" 
                       step="0.01" 
                       value={formData.length_m} 
                       onChange={e => setFormData({...formData, length_m: e.target.value})} 
-                      className="w-full bg-transparent border-b border-white/10 py-2 text-white text-xl font-black outline-none focus:border-blue-400" 
+                      className="w-full bg-transparent border-b border-white/10 py-2 text-white text-xl font-bold outline-none focus:border-blue-400" 
                       placeholder="0.00" 
                     />
                   </div>
                   <div className="space-y-1 pl-4 border-l border-white/5">
-                    <label className="text-[9px] font-black text-blue-400 uppercase tracking-widest">{t('count_pcs')}</label>
+                    <label className="text-[9px] font-bold text-blue-400 uppercase tracking-wide">{t('count_pcs')}</label>
                     <input 
                       required 
                       type="number" 
                       value={formData.item_count} 
                       onChange={e => setFormData({...formData, item_count: e.target.value})} 
-                      className="w-full bg-transparent border-b border-white/10 py-2 text-white text-xl font-black outline-none focus:border-blue-400" 
+                      className="w-full bg-transparent border-b border-white/10 py-2 text-white text-xl font-bold outline-none focus:border-blue-400" 
                       placeholder="1" 
                     />
                   </div>
@@ -333,26 +333,26 @@ export default function InboundModal({ isOpen, onClose, onSuccess, editData }: I
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-emerald-500 uppercase ml-2 tracking-widest">{t('tan_narx')} ($)</label>
+              <label className="text-[10px] font-bold text-emerald-500 uppercase ml-2 tracking-wide">{t('tan_narx')} ($)</label>
               <input 
                 required 
                 type="number" 
                 step="0.01" 
                 value={formData.purchase_price} 
                 onChange={e => setFormData({...formData, purchase_price: e.target.value})} 
-                className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-emerald-500 font-black outline-none text-lg" 
+                className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-emerald-500 font-bold outline-none text-lg" 
                 placeholder="0.00" 
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-primary uppercase ml-2 tracking-widest">{t('sotuv_narxi')} ($)</label>
+              <label className="text-[10px] font-bold text-primary uppercase ml-2 tracking-wide">{t('sotuv_narxi')} ($)</label>
               <input 
                 required 
                 type="number" 
                 step="0.01" 
                 value={formData.selling_price} 
                 onChange={e => setFormData({...formData, selling_price: e.target.value})} 
-                className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-primary font-black outline-none text-lg" 
+                className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-primary font-bold outline-none text-lg" 
                 placeholder="0.00" 
               />
             </div>
@@ -360,21 +360,21 @@ export default function InboundModal({ isOpen, onClose, onSuccess, editData }: I
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-gray-600 uppercase ml-2 tracking-widest">{t('batch_no')}</label>
+              <label className="text-[10px] font-bold text-gray-500 uppercase ml-2 tracking-wide">{t('batch_no')}</label>
               <div className="flex items-center px-5 py-4 bg-white/5 border border-white/5 rounded-2xl">
-                <span className="text-gray-500 font-black mr-2 italic">P-</span>
+                <span className="text-gray-400 font-bold mr-2 italic">P-</span>
                 <input 
                   required 
                   type="number" 
                   value={formData.batch_number} 
                   onChange={e => setFormData({...formData, batch_number: e.target.value})} 
-                  className="bg-transparent border-none text-white font-black outline-none w-full" 
+                  className="bg-transparent border-none text-white font-bold outline-none w-full" 
                   placeholder="1" 
                 />
               </div>
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-rose-500 uppercase ml-2 flex items-center gap-1 tracking-widest">
+              <label className="text-[10px] font-bold text-rose-500 uppercase ml-2 flex items-center gap-1 tracking-wide">
                 <AlertCircle size={12}/> {t('limit')}
               </label>
               <input 
@@ -382,15 +382,15 @@ export default function InboundModal({ isOpen, onClose, onSuccess, editData }: I
                 type="number" 
                 value={formData.min_limit} 
                 onChange={e => setFormData({...formData, min_limit: e.target.value})} 
-                className="w-full px-5 py-4 bg-rose-500/5 border border-rose-500/10 rounded-2xl text-rose-500 font-black outline-none text-lg" 
+                className="w-full px-5 py-4 bg-rose-500/5 border border-rose-500/10 rounded-2xl text-rose-500 font-bold outline-none text-lg" 
                 placeholder="5" 
               />
             </div>
           </div>
 
           <div className="p-6 bg-primary/10 border border-primary/20 rounded-4xl text-center">
-            <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1">{t('total_inbound_qty')}</p>
-            <h4 className="text-4xl font-black text-white tracking-tighter italic">
+            <p className="text-[10px] font-bold text-primary uppercase tracking-wide mb-1">{t('total_inbound_qty')}</p>
+            <h4 className="text-4xl font-bold text-white tracking-tighter italic">
               {calculateTotal().toFixed(2)} <span className="text-sm not-italic opacity-40 uppercase ml-1">{isTekstil ? t('sq_m') : t('meter')}</span>
             </h4>
           </div>
@@ -398,7 +398,7 @@ export default function InboundModal({ isOpen, onClose, onSuccess, editData }: I
           <button 
             disabled={loading} 
             type="submit" 
-            className="w-full py-5 bg-primary text-black font-black rounded-3xl shadow-lg hover:scale-[1.01] active:scale-95 transition-all uppercase tracking-widest text-xs flex justify-center items-center gap-3 disabled:opacity-50"
+            className="w-full py-5 bg-primary text-black font-bold rounded-3xl shadow-lg hover:scale-[1.01] active:scale-95 transition-all uppercase tracking-wide text-xs flex justify-center items-center gap-3 disabled:opacity-50"
           >
             {loading ? <Loader2 className="animate-spin" /> : <Save size={18}/>} {t('save')}
           </button>

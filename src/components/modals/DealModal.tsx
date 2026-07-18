@@ -121,24 +121,24 @@ export default function DealModal({ isOpen, initialData, defaultStage, lockedCli
         className="relative w-full max-w-115 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] p-7 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto no-scrollbar"
       >
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-black text-white uppercase tracking-tighter flex items-center gap-2">
+          <h3 className="text-lg font-bold text-white uppercase tracking-tighter flex items-center gap-2">
             <GitBranch size={18} className="text-primary" /> {initialData ? t('edit_deal') : t('new_deal')}
           </h3>
-          <button type="button" onClick={onClose} className="p-2 bg-white/5 rounded-xl text-gray-500 hover:text-white transition-all"><X size={20} /></button>
+          <button type="button" onClick={onClose} className="p-2 bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all"><X size={20} /></button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
           {/* Bitim nomi */}
           <div className="space-y-1.5">
-            <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">{t('deal_title')}</label>
+            <label className="text-[9px] font-bold text-gray-400 uppercase tracking-wide ml-1">{t('deal_title')}</label>
             <input required value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="OOO Stroy Invest — tekstil" className="w-full px-4 py-3.5 bg-white/5 border border-white/5 rounded-2xl text-white text-xs font-bold outline-none focus:border-primary/30" />
           </div>
 
           {/* Kontragent */}
           <div className="space-y-1.5">
-            <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">{t('client')}</label>
+            <label className="text-[9px] font-bold text-gray-400 uppercase tracking-wide ml-1">{t('client')}</label>
             {lockedClientId ? (
-              <div className="w-full px-4 py-3.5 bg-white/5 border border-white/5 rounded-2xl text-white text-xs font-black flex items-center gap-2">
+              <div className="w-full px-4 py-3.5 bg-white/5 border border-white/5 rounded-2xl text-white text-xs font-bold flex items-center gap-2">
                 {isCompany ? <Building2 size={14} className="text-primary" /> : <User size={14} className="text-primary" />}
                 {selectedClient?.full_name || '—'}
               </div>
@@ -158,7 +158,7 @@ export default function DealModal({ isOpen, initialData, defaultStage, lockedCli
           {/* Kontakt — faqat kompaniyada */}
           {isCompany && contacts.length > 0 && (
             <div className="space-y-1.5">
-              <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">{t('spoke_with')}</label>
+              <label className="text-[9px] font-bold text-gray-400 uppercase tracking-wide ml-1">{t('spoke_with')}</label>
               <select value={form.contact_id} onChange={e => setForm({ ...form, contact_id: e.target.value })} className="w-full px-4 py-3.5 bg-white/5 border border-white/5 rounded-2xl text-white text-xs font-bold outline-none focus:border-primary/30 appearance-none">
                 <option value="" className="bg-[#0c0c0e]">— {t('no_contact_selected')} —</option>
                 {contacts.map(ct => (
@@ -170,18 +170,18 @@ export default function DealModal({ isOpen, initialData, defaultStage, lockedCli
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1 flex items-center gap-1"><Banknote size={11} /> {t('expected_amount')}</label>
-              <input type="number" step="any" value={form.expected_amount} onChange={e => setForm({ ...form, expected_amount: e.target.value })} placeholder="0" className="w-full px-4 py-3.5 bg-white/5 border border-white/5 rounded-2xl text-emerald-400 text-sm font-black outline-none focus:border-primary/30" />
+              <label className="text-[9px] font-bold text-gray-400 uppercase tracking-wide ml-1 flex items-center gap-1"><Banknote size={11} /> {t('expected_amount')}</label>
+              <input type="number" step="any" value={form.expected_amount} onChange={e => setForm({ ...form, expected_amount: e.target.value })} placeholder="0" className="w-full px-4 py-3.5 bg-white/5 border border-white/5 rounded-2xl text-emerald-400 text-sm font-bold outline-none focus:border-primary/30" />
             </div>
             <div className="space-y-1.5">
-              <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1 flex items-center gap-1"><CalendarClock size={11} /> {t('expected_close')}</label>
+              <label className="text-[9px] font-bold text-gray-400 uppercase tracking-wide ml-1 flex items-center gap-1"><CalendarClock size={11} /> {t('expected_close')}</label>
               <input type="date" value={form.expected_close_date} onChange={e => setForm({ ...form, expected_close_date: e.target.value })} className="w-full px-4 py-3.5 bg-white/5 border border-white/5 rounded-2xl text-white text-xs font-bold outline-none focus:border-primary/30" />
             </div>
           </div>
 
           {/* Javobgar */}
           <div className="space-y-1.5">
-            <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1 flex items-center gap-1"><UserCheck size={11} /> {t('deal_owner')}</label>
+            <label className="text-[9px] font-bold text-gray-400 uppercase tracking-wide ml-1 flex items-center gap-1"><UserCheck size={11} /> {t('deal_owner')}</label>
             <select value={form.owner_id} onChange={e => setForm({ ...form, owner_id: e.target.value })} className="w-full px-4 py-3.5 bg-white/5 border border-white/5 rounded-2xl text-white text-xs font-bold outline-none focus:border-primary/30 appearance-none">
               <option value="" className="bg-[#0c0c0e]">—</option>
               {staff.map(s => <option key={s.id} value={s.id} className="bg-[#0c0c0e]">{s.full_name}</option>)}
@@ -190,7 +190,7 @@ export default function DealModal({ isOpen, initialData, defaultStage, lockedCli
 
           {/* Bosqich */}
           <div className="space-y-1.5">
-            <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">{t('status')}</label>
+            <label className="text-[9px] font-bold text-gray-400 uppercase tracking-wide ml-1">{t('status')}</label>
             <div className="grid grid-cols-3 gap-1.5">
               {DEAL_STAGES.map(s => (
                 <button
@@ -198,8 +198,8 @@ export default function DealModal({ isOpen, initialData, defaultStage, lockedCli
                   type="button"
                   onClick={() => setForm({ ...form, stage: s.id })}
                   className={cn(
-                    "py-2 rounded-xl text-[8px] font-black uppercase tracking-wide transition-all border",
-                    form.stage === s.id ? "bg-primary/10 border-primary/30 text-primary" : "bg-white/5 border-white/5 text-gray-500 hover:text-white"
+                    "py-2 rounded-xl text-[8px] font-bold uppercase tracking-wide transition-all border",
+                    form.stage === s.id ? "bg-primary/10 border-primary/30 text-primary" : "bg-white/5 border-white/5 text-gray-400 hover:text-white"
                   )}
                 >
                   {t(s.labelKey)}
@@ -208,7 +208,7 @@ export default function DealModal({ isOpen, initialData, defaultStage, lockedCli
             </div>
           </div>
 
-          <button disabled={loading} type="submit" className="w-full py-4 bg-primary text-black font-black rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 disabled:opacity-50">
+          <button disabled={loading} type="submit" className="w-full py-4 bg-primary text-black font-bold rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all uppercase text-[10px] tracking-wide flex items-center justify-center gap-2 disabled:opacity-50">
             {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} strokeWidth={3} />} {t('save')}
           </button>
         </form>

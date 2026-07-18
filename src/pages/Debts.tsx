@@ -67,8 +67,8 @@ export default function Debts() {
     <div className="space-y-5 text-left animate-in fade-in duration-500">
       <div className="flex justify-between items-center px-2">
         <div>
-          <h2 className="text-2xl font-black text-white uppercase ">{t('debts_control')}</h2>
-          <p className="text-sm text-gray-500 italic">{t('manage_debtors')}</p>
+          <h2 className="text-2xl font-bold text-white uppercase ">{t('debts_control')}</h2>
+          <p className="text-sm text-gray-400 italic">{t('manage_debtors')}</p>
         </div>
         <div className="flex gap-3">
           <button onClick={exportDebtsPDF} className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl flex items-center gap-2 hover:bg-white/10 transition-all font-bold text-xs uppercase">
@@ -81,22 +81,22 @@ export default function Debts() {
         <div className="flex items-center gap-4">
           <div className="p-3 bg-rose-500/20 rounded-xl text-rose-500"><Wallet size={26} /></div>
           <div>
-            <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">{t('total_debtors_sum')}:</p>
-            <p className="text-2xl font-black text-white tracking-tighter">${totalDebt.toLocaleString()}</p>
+            <p className="text-[10px] font-bold text-rose-500 uppercase tracking-wide">{t('total_debtors_sum')}:</p>
+            <p className="text-2xl font-bold text-white tracking-tighter">${totalDebt.toLocaleString()}</p>
           </div>
         </div>
         <div className="text-right hidden md:block">
-           <p className="text-[10px] font-bold text-gray-500 uppercase">{t('debtors_count')}:</p>
-           <p className="text-xl font-black text-white">{clients.length} {t('unit_pcs')}</p>
+           <p className="text-[10px] font-bold text-gray-400 uppercase">{t('debtors_count')}:</p>
+           <p className="text-xl font-bold text-white">{clients.length} {t('unit_pcs')}</p>
         </div>
       </div>
 
       <div className="relative mx-2">
-        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
+        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
         <input 
           type="text" placeholder={t('search_debtor_placeholder')} 
           value={search} onChange={e => setSearch(e.target.value)}
-          className="w-full pl-14 pr-4 py-3.5 bg-[#0c0c0e] border border-white/5 rounded-2xl text-white outline-none focus:border-rose-500/30 transition-all font-black"
+          className="w-full pl-14 pr-4 py-3.5 bg-[#0c0c0e] border border-white/5 rounded-2xl text-white outline-none focus:border-rose-500/30 transition-all font-bold"
         />
       </div>
 
@@ -108,23 +108,23 @@ export default function Debts() {
                   <User size={20} />
                </div>
                <div className="text-right">
-                  <p className="text-[9px] font-black text-gray-500 uppercase">{t('debt_label')}:</p>
-                  <p className="text-xl font-black text-rose-500 italic">-${Math.abs(client.balance).toLocaleString()}</p>
+                  <p className="text-[9px] font-bold text-gray-400 uppercase">{t('debt_label')}:</p>
+                  <p className="text-xl font-bold text-rose-500 italic">-${Math.abs(client.balance).toLocaleString()}</p>
                </div>
             </div>
             <h4 className="text-base font-bold text-white mb-1 uppercase">{client.full_name}</h4>
-            <p className="text-[10px] text-gray-600 font-bold mb-4 uppercase tracking-widest">{client.phone || t('no_contact')}</p>
+            <p className="text-[10px] text-gray-500 font-bold mb-4 uppercase tracking-wide">{client.phone || t('no_contact')}</p>
 
             <button
               onClick={() => setSelectedClient(client)}
-              className="w-full py-3 bg-white/5 hover:bg-rose-500 hover:text-white text-gray-400 font-black rounded-xl transition-all uppercase text-[10px] tracking-widest flex items-center justify-center gap-2"
+              className="w-full py-3 bg-white/5 hover:bg-rose-500 hover:text-white text-gray-400 font-bold rounded-xl transition-all uppercase text-[10px] tracking-wide flex items-center justify-center gap-2"
             >
               <ArrowRightCircle size={16} /> {t('accept_payment')}
             </button>
           </div>
         ))}
         {clients.length === 0 && !loading && (
-          <div className="col-span-full py-20 text-center text-gray-700 font-black uppercase text-[10px] tracking-widest">{t('no_data')}</div>
+          <div className="col-span-full py-20 text-center text-gray-700 font-bold uppercase text-[10px] tracking-wide">{t('no_data')}</div>
         )}
       </div>
 
@@ -135,14 +135,14 @@ export default function Debts() {
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
               className="relative w-full max-w-100 bg-[#0c0c0e] border border-white/10 rounded-[2.5rem] p-10 shadow-2xl space-y-6"
             >
-              <button onClick={() => setSelectedClient(null)} className="absolute right-6 top-6 text-gray-500"><X size={20}/></button>
+              <button onClick={() => setSelectedClient(null)} className="absolute right-6 top-6 text-gray-400"><X size={20}/></button>
               <div className="text-center">
-                 <h3 className="text-xl font-black text-white italic uppercase tracking-tight">{selectedClient.full_name}</h3>
+                 <h3 className="text-xl font-bold text-white italic uppercase tracking-tight">{selectedClient.full_name}</h3>
                  <p className="text-xs text-rose-500 font-bold uppercase mt-1">{t('available_debt')}: ${Math.abs(selectedClient.balance).toLocaleString()}</p>
               </div>
 
               <div className="space-y-2">
-                 <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">{t('payment_amount_label')} ($)</label>
+                 <label className="text-[9px] font-bold text-gray-400 uppercase tracking-wide ml-1">{t('payment_amount_label')} ($)</label>
                  <input 
                    type="number" autoFocus placeholder="0.00" 
                    className="w-full px-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-mono font-bold text-xl outline-none focus:border-emerald-500/40 text-center"
@@ -153,7 +153,7 @@ export default function Debts() {
               <button 
                 onClick={handlePayment}
                 disabled={paying || !paymentAmount}
-                className="w-full py-5 bg-primary text-black font-black rounded-2xl shadow-lg uppercase text-[11px] tracking-widest flex items-center justify-center gap-2"
+                className="w-full py-5 bg-primary text-black font-bold rounded-2xl shadow-lg uppercase text-[11px] tracking-wide flex items-center justify-center gap-2"
               >
                 {paying ? <Loader2 className="animate-spin" size={18}/> : <CheckCircle2 size={18}/>} {t('save_payment')}
               </button>

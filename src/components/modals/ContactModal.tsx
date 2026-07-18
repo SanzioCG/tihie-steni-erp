@@ -79,10 +79,10 @@ export default function ContactModal({ isOpen, clientId, initialData, onClose, o
         className="relative w-full max-w-105 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] p-8 shadow-2xl space-y-6 max-h-[92vh] overflow-y-auto no-scrollbar"
       >
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-black text-white uppercase tracking-tighter">
+          <h3 className="text-lg font-bold text-white uppercase tracking-tighter">
             {initialData ? t('edit_contact') : t('add_contact')}
           </h3>
-          <button type="button" onClick={onClose} className="p-2 bg-white/5 rounded-xl text-gray-500 hover:text-white transition-all"><X size={20} /></button>
+          <button type="button" onClick={onClose} className="p-2 bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all"><X size={20} /></button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
@@ -96,16 +96,16 @@ export default function ContactModal({ isOpen, clientId, initialData, onClose, o
             type="button"
             onClick={() => setForm({ ...form, is_primary: !form.is_primary })}
             className={cn(
-              "w-full py-4 rounded-2xl border text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all",
+              "w-full py-4 rounded-2xl border text-[10px] font-bold uppercase tracking-wide flex items-center justify-center gap-2 transition-all",
               form.is_primary
                 ? "bg-primary/10 border-primary/30 text-primary"
-                : "bg-white/5 border-white/5 text-gray-500 hover:text-white"
+                : "bg-white/5 border-white/5 text-gray-400 hover:text-white"
             )}
           >
             <Star size={14} strokeWidth={3} fill={form.is_primary ? 'currentColor' : 'none'} /> {t('primary_contact')}
           </button>
 
-          <button disabled={loading} type="submit" className="w-full py-4 bg-primary text-black font-black rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 disabled:opacity-50">
+          <button disabled={loading} type="submit" className="w-full py-4 bg-primary text-black font-bold rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all uppercase text-[10px] tracking-wide flex items-center justify-center gap-2 disabled:opacity-50">
             {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} strokeWidth={3} />} {t('save')}
           </button>
         </form>
@@ -117,9 +117,9 @@ export default function ContactModal({ isOpen, clientId, initialData, onClose, o
 function Field({ icon: Icon, label, value, onChange, placeholder, type = 'text', required = false }: any) {
   return (
     <div className="space-y-1.5">
-      <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">{label}</label>
+      <label className="text-[9px] font-bold text-gray-400 uppercase tracking-wide ml-1">{label}</label>
       <div className="relative">
-        <Icon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" size={15} />
+        <Icon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={15} />
         <input
           type={type}
           required={required}

@@ -48,10 +48,10 @@ export default function Inventory() {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-2">
         <div>
-          <h2 className="text-2xl font-black uppercase tracking-tighter text-primary">
+          <h2 className="text-2xl font-bold uppercase tracking-tighter text-primary">
             {t('products')}
           </h2>
-          <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.3em] opacity-60">{t('inventory_subtitle')}</p>
+          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide opacity-60">{t('inventory_subtitle')}</p>
         </div>
         
         <div className="flex gap-3 w-full md:w-auto">
@@ -59,7 +59,7 @@ export default function Inventory() {
             <select 
               value={selectedCat} 
               onChange={(e) => setSelectedCat(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-[#0c0c0e] border border-white/5 rounded-2xl text-white text-[10px] font-black uppercase outline-none appearance-none cursor-pointer focus:border-primary/40 shadow-xl"
+              className="w-full pl-10 pr-4 py-3 bg-[#0c0c0e] border border-white/5 rounded-2xl text-white text-[10px] font-bold uppercase outline-none appearance-none cursor-pointer focus:border-primary/40 shadow-xl"
             >
               <option value="ALL">{t('all_categories')}</option>
               {categories.map((c: any) => <option key={c.id} value={c.id} className="bg-black">{c.name_uz}</option>)}
@@ -67,13 +67,13 @@ export default function Inventory() {
             <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-primary" size={14} />
           </div>
 
-          <button onClick={() => { setEditingData(null); setIsModalOpen(true); }} className="px-8 py-3 bg-primary text-black font-black rounded-2xl shadow-lg hover:scale-105 transition-all uppercase text-[10px] tracking-widest">+ {t('add_product')}</button>
+          <button onClick={() => { setEditingData(null); setIsModalOpen(true); }} className="px-8 py-3 bg-primary text-black font-bold rounded-2xl shadow-lg hover:scale-105 transition-all uppercase text-[10px] tracking-wide">+ {t('add_product')}</button>
         </div>
       </div>
 
       {/* SEARCH BAR */}
       <div className="relative mx-2">
-        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600" size={20} />
+        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
         <input 
           type="text" 
           placeholder={t('search')} 
@@ -91,19 +91,19 @@ export default function Inventory() {
           <table className="w-full text-left border-collapse min-w-250">
             <thead className="bg-white/5 text-primary border-b border-white/10">
               <tr>
-                <th className="px-6 py-4 text-[10px] font-black uppercase text-center w-16">#</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase">{t('image')}</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase text-center">{t('category')}</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase">{t('name')}</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase text-center">{t('sku')}</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase text-center">{t('stock') || 'Zaxira'}</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase text-right">{t('actions')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold uppercase text-center w-16">#</th>
+                <th className="px-6 py-4 text-[10px] font-bold uppercase">{t('image')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold uppercase text-center">{t('category')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold uppercase">{t('name')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold uppercase text-center">{t('sku')}</th>
+                <th className="px-6 py-4 text-[10px] font-bold uppercase text-center">{t('stock') || 'Zaxira'}</th>
+                <th className="px-6 py-4 text-[10px] font-bold uppercase text-right">{t('actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {filtered.map((p: any, index: number) => (
                 <tr key={p.id} className="group hover:bg-white/5 transition-all text-white font-medium">
-                  <td className="px-6 py-2.5 text-gray-700 font-black text-xs text-center">{index + 1}</td>
+                  <td className="px-6 py-2.5 text-gray-700 font-bold text-xs text-center">{index + 1}</td>
                   
                   <td className="px-6 py-2.5">
                     <div 
@@ -131,21 +131,21 @@ export default function Inventory() {
                   </td>
 
                   <td className="px-6 py-2.5 text-center">
-                    <span className="px-3 py-1 bg-white/5 text-gray-400 border border-white/5 rounded-lg text-[9px] font-black uppercase tracking-widest">
+                    <span className="px-3 py-1 bg-white/5 text-gray-400 border border-white/5 rounded-lg text-[9px] font-bold uppercase tracking-wide">
                       {p.categories?.name_uz}
                     </span>
                   </td>
 
                   <td className="px-6 py-2.5">
-                    <p className="font-black text-sm uppercase tracking-tight">{p.name_uz}</p>
-                    <p className="text-[9px] text-gray-600 font-bold uppercase tracking-widest mt-0.5">{p.series || '—'}</p>
+                    <p className="font-bold text-sm uppercase tracking-tight">{p.name_uz}</p>
+                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wide mt-0.5">{p.series || '—'}</p>
                   </td>
 
-                  <td className="px-6 py-2.5 text-center font-mono text-[10px] text-gray-500 font-black uppercase tracking-tighter">{p.sku}</td>
+                  <td className="px-6 py-2.5 text-center font-mono text-[10px] text-gray-400 font-bold uppercase tracking-tighter">{p.sku}</td>
                   
                   <td className="px-6 py-2.5 text-center">
                     <div className={cn(
-                      "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border font-black text-xs",
+                      "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border font-bold text-xs",
                       p.total_stock <= (p.min_stock || 10) 
                         ? "bg-rose-500/10 border-rose-500/20 text-rose-500 animate-pulse" 
                         : "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
@@ -159,13 +159,13 @@ export default function Inventory() {
                     <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
                       <button 
                         onClick={() => { setEditingData(p); setIsModalOpen(true); }} 
-                        className="p-2.5 bg-white/5 hover:bg-primary text-gray-500 hover:text-black rounded-xl border border-white/10 transition-all active:scale-90"
+                        className="p-2.5 bg-white/5 hover:bg-primary text-gray-400 hover:text-black rounded-xl border border-white/10 transition-all active:scale-90"
                       >
                         <Edit2 size={16}/>
                       </button>
                       <button 
                         onClick={() => handleDelete(p.id)} 
-                        className="p-2.5 bg-white/5 hover:bg-rose-500 text-gray-500 hover:text-white rounded-xl border border-white/10 transition-all active:scale-90"
+                        className="p-2.5 bg-white/5 hover:bg-rose-500 text-gray-400 hover:text-white rounded-xl border border-white/10 transition-all active:scale-90"
                       >
                         <Trash2 size={16}/>
                       </button>
@@ -178,7 +178,7 @@ export default function Inventory() {
                   <td colSpan={7} className="py-32 text-center">
                     <div className="flex flex-col items-center gap-4 opacity-20">
                       <Search size={48} />
-                      <p className="font-black uppercase text-xs tracking-widest">{t('no_data')}</p>
+                      <p className="font-bold uppercase text-xs tracking-wide">{t('no_data')}</p>
                     </div>
                   </td>
                 </tr>

@@ -151,10 +151,10 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, initialDat
     <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm font-sans">
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative w-full max-w-2xl bg-[#0c0c0e] border border-white/10 rounded-4xl shadow-2xl p-10">
         <div className="flex items-center justify-between mb-8">
-          <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">
+          <h3 className="text-2xl font-bold text-white uppercase italic tracking-tighter">
             {initialData ? "Mahsulotni tahrirlash" : "Yangi Mahsulot Pasporti"}
           </h3>
-          <button onClick={onClose} className="p-2 bg-white/5 rounded-xl text-gray-500 hover:text-white transition-all"><X size={22}/></button>
+          <button onClick={onClose} className="p-2 bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all"><X size={22}/></button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -171,21 +171,21 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, initialDat
                 ) : (
                     <div className="flex flex-col items-center gap-1 text-gray-700 group-hover:text-primary transition-colors">
                         <Camera size={32} />
-                        <span className="text-[8px] font-black uppercase tracking-widest">Rasm yuklash</span>
+                        <span className="text-[8px] font-bold uppercase tracking-wide">Rasm yuklash</span>
                     </div>
                 )}
                 <input type="file" className="hidden" onChange={handleFileChange} accept="image/*" />
             </label>
 
             <div className="flex-1 space-y-3 text-left">
-                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">Tashqi rasm havolasi (URL)</label>
+                <label className="text-[9px] font-bold text-gray-400 uppercase tracking-wide ml-1">Tashqi rasm havolasi (URL)</label>
                 <div className="relative">
-                    <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" size={14} />
+                    <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
                     <input 
                       value={imageUrl} 
                       onChange={e => handleUrlChange(e.target.value)} 
                       placeholder="https://..." 
-                      className="w-full pl-11 pr-4 py-4 bg-white/5 border border-white/5 rounded-2xl text-white text-[11px] outline-none focus:border-primary/30 font-black uppercase" 
+                      className="w-full pl-11 pr-4 py-4 bg-white/5 border border-white/5 rounded-2xl text-white text-[11px] outline-none focus:border-primary/30 font-bold uppercase" 
                     />
                 </div>
             </div>
@@ -193,33 +193,33 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, initialDat
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">1. Kategoriya</label>
-              <select required value={formData.category_id} onChange={(e) => setFormData({...formData, category_id: e.target.value})} className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-black outline-none appearance-none uppercase text-sm focus:border-primary/20">
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide ml-2">1. Kategoriya</label>
+              <select required value={formData.category_id} onChange={(e) => setFormData({...formData, category_id: e.target.value})} className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-bold outline-none appearance-none uppercase text-sm focus:border-primary/20">
                 <option value="" className="bg-black">Tanlang...</option>
                 {categories.map(c => <option key={c.id} value={c.id} className="bg-black">{c.name_uz}</option>)}
               </select>
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">2. Seriya</label>
-              <input list="series-data" required value={formData.series} onChange={e => setFormData({...formData, series: e.target.value})} className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-black outline-none focus:border-primary/30 uppercase text-sm" placeholder="Masalan: Komfort" />
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide ml-2">2. Seriya</label>
+              <input list="series-data" required value={formData.series} onChange={e => setFormData({...formData, series: e.target.value})} className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-bold outline-none focus:border-primary/30 uppercase text-sm" placeholder="Masalan: Komfort" />
               <datalist id="series-data">{existingSeries.map(s => <option key={s} value={s} />)}</datalist>
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">3. Mahsulot Nomi</label>
-              <input required value={formData.name_uz} onChange={e => setFormData({...formData, name_uz: e.target.value})} className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-black outline-none focus:border-primary/30 uppercase text-sm" />
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide ml-2">3. Mahsulot Nomi</label>
+              <input required value={formData.name_uz} onChange={e => setFormData({...formData, name_uz: e.target.value})} className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-bold outline-none focus:border-primary/30 uppercase text-sm" />
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">4. Mahsulot ID (SKU)</label>
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide ml-2">4. Mahsulot ID (SKU)</label>
               <div className="relative">
-                <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" size={16} />
-                <input required value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value})} className="w-full pl-12 pr-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-mono font-black outline-none focus:border-primary/30 uppercase text-sm" />
+                <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                <input required value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value})} className="w-full pl-12 pr-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-mono font-bold outline-none focus:border-primary/30 uppercase text-sm" />
               </div>
             </div>
           </div>
 
           <div className="flex justify-end gap-6 pt-6 border-t border-white/5">
-            <button type="button" onClick={onClose} className="px-6 py-4 text-gray-500 font-black uppercase text-[10px] tracking-widest hover:text-white transition-all">Bekor qilish</button>
-            <button disabled={loading} type="submit" className="px-14 py-4 bg-primary text-black font-black rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3 uppercase text-[10px] tracking-[0.2em] shadow-primary/10">
+            <button type="button" onClick={onClose} className="px-6 py-4 text-gray-400 font-bold uppercase text-[10px] tracking-wide hover:text-white transition-all">Bekor qilish</button>
+            <button disabled={loading} type="submit" className="px-14 py-4 bg-primary text-black font-bold rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3 uppercase text-[10px] tracking-wide shadow-primary/10">
               {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Saqlash Ma'lumotni
             </button>
           </div>

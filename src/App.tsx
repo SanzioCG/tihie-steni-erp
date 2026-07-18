@@ -53,7 +53,7 @@ export default function App() {
     return (
       <div className="h-screen bg-[#080809] flex flex-col items-center justify-center gap-4">
         <Loader2 className="animate-spin text-primary" size={48} />
-        <p className="text-white text-[10px] font-black uppercase tracking-[0.3em]">TS ERP Yuklanmoqda</p>
+        <p className="text-white text-[10px] font-bold uppercase tracking-wide">TS ERP Yuklanmoqda</p>
       </div>
     );
   }

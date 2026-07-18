@@ -28,7 +28,7 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
           <Menu size={22} />
         </button>
         <div className="hidden md:block">
-           <p className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em]">
+           <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">
              {t('operations_control')}
            </p>
         </div>
@@ -44,10 +44,10 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
               key={lang}
               onClick={() => changeLanguage(lang)}
               className={cn(
-                "px-2.5 py-1.5 md:px-4 md:py-2 rounded-lg text-[9px] font-black uppercase transition-all",
+                "px-2.5 py-1.5 md:px-4 md:py-2 rounded-lg text-[9px] font-bold uppercase transition-all",
                 i18n.language === lang 
                   ? "bg-primary text-black shadow-lg shadow-primary/20 scale-105" 
-                  : "text-gray-500 hover:text-white"
+                  : "text-gray-400 hover:text-white"
               )}
             >
               {lang}
@@ -58,10 +58,10 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
         {/* 👤 PROFIL VA AVATAR */}
         <div className="flex items-center gap-3 pl-3 md:pl-6 border-l border-white/5">
           <div className="text-right hidden sm:block">
-            <p className="text-[11px] font-black text-white uppercase tracking-tight leading-none">
+            <p className="text-[11px] font-bold text-white uppercase tracking-tight leading-none">
               {profile?.full_name?.split(' ')[0] || 'Admin'}
             </p>
-            <p className="text-[8px] text-primary font-black uppercase tracking-widest mt-1 opacity-60">
+            <p className="text-[8px] text-primary font-bold uppercase tracking-wide mt-1 opacity-60">
               {profile?.role || 'User'}
             </p>
           </div>

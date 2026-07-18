@@ -80,20 +80,20 @@ export default function PaymentModal({ isOpen, onClose, onSuccess, client }: Pay
           <div className="flex items-center gap-3 font-bold text-white italic">
             <Banknote className="text-primary" /> To'lov Qabul Qilish
           </div>
-          <button onClick={onClose} className="p-2 text-gray-500 hover:text-white"><X size={20}/></button>
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-white"><X size={20}/></button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6 text-left">
           <div>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1 mb-1">Mijoz</p>
-            <p className="text-lg font-black text-white">{client?.full_name}</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide ml-1 mb-1">Mijoz</p>
+            <p className="text-lg font-bold text-white">{client?.full_name}</p>
             <p className="text-xs text-rose-500 font-bold">
               Jami qarz: ${Math.abs(Number(client?.balance) || 0).toLocaleString()}
             </p>
           </div>
 
           <div className="space-y-2">
-            <label className="text-[9px] font-bold text-gray-600 uppercase tracking-widest ml-1">To'lov Summasi ($)</label>
+            <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wide ml-1">To'lov Summasi ($)</label>
             <div className="relative">
                 <DollarSign size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-primary" />
                 <input 
@@ -103,7 +103,7 @@ export default function PaymentModal({ isOpen, onClose, onSuccess, client }: Pay
                   min="0.01"
                   value={amount} 
                   onChange={e => setAmount(e.target.value)} 
-                  className="w-full pl-12 pr-5 py-5 bg-primary/5 border border-primary/20 rounded-2xl text-primary text-xl font-black outline-none focus:bg-primary/10 transition-all" 
+                  className="w-full pl-12 pr-5 py-5 bg-primary/5 border border-primary/20 rounded-2xl text-primary text-xl font-bold outline-none focus:bg-primary/10 transition-all" 
                   placeholder="0.00" 
                 />
             </div>
@@ -112,7 +112,7 @@ export default function PaymentModal({ isOpen, onClose, onSuccess, client }: Pay
           <button 
             disabled={loading || !amount} 
             type="submit" 
-            className="w-full py-5 bg-primary text-black font-black rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full py-5 bg-primary text-black font-bold rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all uppercase tracking-wide text-xs flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {loading ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle2 size={18} />}
             To'lovni Tasdiqlash

@@ -79,10 +79,10 @@ export default function Tasks() {
     <div className="space-y-5 text-left animate-in fade-in duration-500">
       {/* HEADER */}
       <div className="px-2">
-        <h2 className="text-2xl font-black text-white uppercase tracking-tight flex items-center gap-2">
+        <h2 className="text-2xl font-bold text-white uppercase tracking-tight flex items-center gap-2">
           <CalendarClock size={22} className="text-primary" /> {t('crm_tasks')}
         </h2>
-        <p className="text-[10px] text-gray-500 font-black uppercase tracking-wider mt-0.5">{t('tasks_subtitle')}</p>
+        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mt-0.5">{t('tasks_subtitle')}</p>
       </div>
 
       {/* KPI */}
@@ -95,7 +95,7 @@ export default function Tasks() {
       {totalOpen === 0 ? (
         <div className="py-24 text-center text-gray-700 mx-2">
           <Inbox size={56} className="mx-auto mb-4 opacity-30" />
-          <p className="text-[11px] font-black uppercase tracking-[0.3em]">{t('no_tasks')}</p>
+          <p className="text-[11px] font-bold uppercase tracking-wide">{t('no_tasks')}</p>
         </div>
       ) : (
         <div className="space-y-5 mx-2">
@@ -108,19 +108,19 @@ export default function Tasks() {
       {/* SO'NGGI MULOQOTLAR */}
       {recentInteractions.length > 0 && (
         <div className="mx-2 space-y-4">
-          <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] flex items-center gap-2 pl-1">
+          <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wide flex items-center gap-2 pl-1">
             <MessageSquare size={14} /> {t('timeline_interaction')}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {recentInteractions.map((it: any) => (
               <div key={it.id} className="p-4 bg-[#0c0c0e] border border-white/5 rounded-2xl flex items-center justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-sm font-black text-white truncate">{it.subject || t(`type_${it.type}`)}</p>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5 truncate">
+                  <p className="text-sm font-bold text-white truncate">{it.subject || t(`type_${it.type}`)}</p>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mt-0.5 truncate">
                     {it.client_name} • {t(`type_${it.type}`)}{it.outcome ? ` · ${t(`outcome_${it.outcome}`)}` : ''}
                   </p>
                 </div>
-                <span className="text-[9px] text-gray-600 font-bold shrink-0">{new Date(it.occurred_at).toLocaleDateString(i18n.language)}</span>
+                <span className="text-[9px] text-gray-500 font-bold shrink-0">{new Date(it.occurred_at).toLocaleDateString(i18n.language)}</span>
               </div>
             ))}
           </div>
@@ -135,8 +135,8 @@ function KpiTile({ icon: Icon, label, value, color, bg, border }: any) {
     <div className={cn("p-4 rounded-2xl border flex items-center gap-3", bg, border)}>
       <div className={cn("p-2.5 rounded-xl bg-white/5 shrink-0", color)}><Icon size={18} /></div>
       <div className="min-w-0">
-        <p className={cn("text-[10px] font-black uppercase tracking-wide truncate", color)}>{label}</p>
-        <p className="text-xl font-black text-white tracking-tighter">{value}</p>
+        <p className={cn("text-[10px] font-medium uppercase tracking-wide truncate", color)}>{label}</p>
+        <p className="text-xl font-bold text-white tracking-tighter">{value}</p>
       </div>
     </div>
   );
@@ -146,8 +146,8 @@ function TaskSection({ title, icon: Icon, accent, tasks, onComplete, completing,
   if (!tasks || tasks.length === 0) return null;
   return (
     <div className="space-y-3">
-      <h3 className={cn("text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2 pl-1", accent)}>
-        <Icon size={14} strokeWidth={3} /> {title} <span className="text-gray-600">· {tasks.length}</span>
+      <h3 className={cn("text-[10px] font-bold uppercase tracking-wide flex items-center gap-2 pl-1", accent)}>
+        <Icon size={14} strokeWidth={3} /> {title} <span className="text-gray-500">· {tasks.length}</span>
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {tasks.map((task: CrmTask) => (
@@ -167,18 +167,18 @@ function TaskCard({ task, accent, onComplete, completing, language }: any) {
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-black text-white uppercase tracking-tight">{task.title}</p>
-          <div className="flex items-center gap-2 mt-1.5 text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+          <p className="text-sm font-bold text-white uppercase tracking-tight">{task.title}</p>
+          <div className="flex items-center gap-2 mt-1.5 text-[10px] text-gray-400 font-bold uppercase tracking-wide">
             <User size={12} /> <span className="truncate">{task.client_name || '—'}</span>
           </div>
           {task.client_phone && (
-            <div className="flex items-center gap-2 mt-1 text-[10px] text-gray-600 font-bold font-mono">
+            <div className="flex items-center gap-2 mt-1 text-[10px] text-gray-500 font-bold font-mono">
               <Phone size={12} /> {task.client_phone}
             </div>
           )}
         </div>
         {task.priority === 'high' && (
-          <span className="text-[8px] font-black uppercase px-2 py-1 rounded-lg bg-rose-500/15 text-rose-500 shrink-0">{t('priority_high')}</span>
+          <span className="text-[8px] font-bold uppercase px-2 py-1 rounded-lg bg-rose-500/15 text-rose-500 shrink-0">{t('priority_high')}</span>
         )}
       </div>
 
@@ -190,7 +190,7 @@ function TaskCard({ task, accent, onComplete, completing, language }: any) {
         <button
           onClick={() => onComplete(task.id)}
           disabled={isBusy}
-          className="px-4 py-2.5 bg-primary text-black font-black rounded-xl uppercase text-[9px] tracking-widest flex items-center gap-1.5 hover:scale-[1.03] active:scale-95 transition-all disabled:opacity-50"
+          className="px-4 py-2.5 bg-primary text-black font-bold rounded-xl uppercase text-[9px] tracking-wide flex items-center gap-1.5 hover:scale-[1.03] active:scale-95 transition-all disabled:opacity-50"
         >
           {isBusy ? <Loader2 className="animate-spin" size={14} /> : <CheckCircle2 size={14} />} {t('mark_done')}
         </button>

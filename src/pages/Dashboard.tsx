@@ -76,14 +76,14 @@ export default function Dashboard() {
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-2">
         <div>
-          <h2 className="text-2xl font-black text-white uppercase tracking-tighter ">{t('dashboard')}</h2>
+          <h2 className="text-2xl font-bold text-white uppercase tracking-tighter ">{t('dashboard')}</h2>
           <div className="flex items-center gap-4 mt-2">
-             <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.4em] flex items-center gap-2">
+             <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wide flex items-center gap-2">
                 <Activity size={12} className="text-primary animate-pulse" /> Live Monitoring
              </p>
              <button 
                onClick={openZReport} 
-               className="px-4 py-1.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-emerald-500 hover:text-black transition-all shadow-lg shadow-emerald-500/5"
+               className="px-4 py-1.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl font-bold text-[9px] uppercase tracking-wide hover:bg-emerald-500 hover:text-black transition-all shadow-lg shadow-emerald-500/5"
              >
                 {t('daily_z_report') || "Bugungi Hisobot (Z)"}
              </button>
@@ -96,8 +96,8 @@ export default function Dashboard() {
                key={c}
                onClick={() => setCurrency(c)}
                className={cn(
-                 "px-6 py-2.5 rounded-xl text-[10px] font-black transition-all uppercase tracking-widest",
-                 currency === c ? "bg-primary text-black shadow-lg shadow-primary/20" : "text-gray-500 hover:text-white"
+                 "px-6 py-2.5 rounded-xl text-[10px] font-bold transition-all uppercase tracking-wide",
+                 currency === c ? "bg-primary text-black shadow-lg shadow-primary/20" : "text-gray-400 hover:text-white"
                )}
              >
                {c}
@@ -172,10 +172,10 @@ export default function Dashboard() {
           <div className="lg:col-span-2 p-5 bg-[#0c0c0e] border border-white/5 rounded-2xl shadow-2xl relative overflow-hidden h-[420px]">
              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] -mr-32 -mt-32" />
              <div className="flex justify-between items-center relative z-10 mb-5">
-                <h3 className="text-lg font-black text-white uppercase flex items-center gap-3 tracking-tight">
+                <h3 className="text-lg font-bold text-white uppercase flex items-center gap-3 tracking-tight">
                   <Activity className="text-primary"/> {t('sales_dynamics')}
                 </h3>
-                <div className="px-4 py-2 bg-white/5 rounded-xl text-[10px] font-bold text-gray-500 flex items-center gap-2">
+                <div className="px-4 py-2 bg-white/5 rounded-xl text-[10px] font-bold text-gray-400 flex items-center gap-2">
                    <Calendar size={14} /> Last 7 Days
                 </div>
              </div>
@@ -203,7 +203,7 @@ export default function Dashboard() {
           </div>
 
           <div className="p-5 bg-[#0c0c0e] border border-white/5 rounded-2xl shadow-2xl h-[420px] flex flex-col overflow-hidden">
-             <h3 className="text-lg font-black text-white uppercase mb-5 flex items-center gap-3 tracking-tighter">
+             <h3 className="text-lg font-bold text-white uppercase mb-5 flex items-center gap-3 tracking-tighter">
                <History className="text-primary"/> {t('recent_activity')}
              </h3>
              <div className="space-y-4 flex-1 overflow-y-auto no-scrollbar pr-2">
@@ -211,10 +211,10 @@ export default function Dashboard() {
                   <div key={log.id} className="flex items-start gap-4 group">
                     <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shadow-[0_0_8px_#34d399] group-hover:scale-150 transition-all" />
                     <div>
-                      <p className="text-[13px] font-black text-white uppercase italic tracking-tight leading-tight group-hover:text-primary transition-colors">
+                      <p className="text-[13px] font-semibold text-gray-100 uppercase italic tracking-tight leading-tight group-hover:text-primary transition-colors">
                         {log.details}
                       </p>
-                      <p className="text-[9px] text-gray-600 font-bold uppercase mt-1">
+                      <p className="text-[9px] text-gray-500 font-normal uppercase mt-1">
                         {new Date(log.created_at).toLocaleTimeString()} • {log.user_name}
                       </p>
                     </div>
@@ -223,7 +223,7 @@ export default function Dashboard() {
                 {recentActivity.length === 0 && (
                   <div className="h-full flex flex-col items-center justify-center opacity-20 py-20">
                      <History size={48} />
-                     <p className="text-[10px] font-black uppercase tracking-[0.3em] mt-4">{t('no_data')}</p>
+                     <p className="text-[10px] font-bold uppercase tracking-wide mt-4">{t('no_data')}</p>
                   </div>
                 )}
              </div>
@@ -243,8 +243,8 @@ export default function Dashboard() {
                   <div className="w-16 h-16 bg-emerald-500/10 rounded-3xl flex items-center justify-center mx-auto text-emerald-500 mb-4">
                     <FileText size={32} />
                   </div>
-                  <h3 className="text-2xl font-black text-white uppercase tracking-tighter italic">{t('daily_closing') || "Kunlik Yopilish"}</h3>
-                  <p className="text-gray-600 text-[10px] font-black uppercase tracking-widest">
+                  <h3 className="text-2xl font-bold text-white uppercase tracking-tighter italic">{t('daily_closing') || "Kunlik Yopilish"}</h3>
+                  <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wide">
                     {new Date().toLocaleDateString()} — Z-REPORT
                   </p>
                </div>
@@ -257,8 +257,8 @@ export default function Dashboard() {
                   
                   <div className="pt-6 border-t border-white/5">
                      <div className="p-8 bg-emerald-500/5 border border-emerald-500/10 rounded-[2rem] text-center">
-                        <p className="text-[10px] text-gray-500 font-black uppercase mb-1 tracking-widest">{t('cash_in_hand') || "Kassadagi Naqd Pul"}:</p>
-                        <h2 className="text-4xl font-black text-emerald-500 italic">
+                        <p className="text-[10px] text-gray-400 font-bold uppercase mb-1 tracking-wide">{t('cash_in_hand') || "Kassadagi Naqd Pul"}:</p>
+                        <h2 className="text-4xl font-bold text-emerald-500 italic">
                           {convert(zData.cash_in_hand)}
                         </h2>
                      </div>
@@ -267,7 +267,7 @@ export default function Dashboard() {
 
                <button 
                  onClick={() => setShowZReport(false)} 
-                 className="w-full py-5 bg-white/5 text-white font-black rounded-2xl uppercase text-[10px] tracking-[0.2em] hover:bg-white/10 transition-all border border-white/5"
+                 className="w-full py-5 bg-white/5 text-white font-bold rounded-2xl uppercase text-[10px] tracking-wide hover:bg-white/10 transition-all border border-white/5"
                >
                  {t('close') || "Yopish"}
                </button>
@@ -294,15 +294,15 @@ function KPIItem({ label, value, icon: Icon, color, trend, isText, onClick }: an
       </div>
       <div className="relative z-10 min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider truncate">{label}</p>
+          <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wide truncate">{label}</p>
           {trend && (
-            <span className="text-[8px] font-black px-1.5 py-0.5 rounded-md bg-white/5 border border-white/5 text-gray-500 uppercase tracking-widest shrink-0">
+            <span className="text-[8px] font-medium px-1.5 py-0.5 rounded-md bg-white/5 border border-white/5 text-gray-400 uppercase tracking-wide shrink-0">
               {trend}
             </span>
           )}
         </div>
         <h3 className={cn(
-          "font-black text-white tracking-tighter uppercase mt-0.5 truncate",
+          "font-bold text-white tracking-tighter uppercase mt-0.5 truncate",
           isText ? "text-sm" : "text-xl"
         )}>{value}</h3>
       </div>
@@ -313,8 +313,8 @@ function KPIItem({ label, value, icon: Icon, color, trend, isText, onClick }: an
 function ReportRow({ label, value, color = "text-white" }: any) {
   return (
     <div className="flex justify-between items-center py-2 border-b border-white/5">
-      <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">{label}</span>
-      <span className={cn("text-lg font-black tracking-tighter", color)}>{value}</span>
+      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">{label}</span>
+      <span className={cn("text-lg font-bold tracking-tighter", color)}>{value}</span>
     </div>
   );
 }

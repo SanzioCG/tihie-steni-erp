@@ -89,10 +89,10 @@ export default function ReturnModal({ isOpen, onClose, onSuccess, saleData }: Re
         >
           {/* Header */}
           <div className="flex justify-between items-center">
-            <h3 className="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-3">
+            <h3 className="text-xl font-bold text-white uppercase tracking-tighter flex items-center gap-3">
               <RotateCcw className="text-rose-500" size={24} strokeWidth={3} /> {t('return_title')}
             </h3>
-            <button onClick={onClose} className="p-2 bg-white/5 rounded-xl text-gray-500 hover:text-white transition-all">
+            <button onClick={onClose} className="p-2 bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all">
               <X size={20}/>
             </button>
           </div>
@@ -100,18 +100,18 @@ export default function ReturnModal({ isOpen, onClose, onSuccess, saleData }: Re
           {/* Sotuv haqida qisqacha ma'lumot */}
           <div className="p-6 bg-white/3 border border-white/5 rounded-3xl space-y-3">
              <div className="flex flex-col gap-1">
-                <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">{t('sold_product_label')}</span>
-                <span className="text-sm font-black text-white uppercase truncate">{saleData.products?.name_uz}</span>
+                <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wide">{t('sold_product_label')}</span>
+                <span className="text-sm font-bold text-white uppercase truncate">{saleData.products?.name_uz}</span>
              </div>
              
              <div className="grid grid-cols-2 gap-4 pt-3 border-t border-white/5">
                 <div>
-                   <span className="text-[9px] font-black text-rose-500 uppercase block mb-1">{t('sold_qty')}</span>
-                   <span className="text-sm font-black text-white italic">{saleData.quantity} {unit}</span>
+                   <span className="text-[9px] font-bold text-rose-500 uppercase block mb-1">{t('sold_qty')}</span>
+                   <span className="text-sm font-bold text-white italic">{saleData.quantity} {unit}</span>
                 </div>
                 <div>
-                   <span className="text-[9px] font-black text-primary uppercase block mb-1">{t('total_bill')}</span>
-                   <span className="text-sm font-black text-white italic">{convert(saleData.total_amount)}</span>
+                   <span className="text-[9px] font-bold text-primary uppercase block mb-1">{t('total_bill')}</span>
+                   <span className="text-sm font-bold text-white italic">{convert(saleData.total_amount)}</span>
                 </div>
              </div>
           </div>
@@ -121,7 +121,7 @@ export default function ReturnModal({ isOpen, onClose, onSuccess, saleData }: Re
             
             {/* Qaytarilayotgan miqdor */}
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide ml-2">
                 1. {t('return_qty_label')} ({unit})
               </label>
               <input 
@@ -132,13 +132,13 @@ export default function ReturnModal({ isOpen, onClose, onSuccess, saleData }: Re
                 value={returnQty} 
                 onChange={e => setReturnQty(e.target.value)}
                 placeholder="0.00"
-                className="w-full px-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-black outline-none focus:border-rose-500/40 transition-all text-lg" 
+                className="w-full px-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-bold outline-none focus:border-rose-500/40 transition-all text-lg" 
               />
             </div>
 
             {/* Qaytarilayotgan summa */}
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide ml-2">
                 2. {t('refund_amount_label')} ($)
               </label>
               <div className="relative">
@@ -148,11 +148,11 @@ export default function ReturnModal({ isOpen, onClose, onSuccess, saleData }: Re
                    step="0.01" 
                    value={refundAmount} 
                    onChange={e => setRefundAmount(e.target.value)}
-                   className="w-full px-6 py-5 bg-rose-500/5 border border-rose-500/10 rounded-2xl text-rose-500 font-black text-3xl outline-none focus:border-rose-500/30 text-center" 
+                   className="w-full px-6 py-5 bg-rose-500/5 border border-rose-500/10 rounded-2xl text-rose-500 font-bold text-3xl outline-none focus:border-rose-500/30 text-center" 
                  />
                  <div className="flex items-center justify-center gap-1 mt-3">
-                    <AlertCircle size={10} className="text-gray-600" />
-                    <p className="text-[8px] text-gray-600 font-black uppercase tracking-widest">
+                    <AlertCircle size={10} className="text-gray-500" />
+                    <p className="text-[8px] text-gray-500 font-bold uppercase tracking-wide">
                       {t('cash_out_warning') || "DIQQAT: BU SUMMA KASSADAN CHIQIM QILINADI"}
                     </p>
                  </div>
@@ -163,7 +163,7 @@ export default function ReturnModal({ isOpen, onClose, onSuccess, saleData }: Re
             <button 
               disabled={loading || !returnQty} 
               type="submit" 
-              className="w-full py-6 bg-rose-500 text-white font-black rounded-3xl shadow-lg shadow-rose-500/20 hover:scale-[1.01] active:scale-95 transition-all uppercase text-[11px] tracking-[0.2em] flex items-center justify-center gap-3 disabled:opacity-50 disabled:pointer-events-none"
+              className="w-full py-6 bg-rose-500 text-white font-bold rounded-3xl shadow-lg shadow-rose-500/20 hover:scale-[1.01] active:scale-95 transition-all uppercase text-[11px] tracking-wide flex items-center justify-center gap-3 disabled:opacity-50 disabled:pointer-events-none"
             >
               {loading ? (
                 <Loader2 className="animate-spin" size={20} />

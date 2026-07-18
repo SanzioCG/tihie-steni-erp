@@ -161,8 +161,8 @@ export default function KP() {
   return (
     <div className="space-y-5 text-left animate-in fade-in duration-500 max-w-7xl mx-auto pb-20 font-sans">
       <div className="flex justify-between items-center px-4">
-        <h2 className="text-2xl font-black uppercase tracking-tighter text-primary">{t('kp')}</h2>
-        <button onClick={() => setShowHistory(!showHistory)} className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl flex items-center gap-2 font-black text-[10px] uppercase">
+        <h2 className="text-2xl font-bold uppercase tracking-tighter text-primary">{t('kp')}</h2>
+        <button onClick={() => setShowHistory(!showHistory)} className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl flex items-center gap-2 font-bold text-[10px] uppercase">
           <History size={18} /> {showHistory ? t('calculator') : t('view_history')}
         </button>
       </div>
@@ -173,15 +173,15 @@ export default function KP() {
             <div className="bg-[#0c0c0e] border border-white/5 rounded-2xl p-5 shadow-2xl space-y-4">
               
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-primary uppercase tracking-widest ml-2">1. {t('select_client')}</label>
-                <select className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-black outline-none text-sm cursor-pointer" value={clientId} onChange={e => setClientId(e.target.value)}>
+                <label className="text-[10px] font-bold text-primary uppercase tracking-wide ml-2">1. {t('select_client')}</label>
+                <select className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-bold outline-none text-sm cursor-pointer" value={clientId} onChange={e => setClientId(e.target.value)}>
                   <option value="" className="bg-black">{t('select_client')}...</option>
                   {clients.map(c => <option key={c.id} value={c.id} className="bg-black">{c.full_name}</option>)}
                 </select>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-500 uppercase ml-2">2. {t('category')}</label>
+                <label className="text-[10px] font-bold text-gray-400 uppercase ml-2">2. {t('category')}</label>
                 <select className="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-bold outline-none text-sm" value={selectedCatId} onChange={e => handleCatChange(e.target.value)}>
                   <option value="" className="bg-black">{t('save')}...</option>
                   {categories.map(c => <option key={c.id} value={c.id} className="bg-black">{c.name_uz}</option>)}
@@ -189,7 +189,7 @@ export default function KP() {
               </div>
 
               <div className="space-y-1 relative" ref={dropdownRef}>
-                <label className="text-[10px] font-black text-gray-500 uppercase ml-2">3. {t('search_product')}</label>
+                <label className="text-[10px] font-bold text-gray-400 uppercase ml-2">3. {t('search_product')}</label>
                 <div className="relative">
                   <input 
                     value={searchTerm}
@@ -220,7 +220,7 @@ export default function KP() {
                         <div 
                           key={p.id} 
                           onClick={() => handleProductSelect(p)} 
-                          className="px-6 py-4 hover:bg-primary/10 text-xs text-white font-black cursor-pointer border-b border-white/2 uppercase"
+                          className="px-6 py-4 hover:bg-primary/10 text-xs text-white font-bold cursor-pointer border-b border-white/2 uppercase"
                         >
                           {p.name_uz}
                         </div>
@@ -229,7 +229,7 @@ export default function KP() {
                         p.name_uz.toLowerCase().includes(searchTerm.toLowerCase()) && 
                         p.category_id === selectedCatId
                       ).length === 0 && (
-                        <div className="px-6 py-4 text-xs text-gray-600 font-black uppercase">Topilmadi</div>
+                        <div className="px-6 py-4 text-xs text-gray-500 font-bold uppercase">Topilmadi</div>
                       )}
                     </div>
                   )}
@@ -238,13 +238,13 @@ export default function KP() {
 
               {selectedProdId && (
                 <div className="grid grid-cols-2 gap-4 p-6 bg-white/2 border border-white/5 rounded-3xl">
-                  <input type="number" placeholder={t('width_m')} value={dims.width_m} onChange={e => setDims({...dims, width_m: e.target.value})} className="w-full bg-transparent border-b border-white/10 py-2 text-white text-lg font-black outline-none" />
-                  <input type="number" placeholder={t('length_m')} value={dims.length_m} onChange={e => setDims({...dims, length_m: e.target.value})} className="w-full bg-transparent border-b border-white/10 py-2 text-white text-lg font-black outline-none" />
-                  <input type="number" placeholder={t('price_label')} value={dims.price} onChange={e => setDims({...dims, price: e.target.value})} className="col-span-2 mt-2 w-full bg-transparent border-b border-white/10 py-2 text-emerald-500 text-xl font-black outline-none" />
+                  <input type="number" placeholder={t('width_m')} value={dims.width_m} onChange={e => setDims({...dims, width_m: e.target.value})} className="w-full bg-transparent border-b border-white/10 py-2 text-white text-lg font-bold outline-none" />
+                  <input type="number" placeholder={t('length_m')} value={dims.length_m} onChange={e => setDims({...dims, length_m: e.target.value})} className="w-full bg-transparent border-b border-white/10 py-2 text-white text-lg font-bold outline-none" />
+                  <input type="number" placeholder={t('price_label')} value={dims.price} onChange={e => setDims({...dims, price: e.target.value})} className="col-span-2 mt-2 w-full bg-transparent border-b border-white/10 py-2 text-emerald-500 text-xl font-bold outline-none" />
                 </div>
               )}
 
-              <button onClick={addToCart} className="w-full py-5 bg-primary text-black font-black rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all uppercase text-[10px] tracking-widest flex items-center justify-center gap-2">
+              <button onClick={addToCart} className="w-full py-5 bg-primary text-black font-bold rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all uppercase text-[10px] tracking-wide flex items-center justify-center gap-2">
                 <Plus size={18} strokeWidth={4} /> {t('add_to_cart')}
               </button>
             </div>
@@ -255,32 +255,32 @@ export default function KP() {
                 <div className="flex-1 overflow-y-auto pr-2 no-scrollbar">
                    {cart.length > 0 ? (
                      <table className="w-full text-left border-collapse">
-                       <thead className="text-[10px] font-black text-gray-600 uppercase border-b border-white/5">
+                       <thead className="text-[10px] font-bold text-gray-500 uppercase border-b border-white/5">
                         <tr><th className="pb-4">{t('products')}</th><th className="pb-4 text-center">{t('details')}</th><th className="pb-4 text-right">{t('total')}</th><th className="pb-4"></th></tr>
                        </thead>
                        <tbody className="divide-y divide-white/3">
                           {cart.map(i => (
                             <tr key={i.id} className="group">
-                               <td className="py-2.5 font-black text-white text-[13px] uppercase">{i.product_name}</td>
-                               <td className="py-2.5 text-center text-[10px] text-gray-500 font-black uppercase">{i.details} = {i.qty.toFixed(2)}{i.unit}</td>
-                               <td className="py-2.5 text-right font-black text-primary text-[13px]">${i.total.toLocaleString()}</td>
+                               <td className="py-2.5 font-bold text-white text-[13px] uppercase">{i.product_name}</td>
+                               <td className="py-2.5 text-center text-[10px] text-gray-400 font-bold uppercase">{i.details} = {i.qty.toFixed(2)}{i.unit}</td>
+                               <td className="py-2.5 text-right font-bold text-primary text-[13px]">${i.total.toLocaleString()}</td>
                                <td className="py-2.5 text-right"><button onClick={() => setCart(cart.filter(c => c.id !== i.id))} className="p-2 text-gray-700 hover:text-rose-500 transition-colors"><Trash2 size={16}/></button></td>
                             </tr>
                           ))}
                        </tbody>
                      </table>
                    ) : (
-                     <div className="h-full flex flex-col items-center justify-center opacity-10 gap-6 py-20"><Calculator size={64} strokeWidth={1} /><p className="text-[10px] font-black uppercase tracking-[0.5em]">{t('cart_empty')}</p></div>
+                     <div className="h-full flex flex-col items-center justify-center opacity-10 gap-6 py-20"><Calculator size={64} strokeWidth={1} /><p className="text-[10px] font-bold uppercase tracking-wide">{t('cart_empty')}</p></div>
                    )}
                 </div>
 
                 <div className="mt-auto pt-5 border-t border-white/5 flex justify-between items-end">
                    <div className="text-left">
-                    <p className="text-[10px] font-black text-gray-600 uppercase">{t('selected_client')}:</p>
-                    <p className="text-xl font-black text-white uppercase">{clients.find(c => c.id === clientId)?.full_name || t('not_selected')}</p>
+                    <p className="text-[10px] font-bold text-gray-500 uppercase">{t('selected_client')}:</p>
+                    <p className="text-xl font-bold text-white uppercase">{clients.find(c => c.id === clientId)?.full_name || t('not_selected')}</p>
                    </div>
                    <div className="text-right flex items-center gap-6">
-                      <div><p className="text-[10px] font-black text-primary uppercase mb-1 tracking-widest">{t('total_bill')}:</p><h3 className="text-2xl font-black text-white tracking-tighter italic">{convert(totalSum)}</h3></div>
+                      <div><p className="text-[10px] font-bold text-primary uppercase mb-1 tracking-wide">{t('total_bill')}:</p><h3 className="text-2xl font-bold text-white tracking-tighter italic">{convert(totalSum)}</h3></div>
                       {cart.length > 0 && <button onClick={saveAndExport} disabled={loading} className="p-5 bg-primary text-black rounded-3xl shadow-lg hover:scale-110 transition-all"><Save size={24} /></button>}
                    </div>
                 </div>
@@ -291,14 +291,14 @@ export default function KP() {
         <div className="bg-[#0c0c0e] border border-white/5 rounded-4xl overflow-hidden shadow-2xl mx-2">
            <table className="w-full text-left border-collapse">
               <thead className="bg-white/5 text-primary border-b border-white/5">
-                 <tr><th className="px-8 py-6 text-[10px] font-black uppercase">{t('date')}</th><th className="px-8 py-6 text-[10px] font-black uppercase">{t('client')}</th><th className="px-8 py-6 text-[10px] font-black uppercase text-right">{t('total')}</th><th className="px-8 py-6 text-[10px] font-black uppercase text-center">{t('actions')}</th></tr>
+                 <tr><th className="px-8 py-6 text-[10px] font-bold uppercase">{t('date')}</th><th className="px-8 py-6 text-[10px] font-bold uppercase">{t('client')}</th><th className="px-8 py-6 text-[10px] font-bold uppercase text-right">{t('total')}</th><th className="px-8 py-6 text-[10px] font-bold uppercase text-center">{t('actions')}</th></tr>
               </thead>
               <tbody className="divide-y divide-white/3">
                  {kpHistory.map((h: any) => (
                    <tr key={h.id} className="group hover:bg-white/1">
-                      <td className="px-8 py-6 text-gray-500 font-bold text-xs uppercase">{new Date(h.created_at).toLocaleString(i18n.language)}</td>
-                      <td className="px-8 py-6 text-white font-black text-sm uppercase">{h.clients?.full_name}</td>
-                      <td className="px-8 py-6 text-right text-emerald-500 font-black text-lg tracking-tighter">{convert(h.total_amount)}</td>
+                      <td className="px-8 py-6 text-gray-400 font-bold text-xs uppercase">{new Date(h.created_at).toLocaleString(i18n.language)}</td>
+                      <td className="px-8 py-6 text-white font-bold text-sm uppercase">{h.clients?.full_name}</td>
+                      <td className="px-8 py-6 text-right text-emerald-500 font-bold text-lg tracking-tighter">{convert(h.total_amount)}</td>
                       <td className="px-8 py-6 text-center">
                          <button onClick={() => exportToPDF("Tijorat_Taklifi", [["MAHSULOT", "JAMI"]], h.items.map((i:any) => [i.product_name, convert(i.total)]), {name: h.clients?.full_name, phone: h.clients?.phone, total: convert(h.total_amount)})} className="p-3 bg-white/5 rounded-xl hover:bg-primary/20 text-primary transition-all active:scale-90"><FileDown size={18}/></button>
                       </td>

@@ -112,7 +112,7 @@ export default function Settings() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-5 pb-20 animate-in fade-in font-sans text-left">
-      <h2 className="text-2xl font-black text-white uppercase tracking-tighter px-2 flex items-center gap-2">
+      <h2 className="text-2xl font-bold text-white uppercase tracking-tighter px-2 flex items-center gap-2">
         <SettingsIcon size={22} className="text-primary" /> {t('settings')}
       </h2>
 
@@ -134,19 +134,19 @@ export default function Settings() {
                 <User size={48} className="text-gray-700" />
               </div>
               <div className="text-center">
-                <h4 className="text-xl font-black text-white uppercase">{profile?.full_name}</h4>
-                <p className="text-[10px] text-primary font-black uppercase tracking-widest mt-1">{profile?.role}</p>
+                <h4 className="text-xl font-bold text-white uppercase">{profile?.full_name}</h4>
+                <p className="text-[10px] text-primary font-bold uppercase tracking-wide mt-1">{profile?.role}</p>
               </div>
             </div>
 
             <div className="max-w-md mx-auto space-y-6">
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-600 uppercase ml-2">{t('full_name_label')}</label>
-                <input type="text" value={fullName} onChange={e => setFullName(e.target.value)} className="w-full px-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-black outline-none focus:border-primary/30 text-sm uppercase" />
+                <label className="text-[10px] font-bold text-gray-500 uppercase ml-2">{t('full_name_label')}</label>
+                <input type="text" value={fullName} onChange={e => setFullName(e.target.value)} className="w-full px-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-bold outline-none focus:border-primary/30 text-sm uppercase" />
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-600 uppercase ml-2 flex items-center gap-2">
+                <label className="text-[10px] font-bold text-gray-500 uppercase ml-2 flex items-center gap-2">
                   <Globe size={12} /> {t('language')}
                 </label>
                 <div className="flex gap-2 bg-white/5 p-1.5 rounded-2xl border border-white/5">
@@ -159,8 +159,8 @@ export default function Settings() {
                       key={lang.code}
                       onClick={() => i18n.changeLanguage(lang.code)}
                       className={cn(
-                        "flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
-                        i18n.language === lang.code ? "bg-primary text-black shadow-lg" : "text-gray-500 hover:text-white"
+                        "flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-wide transition-all",
+                        i18n.language === lang.code ? "bg-primary text-black shadow-lg" : "text-gray-400 hover:text-white"
                       )}
                     >
                       {lang.label}
@@ -169,7 +169,7 @@ export default function Settings() {
                 </div>
               </div>
 
-              <button onClick={handleSaveProfile} disabled={loading} className="w-full py-5 bg-primary text-black font-black rounded-2xl shadow-lg uppercase text-[11px] tracking-widest flex justify-center items-center gap-3">
+              <button onClick={handleSaveProfile} disabled={loading} className="w-full py-5 bg-primary text-black font-bold rounded-2xl shadow-lg uppercase text-[11px] tracking-wide flex justify-center items-center gap-3">
                 {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} strokeWidth={3} />} {t('save')}
               </button>
             </div>
@@ -178,14 +178,14 @@ export default function Settings() {
 
         {activeTab === 'system' && isAdmin && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-[#0c0c0e] border border-white/5 rounded-[3rem] p-10 space-y-8 shadow-2xl">
-            <h3 className="text-white font-black uppercase text-sm italic">{t('store_details')}</h3>
+            <h3 className="text-white font-bold uppercase text-sm italic">{t('store_details')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputBlock label={t('store_name_label')} value={storeInfo.name} onChange={(v:string) => setStoreInfo({...storeInfo, name: v})} />
               <InputBlock label={t('address_label')} value={storeInfo.address} onChange={(v:string) => setStoreInfo({...storeInfo, address: v})} />
               <InputBlock label={t('phone_label')} value={storeInfo.phone} onChange={(v:string) => setStoreInfo({...storeInfo, phone: v})} />
             </div>
             
-            <button onClick={handleSaveSystem} disabled={loading} className="w-full py-5 bg-primary text-black font-black rounded-2xl uppercase text-[11px] tracking-widest">
+            <button onClick={handleSaveSystem} disabled={loading} className="w-full py-5 bg-primary text-black font-bold rounded-2xl uppercase text-[11px] tracking-wide">
               {loading ? <Loader2 className="animate-spin inline" size={18} /> : t('save')}
             </button>
           </motion.div>
@@ -194,8 +194,8 @@ export default function Settings() {
         {activeTab === 'staff' && isAdmin && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div className="flex justify-between items-center px-2">
-              <h3 className="text-white font-black uppercase text-sm italic">{t('staff')} ({visibleStaff.length})</h3>
-              <button onClick={() => setShowAddStaff(true)} className="px-6 py-3 bg-primary text-black font-black rounded-2xl uppercase text-[10px] tracking-widest flex items-center gap-2">
+              <h3 className="text-white font-bold uppercase text-sm italic">{t('staff')} ({visibleStaff.length})</h3>
+              <button onClick={() => setShowAddStaff(true)} className="px-6 py-3 bg-primary text-black font-bold rounded-2xl uppercase text-[10px] tracking-wide flex items-center gap-2">
                 <Plus size={14} strokeWidth={3} /> {t('new_staff')}
               </button>
             </div>
@@ -203,7 +203,7 @@ export default function Settings() {
             <div className="bg-[#0c0c0e] border border-white/5 rounded-[2rem] overflow-hidden shadow-2xl">
               <table className="w-full text-left">
                 <thead className="bg-white/5">
-                  <tr className="text-gray-500 text-[10px] font-black uppercase">
+                  <tr className="text-gray-400 text-[10px] font-bold uppercase">
                     <th className="px-8 py-5">{t('name')}</th>
                     <th className="px-8 py-5">Email</th>
                     <th className="px-8 py-5">{t('role')}</th>
@@ -216,15 +216,15 @@ export default function Settings() {
                     return (
                       <tr key={s.id} className="hover:bg-white/[0.02]">
                         <td className="px-8 py-4 font-bold text-white uppercase text-sm">{s.full_name} {isSelf && <span className="text-[9px] text-primary ml-2">({t('you')})</span>}</td>
-                        <td className="px-8 py-4 text-xs text-gray-500 font-mono">{s.email}</td>
+                        <td className="px-8 py-4 text-xs text-gray-400 font-mono">{s.email}</td>
                         <td className="px-8 py-4">
                           {isSelf ? (
-                            <span className="px-3 py-1 rounded-lg text-[9px] font-black uppercase border text-primary border-primary/20 bg-primary/5">{s.role}</span>
+                            <span className="px-3 py-1 rounded-lg text-[9px] font-bold uppercase border text-primary border-primary/20 bg-primary/5">{s.role}</span>
                           ) : (
                             <select 
                               value={s.role} 
                               onChange={e => handleChangeRole(s.id, e.target.value)}
-                              className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-black uppercase text-white outline-none cursor-pointer"
+                              className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold uppercase text-white outline-none cursor-pointer"
                             >
                               <option value="manager" className="bg-black">manager</option>
                               <option value="director" className="bg-black">director</option>
@@ -236,7 +236,7 @@ export default function Settings() {
                           {!isSelf && (
                             <button 
                               onClick={() => handleDeleteStaff(s.id, s.full_name)} 
-                              className="p-2 text-gray-500 hover:text-rose-500 transition-colors"
+                              className="p-2 text-gray-400 hover:text-rose-500 transition-colors"
                             >
                               <Trash2 size={14} />
                             </button>
@@ -263,15 +263,15 @@ export default function Settings() {
               className="relative w-full max-w-md bg-[#0c0c0e] border border-white/10 rounded-[2.5rem] p-10 shadow-2xl space-y-6"
             >
               <div className="flex justify-between items-center">
-                <h3 className="text-xl font-black text-white italic uppercase tracking-tight">{t('new_staff')}</h3>
-                <button onClick={() => setShowAddStaff(false)} className="text-gray-500 hover:text-white"><X size={20}/></button>
+                <h3 className="text-xl font-bold text-white italic uppercase tracking-tight">{t('new_staff')}</h3>
+                <button onClick={() => setShowAddStaff(false)} className="text-gray-400 hover:text-white"><X size={20}/></button>
               </div>
 
               <div className="space-y-4">
                 <InputBlock label={t('full_name_label')} value={newStaff.full_name} onChange={(v: string) => setNewStaff({...newStaff, full_name: v})} />
                 <InputBlock label="Email" value={newStaff.email} onChange={(v: string) => setNewStaff({...newStaff, email: v})} placeholder="email@example.com" />
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-black text-gray-600 uppercase ml-1">{t('password_min6')}</label>
+                  <label className="text-[9px] font-bold text-gray-500 uppercase ml-1">{t('password_min6')}</label>
                   <input 
                     type="password" 
                     value={newStaff.password} 
@@ -280,7 +280,7 @@ export default function Settings() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-black text-gray-600 uppercase ml-1">{t('role')}</label>
+                  <label className="text-[9px] font-bold text-gray-500 uppercase ml-1">{t('role')}</label>
                   <select 
                     value={newStaff.role} 
                     onChange={e => setNewStaff({...newStaff, role: e.target.value})}
@@ -296,7 +296,7 @@ export default function Settings() {
               <button 
                 onClick={handleAddStaff} 
                 disabled={loading} 
-                className="w-full py-5 bg-primary text-black font-black rounded-2xl uppercase text-[11px] tracking-widest flex justify-center items-center gap-3"
+                className="w-full py-5 bg-primary text-black font-bold rounded-2xl uppercase text-[11px] tracking-wide flex justify-center items-center gap-3"
               >
                 {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} strokeWidth={3} />} {t('create')}
               </button>
@@ -310,7 +310,7 @@ export default function Settings() {
 
 function TabBtn({ active, onClick, icon, label }: any) {
   return (
-    <button onClick={onClick} className={cn("flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all", active ? "bg-primary text-black shadow-lg" : "text-gray-500 hover:text-white")}>
+    <button onClick={onClick} className={cn("flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-wide transition-all", active ? "bg-primary text-black shadow-lg" : "text-gray-400 hover:text-white")}>
       {icon} {label}
     </button>
   );
@@ -319,7 +319,7 @@ function TabBtn({ active, onClick, icon, label }: any) {
 function InputBlock({ label, value, onChange, placeholder }: any) {
   return (
     <div className="space-y-1.5">
-      <label className="text-[9px] font-black text-gray-600 uppercase ml-1">{label}</label>
+      <label className="text-[9px] font-bold text-gray-500 uppercase ml-1">{label}</label>
       <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="w-full px-5 py-3.5 bg-white/5 border border-white/5 rounded-xl text-white font-bold outline-none focus:border-primary/20 text-sm" />
     </div>
   );

@@ -153,14 +153,14 @@ export default function Clients() {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
         <div>
-          <h2 className="text-2xl font-black tracking-tighter uppercase text-white">{t('clients_database')}</h2>
-          <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.3em] mt-1">{t('crm_subtitle')}</p>
+          <h2 className="text-2xl font-bold tracking-tighter uppercase text-white">{t('clients_database')}</h2>
+          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mt-1">{t('crm_subtitle')}</p>
         </div>
         <div className="flex gap-3">
-          <button onClick={handleExportPDF} className="px-6 py-3.5 bg-white/5 border border-white/10 text-white font-bold rounded-2xl flex items-center gap-2 hover:bg-white/10 transition-all uppercase text-[10px] tracking-widest">
+          <button onClick={handleExportPDF} className="px-6 py-3.5 bg-white/5 border border-white/10 text-white font-bold rounded-2xl flex items-center gap-2 hover:bg-white/10 transition-all uppercase text-[10px] tracking-wide">
             <FileDown size={18} className="text-primary" /> {t('pdf_export')}
           </button>
-          <button onClick={() => { setSelectedClient(null); setIsModalOpen(true); }} className="px-8 py-4 bg-primary text-black font-black rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest text-[10px] flex items-center gap-2">
+          <button onClick={() => { setSelectedClient(null); setIsModalOpen(true); }} className="px-8 py-4 bg-primary text-black font-bold rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-wide text-[10px] flex items-center gap-2">
             <Plus size={20} strokeWidth={3} /> {t('add_client')}
           </button>
         </div>
@@ -169,13 +169,13 @@ export default function Clients() {
       {/* FILTER + SEARCH */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mx-2">
         <div className="relative">
-          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600" size={20} />
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
           <input 
             type="text" 
             placeholder={t('search_client_placeholder')} 
             value={search} 
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-14 pr-4 py-3.5 bg-[#0c0c0e] border border-white/5 rounded-2xl text-white outline-none focus:border-primary/40 transition-all shadow-2xl font-black"
+            className="w-full pl-14 pr-4 py-3.5 bg-[#0c0c0e] border border-white/5 rounded-2xl text-white outline-none focus:border-primary/40 transition-all shadow-2xl font-bold"
           />
         </div>
 
@@ -193,8 +193,8 @@ export default function Clients() {
                 key={f.id}
                 onClick={() => setFilterMode(f.id)}
                 className={cn(
-                  "flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2",
-                  filterMode === f.id ? "bg-primary text-black shadow-lg" : "text-gray-500 hover:text-white"
+                  "flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-wide transition-all flex items-center justify-center gap-2",
+                  filterMode === f.id ? "bg-primary text-black shadow-lg" : "text-gray-400 hover:text-white"
                 )}
               >
                 <Icon size={14} />
@@ -212,11 +212,11 @@ export default function Clients() {
           <table className="w-full text-left border-collapse">
             <thead className="bg-white/5 text-primary border-b border-white/5">
               <tr>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em]">{t('client_and_type')}</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-center">{t('phone')}</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-center">{t('turnover')}</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-center">{t('balance_label')}</th>
-                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-right">{t('actions')}</th>
+                <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-wide">{t('client_and_type')}</th>
+                <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-wide text-center">{t('phone')}</th>
+                <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-wide text-center">{t('turnover')}</th>
+                <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-wide text-center">{t('balance_label')}</th>
+                <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-wide text-right">{t('actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/2">
@@ -228,11 +228,11 @@ export default function Clients() {
                         {c.kind === 'company' ? <Building2 size={18} strokeWidth={2.5} /> : <User size={18} strokeWidth={2.5} />}
                       </div>
                       <div>
-                        <p className="font-black text-sm text-white uppercase tracking-tight group-hover:text-primary transition-colors">{c.full_name}</p>
+                        <p className="font-bold text-sm text-white uppercase tracking-tight group-hover:text-primary transition-colors">{c.full_name}</p>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest">{t(c.client_type)}</p>
+                          <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wide">{t(c.client_type)}</p>
                           {c.kind === 'company' && contactCounts[c.id] > 0 && (
-                            <span className="flex items-center gap-1 text-[9px] text-gray-600 font-black">
+                            <span className="flex items-center gap-1 text-[9px] text-gray-500 font-bold">
                               <Users size={10} /> {contactCounts[c.id]}
                             </span>
                           )}
@@ -240,28 +240,28 @@ export default function Clients() {
                       </div>
                     </div>
                   </td>
-                  <td onClick={() => openHistory(c)} className="px-8 py-2.5 text-center text-xs font-bold text-gray-500 font-mono">
+                  <td onClick={() => openHistory(c)} className="px-8 py-2.5 text-center text-xs font-bold text-gray-400 font-mono">
                     {c.phone || '--'}
                   </td>
-                  <td onClick={() => openHistory(c)} className="px-8 py-2.5 text-center font-black text-sm tracking-tighter text-white">
+                  <td onClick={() => openHistory(c)} className="px-8 py-2.5 text-center font-bold text-sm tracking-tighter text-white">
                     {convert(clientStats[c.id] || 0)}
                   </td>
-                  <td onClick={() => openHistory(c)} className="px-8 py-2.5 text-center font-black text-sm tracking-tighter">
-                    <span className={cn(Number(c.balance) < 0 ? "text-rose-500" : Number(c.balance) > 0 ? "text-emerald-500" : "text-gray-500")}>
+                  <td onClick={() => openHistory(c)} className="px-8 py-2.5 text-center font-bold text-sm tracking-tighter">
+                    <span className={cn(Number(c.balance) < 0 ? "text-rose-500" : Number(c.balance) > 0 ? "text-emerald-500" : "text-gray-400")}>
                         {Number(c.balance) < 0 ? `-${convert(Math.abs(c.balance))}` : convert(c.balance)}
                     </span>
                   </td>
                   <td className="px-8 py-2.5 text-right">
                     <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                       <button onClick={(e) => { e.stopPropagation(); setSelectedClient(c); setIsModalOpen(true); }} className="p-2.5 bg-white/5 text-gray-500 hover:text-primary rounded-xl border border-white/5"><Edit2 size={15}/></button>
-                       <button onClick={(e) => { e.stopPropagation(); if(window.confirm(t('confirm_delete'))) supabase.from('clients').delete().eq('id', c.id).then(() => fetchClients()) }} className="p-2.5 bg-white/5 text-gray-500 hover:text-rose-500 rounded-xl border border-white/5"><Trash2 size={15}/></button>
+                       <button onClick={(e) => { e.stopPropagation(); setSelectedClient(c); setIsModalOpen(true); }} className="p-2.5 bg-white/5 text-gray-400 hover:text-primary rounded-xl border border-white/5"><Edit2 size={15}/></button>
+                       <button onClick={(e) => { e.stopPropagation(); if(window.confirm(t('confirm_delete'))) supabase.from('clients').delete().eq('id', c.id).then(() => fetchClients()) }} className="p-2.5 bg-white/5 text-gray-400 hover:text-rose-500 rounded-xl border border-white/5"><Trash2 size={15}/></button>
                     </div>
                   </td>
                 </tr>
               ))}
               {filteredClients.length === 0 && !loading && (
                 <tr>
-                  <td colSpan={5} className="py-20 text-center text-gray-700 font-black uppercase text-[10px] tracking-widest">{t('no_data')}</td>
+                  <td colSpan={5} className="py-20 text-center text-gray-700 font-bold uppercase text-[10px] tracking-wide">{t('no_data')}</td>
                 </tr>
               )}
             </tbody>
@@ -277,19 +277,19 @@ export default function Clients() {
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
               className="relative w-full max-w-4xl bg-[#0c0c0e] border border-white/5 rounded-[3rem] p-8 md:p-10 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
             >
-              <button onClick={() => setViewingHistory(null)} className="absolute right-8 top-8 p-2 bg-white/5 rounded-xl text-gray-500 hover:text-white transition-all z-10"><X size={24}/></button>
+              <button onClick={() => setViewingHistory(null)} className="absolute right-8 top-8 p-2 bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all z-10"><X size={24}/></button>
 
               <div className="flex items-center gap-6 mb-8 pr-16">
                  <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
                    {viewingHistory.kind === 'company' ? <Building2 size={32} strokeWidth={2.5} /> : <User size={32} strokeWidth={3} />}
                  </div>
                  <div className="min-w-0">
-                    <h3 className="text-2xl font-black text-white uppercase tracking-tighter truncate">{viewingHistory.full_name}</h3>
-                    <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em]">{viewingHistory.phone || t('unknown_phone')} • {t(viewingHistory.client_type)}</p>
+                    <h3 className="text-2xl font-bold text-white uppercase tracking-tighter truncate">{viewingHistory.full_name}</h3>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">{viewingHistory.phone || t('unknown_phone')} • {t(viewingHistory.client_type)}</p>
                  </div>
                  <button
                    onClick={() => setDealModalOpen(true)}
-                   className="ml-auto shrink-0 px-4 py-2.5 bg-primary/10 border border-primary/20 text-primary font-black rounded-xl uppercase text-[9px] tracking-widest flex items-center gap-1.5 hover:bg-primary/20 transition-all"
+                   className="ml-auto shrink-0 px-4 py-2.5 bg-primary/10 border border-primary/20 text-primary font-bold rounded-xl uppercase text-[9px] tracking-wide flex items-center gap-1.5 hover:bg-primary/20 transition-all"
                  >
                    <GitBranch size={13} strokeWidth={3} /> {t('new_deal')}
                  </button>
@@ -320,12 +320,12 @@ export default function Clients() {
                   {viewingHistory.kind === 'company' && (
                     <div>
                       <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2">
+                        <h4 className="text-[10px] font-bold text-primary uppercase tracking-wide flex items-center gap-2">
                           <Users size={14} strokeWidth={3} /> {t('contacts')}
                         </h4>
                         <button
                           onClick={() => { setEditingContact(null); setContactModalOpen(true); }}
-                          className="px-4 py-2 bg-white/5 rounded-xl text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-primary transition-all flex items-center gap-1.5"
+                          className="px-4 py-2 bg-white/5 rounded-xl text-[9px] font-bold uppercase tracking-wide text-gray-400 hover:text-primary transition-all flex items-center gap-1.5"
                         >
                           <Plus size={13} strokeWidth={3} /> {t('add_contact')}
                         </button>
@@ -339,22 +339,22 @@ export default function Clients() {
                                 <div className="p-2 rounded-lg bg-white/5 text-primary shrink-0"><User size={15} /></div>
                                 <div className="min-w-0">
                                   <div className="flex items-center gap-2">
-                                    <p className="text-xs font-black text-white uppercase truncate">{ct.full_name}</p>
+                                    <p className="text-xs font-bold text-white uppercase truncate">{ct.full_name}</p>
                                     {ct.is_primary && (
-                                      <span className="flex items-center gap-1 text-[8px] font-black uppercase px-2 py-0.5 rounded bg-primary/15 text-primary shrink-0">
+                                      <span className="flex items-center gap-1 text-[8px] font-bold uppercase px-2 py-0.5 rounded bg-primary/15 text-primary shrink-0">
                                         <Star size={9} fill="currentColor" /> {t('primary_contact')}
                                       </span>
                                     )}
                                   </div>
-                                  <div className="flex items-center gap-3 mt-0.5 text-[10px] text-gray-500 font-bold">
+                                  <div className="flex items-center gap-3 mt-0.5 text-[10px] text-gray-400 font-bold">
                                     {ct.position && <span className="flex items-center gap-1 truncate"><Briefcase size={10} /> {ct.position}</span>}
                                     {ct.phone && <span className="font-mono shrink-0">{ct.phone}</span>}
                                   </div>
                                 </div>
                               </div>
                               <div className="flex gap-1.5 opacity-0 group-hover/ct:opacity-100 transition-all shrink-0">
-                                <button onClick={() => { setEditingContact(ct); setContactModalOpen(true); }} className="p-2 bg-white/5 text-gray-500 hover:text-primary rounded-lg"><Edit2 size={13} /></button>
-                                <button onClick={() => deleteContact(ct.id)} className="p-2 bg-white/5 text-gray-500 hover:text-rose-500 rounded-lg"><Trash2 size={13} /></button>
+                                <button onClick={() => { setEditingContact(ct); setContactModalOpen(true); }} className="p-2 bg-white/5 text-gray-400 hover:text-primary rounded-lg"><Edit2 size={13} /></button>
+                                <button onClick={() => deleteContact(ct.id)} className="p-2 bg-white/5 text-gray-400 hover:text-rose-500 rounded-lg"><Trash2 size={13} /></button>
                               </div>
                             </div>
                           ))}
@@ -362,7 +362,7 @@ export default function Clients() {
                       ) : (
                         <div className="text-center py-8 opacity-20">
                           <Users size={32} className="mx-auto mb-2" />
-                          <p className="text-[10px] font-black uppercase tracking-[0.2em]">{t('no_contacts')}</p>
+                          <p className="text-[10px] font-bold uppercase tracking-wide">{t('no_contacts')}</p>
                         </div>
                       )}
                     </div>
@@ -371,7 +371,7 @@ export default function Clients() {
                   {/* MULOQOT QO'SHISH (CRM) */}
                   <div>
                     <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2">
+                      <h4 className="text-[10px] font-bold text-primary uppercase tracking-wide flex items-center gap-2">
                         <MessageSquare size={14} strokeWidth={3} /> {t('add_interaction')}
                       </h4>
                       <button onClick={() => setShowInteractionForm(v => !v)} className="p-2 bg-white/5 rounded-xl text-gray-400 hover:text-primary transition-all">
@@ -409,24 +409,24 @@ export default function Clients() {
                             <TextField label={t('interaction_subject')} value={interactionForm.subject} onChange={(v) => setInteractionForm({ ...interactionForm, subject: v })} />
 
                             <div className="space-y-1.5">
-                              <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">{t('interaction_note')}</label>
+                              <label className="text-[9px] font-bold text-gray-400 uppercase tracking-wide ml-1">{t('interaction_note')}</label>
                               <textarea rows={2} value={interactionForm.notes} onChange={(e) => setInteractionForm({ ...interactionForm, notes: e.target.value })} className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-2xl text-white text-xs font-bold outline-none focus:border-primary/30 resize-none" />
                             </div>
 
                             <SelectField label={t('outcome_label')} value={interactionForm.outcome} onChange={(v) => setInteractionForm({ ...interactionForm, outcome: v })} options={[['', '—'], ['answered', t('outcome_answered')], ['no_answer', t('outcome_no_answer')], ['callback', t('outcome_callback')], ['deal', t('outcome_deal')], ['rejected', t('outcome_rejected')], ['info', t('outcome_info')]]} />
 
                             <div className="pt-3 border-t border-white/5 space-y-3">
-                              <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">{t('follow_up')}</p>
+                              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-wide">{t('follow_up')}</p>
                               <div className="grid grid-cols-2 gap-3">
                                 <TextField label={t('follow_up_title')} value={interactionForm.followup_title} onChange={(v) => setInteractionForm({ ...interactionForm, followup_title: v })} />
                                 <div className="space-y-1.5">
-                                  <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">{t('follow_up_date')}</label>
+                                  <label className="text-[9px] font-bold text-gray-400 uppercase tracking-wide ml-1">{t('follow_up_date')}</label>
                                   <input type="datetime-local" value={interactionForm.followup_due} onChange={(e) => setInteractionForm({ ...interactionForm, followup_due: e.target.value })} className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-2xl text-white text-xs font-bold outline-none focus:border-primary/30" />
                                 </div>
                               </div>
                             </div>
 
-                            <button onClick={logInteraction} disabled={savingInteraction || !interactionForm.type} className="w-full py-4 bg-primary text-black font-black rounded-2xl uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 disabled:opacity-50">
+                            <button onClick={logInteraction} disabled={savingInteraction || !interactionForm.type} className="w-full py-4 bg-primary text-black font-bold rounded-2xl uppercase text-[10px] tracking-wide flex items-center justify-center gap-2 disabled:opacity-50">
                               {savingInteraction ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />} {t('save_interaction')}
                             </button>
                           </div>
@@ -436,7 +436,7 @@ export default function Clients() {
                   </div>
 
                   <div>
-                    <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                    <h4 className="text-[10px] font-bold text-primary uppercase tracking-wide mb-4 flex items-center gap-2">
                       <History size={14} strokeWidth={3} /> {t('operations_history')}
                     </h4>
                     
@@ -454,14 +454,14 @@ export default function Clients() {
                     ) : (
                       <div className="text-center py-12 opacity-20">
                         <Package size={48} className="mx-auto mb-4" />
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em]">{t('no_operations')}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wide">{t('no_operations')}</p>
                       </div>
                     )}
                   </div>
                 </div>
               ) : (
                 <div className="text-center py-20 opacity-30">
-                  <p className="text-sm font-black uppercase">{t('no_info')}</p>
+                  <p className="text-sm font-bold uppercase">{t('no_info')}</p>
                 </div>
               )}
             </motion.div>
@@ -496,8 +496,8 @@ export default function Clients() {
 function StatCard({ label, value, color }: any) {
   return (
     <div className="p-4 bg-white/3 border border-white/5 rounded-2xl">
-      <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2">{label}</p>
-      <p className={cn("text-xl font-black tracking-tighter", color)}>{value}</p>
+      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide mb-2">{label}</p>
+      <p className={cn("text-xl font-bold tracking-tighter", color)}>{value}</p>
     </div>
   );
 }
@@ -507,8 +507,8 @@ function InfoItem({ icon: Icon, label, value }: any) {
     <div className="flex items-start gap-3">
       <div className="p-2 bg-white/5 rounded-lg text-primary"><Icon size={16} /></div>
       <div>
-        <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">{label}</p>
-        <p className="text-xs font-black text-white mt-0.5 truncate max-w-[150px]">{value}</p>
+        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-wide">{label}</p>
+        <p className="text-xs font-bold text-white mt-0.5 truncate max-w-[150px]">{value}</p>
       </div>
     </div>
   );
@@ -554,8 +554,8 @@ function TimelineItem({ event, convert, language }: any) {
           <Icon size={18} />
         </div>
         <div>
-          <p className="text-sm font-black text-white uppercase tracking-tight">{event.title}</p>
-          <p className="text-[10px] text-gray-500 font-bold uppercase mt-0.5">
+          <p className="text-sm font-bold text-white uppercase tracking-tight">{event.title}</p>
+          <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5">
             {config.label} • {new Date(event.created_at).toLocaleString(language)}
             {event.contact_name ? ` — ${event.contact_name}` : ''}
           </p>
@@ -563,13 +563,13 @@ function TimelineItem({ event, convert, language }: any) {
       </div>
       <div className="text-right">
         {config.showAmount && (
-          <p className={cn("text-base font-black tracking-tighter", config.color)}>
+          <p className={cn("text-base font-bold tracking-tighter", config.color)}>
             {config.sign}
             {convert(Math.abs(Number(event.amount)))}
           </p>
         )}
         {config.statusLabel && (
-          <span className={cn("inline-block text-[8px] font-black uppercase px-2 py-0.5 rounded mt-1 max-w-[140px] truncate", config.color, 'bg-white/5')}>
+          <span className={cn("inline-block text-[8px] font-bold uppercase px-2 py-0.5 rounded mt-1 max-w-[140px] truncate", config.color, 'bg-white/5')}>
             {config.statusLabel}
           </span>
         )}
@@ -581,7 +581,7 @@ function TimelineItem({ event, convert, language }: any) {
 function SelectField({ label, value, onChange, options }: any) {
   return (
     <div className="space-y-1.5">
-      <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">{label}</label>
+      <label className="text-[9px] font-bold text-gray-400 uppercase tracking-wide ml-1">{label}</label>
       <select value={value} onChange={(e) => onChange(e.target.value)} className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-2xl text-white text-xs font-bold outline-none focus:border-primary/30 appearance-none">
         {options.map(([val, name]: [string, string]) => (
           <option key={val} value={val} className="bg-[#0c0c0e]">{name}</option>
@@ -594,7 +594,7 @@ function SelectField({ label, value, onChange, options }: any) {
 function TextField({ label, value, onChange }: any) {
   return (
     <div className="space-y-1.5">
-      <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">{label}</label>
+      <label className="text-[9px] font-bold text-gray-400 uppercase tracking-wide ml-1">{label}</label>
       <input value={value} onChange={(e) => onChange(e.target.value)} className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-2xl text-white text-xs font-bold outline-none focus:border-primary/30" />
     </div>
   );

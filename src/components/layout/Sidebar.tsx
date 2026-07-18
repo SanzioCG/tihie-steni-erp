@@ -105,7 +105,7 @@ useEffect(() => {
       isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
     )}>
       <div className="flex flex-col h-full p-5 text-left relative overflow-hidden">
-        <button onClick={() => setIsOpen(false)} className="lg:hidden absolute top-5 right-5 p-2 text-gray-500 hover:text-primary transition-colors"><X size={24} /></button>
+        <button onClick={() => setIsOpen(false)} className="lg:hidden absolute top-5 right-5 p-2 text-gray-400 hover:text-primary transition-colors"><X size={24} /></button>
 
         {/* LOGO */}
         <div className="flex items-center gap-3 mb-6 mt-2 px-2">
@@ -115,10 +115,10 @@ useEffect(() => {
                <img src={logo} alt="Logo" className="w-full h-full object-contain" />
             </div>
           </div>
-          <div className="flex flex-col font-black tracking-widest text-white leading-tight uppercase">
+          <div className="flex flex-col font-bold tracking-wide text-white leading-tight uppercase">
             <h1 className="text-base leading-none">ТИХИЕ</h1>
             <h1 className="text-base leading-none mt-0.5">СТЕНЫ</h1>
-            <p className="text-[8px] text-primary mt-1 font-black tracking-[0.3em]">ERP SYSTEM</p>
+            <p className="text-[8px] text-primary mt-1 font-bold tracking-wide">ERP SYSTEM</p>
           </div>
         </div>
 
@@ -126,21 +126,21 @@ useEffect(() => {
         <nav className="flex-1 space-y-5 overflow-y-auto no-scrollbar pr-2 pb-6">
           {menuGroups.map((group, idx) => (
             <div key={idx} className="space-y-0.5">
-              <p className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em] mb-2 pl-3">{group.title}</p>
+              <p className="text-[9px] font-semibold text-gray-600 uppercase tracking-wide mb-2 pl-3">{group.title}</p>
               {group.items.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => handleNavigate(item.id)}
                   className={cn(
                     "flex items-center justify-between w-full py-2.5 px-3 rounded-xl transition-all group",
-                    activeTab === item.id ? "bg-primary text-black shadow-lg shadow-primary/20" : "text-gray-500 hover:text-white hover:bg-white/5"
+                    activeTab === item.id ? "bg-primary text-black shadow-lg shadow-primary/20" : "text-gray-300 hover:text-white hover:bg-white/5"
                   )}
                 >
                   <div className="flex items-center gap-3">
                     <item.icon size={17} className={cn("transition-transform group-hover:scale-110 shrink-0", activeTab === item.id ? "text-black" : "group-hover:text-primary")} />
-                    <span className="font-black text-[11px] uppercase tracking-widest">{item.label}</span>
+                    <span className={cn("text-[11px] uppercase tracking-wide", activeTab === item.id ? "font-semibold" : "font-medium")}>{item.label}</span>
                   </div>
-                  {item.badge !== undefined && item.badge > 0 && <div className="bg-rose-500 text-white text-[9px] px-2 py-0.5 rounded-lg font-black shadow-lg">{item.badge}</div>}
+                  {item.badge !== undefined && item.badge > 0 && <div className="bg-rose-500 text-white text-[9px] px-2 py-0.5 rounded-lg font-bold shadow-lg">{item.badge}</div>}
                 </button>
               ))}
             </div>
@@ -152,14 +152,14 @@ useEffect(() => {
            <div className="px-3 py-3 bg-white/3 border border-white/5 rounded-xl flex items-center gap-3">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0" />
               <div className="flex flex-col">
-                 <span className="text-[11px] font-black text-white uppercase tracking-tight">{profile?.full_name}</span>
-                 <span className="text-[9px] text-gray-600 font-bold uppercase tracking-widest mt-0.5">{profile?.role}</span>
+                 <span className="text-[11px] font-bold text-white uppercase tracking-tight">{profile?.full_name}</span>
+                 <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wide mt-0.5">{profile?.role}</span>
               </div>
            </div>
 
            <button
              onClick={signOut}
-             className="flex items-center gap-3 w-full p-3 text-gray-500 hover:text-rose-500 transition-all group font-black text-[10px] uppercase tracking-widest rounded-xl bg-white/2 border border-white/5"
+             className="flex items-center gap-3 w-full p-3 text-gray-400 hover:text-rose-500 transition-all group font-bold text-[10px] uppercase tracking-wide rounded-xl bg-white/2 border border-white/5"
            >
               <LogOut size={18} className="text-rose-500/70 group-hover:text-rose-500 transition-colors" /> 
               {t('logout')}

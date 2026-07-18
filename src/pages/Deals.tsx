@@ -147,12 +147,12 @@ export default function Deals() {
       {/* HEADER */}
       <div className="flex items-center justify-between px-2">
         <div>
-          <h2 className="text-2xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-white uppercase tracking-tighter flex items-center gap-2">
             <GitBranch size={22} className="text-primary" /> {t('deals_funnel')}
           </h2>
-          <p className="text-[10px] text-gray-500 font-black uppercase tracking-wide mt-1">{t('deals_subtitle')}</p>
+          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mt-1">{t('deals_subtitle')}</p>
         </div>
-        <button onClick={() => openNew('new')} className="px-6 py-3 bg-primary text-black font-black rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest text-[10px] flex items-center gap-2">
+        <button onClick={() => openNew('new')} className="px-6 py-3 bg-primary text-black font-bold rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-wide text-[10px] flex items-center gap-2">
           <Plus size={18} strokeWidth={3} /> {t('new_deal')}
         </button>
       </div>
@@ -199,8 +199,8 @@ export default function Deals() {
               className="relative w-full max-w-96 bg-[#0c0c0e] border border-white/5 rounded-[2rem] p-7 shadow-2xl space-y-5"
             >
               <div className="flex justify-between items-center">
-                <h3 className="text-base font-black text-rose-500 uppercase tracking-tighter">{t('lost_reason')}</h3>
-                <button onClick={() => setLostTarget(null)} className="p-2 bg-white/5 rounded-xl text-gray-500 hover:text-white"><X size={18} /></button>
+                <h3 className="text-base font-bold text-rose-500 uppercase tracking-tighter">{t('lost_reason')}</h3>
+                <button onClick={() => setLostTarget(null)} className="p-2 bg-white/5 rounded-xl text-gray-400 hover:text-white"><X size={18} /></button>
               </div>
               <textarea
                 autoFocus
@@ -210,7 +210,7 @@ export default function Deals() {
                 placeholder={t('lost_reason')}
                 className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-2xl text-white text-xs font-bold outline-none focus:border-rose-500/40 resize-none"
               />
-              <button onClick={confirmLost} className="w-full py-3.5 bg-rose-500 text-white font-black rounded-2xl uppercase text-[10px] tracking-widest hover:scale-[1.02] active:scale-95 transition-all">
+              <button onClick={confirmLost} className="w-full py-3.5 bg-rose-500 text-white font-bold rounded-2xl uppercase text-[10px] tracking-wide hover:scale-[1.02] active:scale-95 transition-all">
                 {t('stage_lost')}
               </button>
             </motion.div>
@@ -232,12 +232,12 @@ function Column({ stage, totals, deals, convert, language, ownerNames, onAdd, on
       <div className={cn("relative flex items-center justify-between gap-2 pl-4 pr-2 py-3 bg-[#0c0c0e] border border-white/5 rounded-2xl mb-2 overflow-hidden")}>
         <div className={cn("absolute left-0 top-0 bottom-0 w-[3px]", cfg.bar)} />
         <div className="min-w-0">
-          <p className={cn("text-[10px] font-black uppercase tracking-wide truncate", cfg.text)}>{t(cfg.labelKey)}</p>
-          <p className="text-[13px] font-black text-white tracking-tighter mt-0.5">
-            <span className="text-gray-500 font-bold">{totals.count} · </span>{convert(totals.total)}
+          <p className={cn("text-[10px] font-bold uppercase tracking-wide truncate", cfg.text)}>{t(cfg.labelKey)}</p>
+          <p className="text-[13px] font-bold text-white tracking-tighter mt-0.5">
+            <span className="text-gray-400 font-bold">{totals.count} · </span>{convert(totals.total)}
           </p>
         </div>
-        <button onClick={onAdd} className="p-1.5 bg-white/5 rounded-lg text-gray-500 hover:text-primary transition-all shrink-0"><Plus size={15} strokeWidth={3} /></button>
+        <button onClick={onAdd} className="p-1.5 bg-white/5 rounded-lg text-gray-400 hover:text-primary transition-all shrink-0"><Plus size={15} strokeWidth={3} /></button>
       </div>
 
       {/* Kartalar zonasi (droppable) */}
@@ -248,7 +248,7 @@ function Column({ stage, totals, deals, convert, language, ownerNames, onAdd, on
         {deals.length === 0 && (
           <div className="py-8 text-center text-gray-700 opacity-40">
             <Inbox size={18} className="mx-auto mb-1.5" />
-            <p className="text-[9px] font-black uppercase tracking-widest">{t('no_deals')}</p>
+            <p className="text-[9px] font-bold uppercase tracking-wide">{t('no_deals')}</p>
           </div>
         )}
       </div>
@@ -279,11 +279,11 @@ function Card({ deal, convert, language, ownerNames, onEdit, onPickStage, dragHa
       {/* Sudrash zonasi + tahrirlash uchun bosish */}
       <div {...(dragHandle || {})} onClick={() => !overlay && onEdit?.()}>
         <div className="flex items-start justify-between gap-2">
-          <p className="text-[13px] font-black text-white leading-tight truncate flex-1">{deal.title}</p>
-          <p className="text-[13px] font-black text-primary tracking-tighter shrink-0">{convert(deal.expected_amount || 0)}</p>
+          <p className="text-[13px] font-bold text-white leading-tight truncate flex-1">{deal.title}</p>
+          <p className="text-[13px] font-bold text-primary tracking-tighter shrink-0">{convert(deal.expected_amount || 0)}</p>
         </div>
 
-        <div className="flex items-center gap-1.5 mt-1 text-[10px] text-gray-500 font-bold min-w-0">
+        <div className="flex items-center gap-1.5 mt-1 text-[10px] text-gray-400 font-bold min-w-0">
           {isCompany ? <Building2 size={11} className="shrink-0" /> : <User size={11} className="shrink-0" />}
           <span className="truncate">
             {deal.clients?.full_name || '—'}
@@ -292,14 +292,14 @@ function Card({ deal, convert, language, ownerNames, onEdit, onPickStage, dragHa
         </div>
 
         <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-white/5">
-          <span className="text-[9px] font-black text-gray-600 truncate">{(deal.owner_id && ownerNames?.[deal.owner_id]) || '—'}</span>
+          <span className="text-[9px] font-bold text-gray-500 truncate">{(deal.owner_id && ownerNames?.[deal.owner_id]) || '—'}</span>
           <div className="flex items-center gap-2 shrink-0">
             {deal.expected_close_date && (
-              <span className={cn("flex items-center gap-1 text-[9px] font-bold", overdue ? "text-rose-500" : "text-gray-600")}>
+              <span className={cn("flex items-center gap-1 text-[9px] font-bold", overdue ? "text-rose-500" : "text-gray-500")}>
                 <CalendarClock size={10} /> {new Date(deal.expected_close_date).toLocaleDateString(language)}
               </span>
             )}
-            <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-white/5 text-gray-400">{deal.probability ?? 0}%</span>
+            <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-white/5 text-gray-400">{deal.probability ?? 0}%</span>
           </div>
         </div>
       </div>
@@ -308,7 +308,7 @@ function Card({ deal, convert, language, ownerNames, onEdit, onPickStage, dragHa
       {!overlay && (
         <button
           onClick={(e) => { e.stopPropagation(); setMenuOpen(v => !v); }}
-          className="absolute top-2 right-2 p-1 rounded-md bg-black/40 text-gray-600 opacity-0 group-hover:opacity-100 lg:opacity-0 max-lg:opacity-100 transition-opacity"
+          className="absolute top-2 right-2 p-1 rounded-md bg-black/40 text-gray-500 opacity-0 group-hover:opacity-100 lg:opacity-0 max-lg:opacity-100 transition-opacity"
         >
           <MoreVertical size={13} />
         </button>
@@ -317,12 +317,12 @@ function Card({ deal, convert, language, ownerNames, onEdit, onPickStage, dragHa
         <>
           <div className="fixed inset-0 z-20" onClick={(e) => { e.stopPropagation(); setMenuOpen(false); }} />
           <div className="absolute right-2 top-8 z-30 w-44 bg-[#1a1a1d] border border-white/10 rounded-xl shadow-2xl overflow-hidden py-1">
-            <p className="px-3 py-1.5 text-[8px] font-black text-gray-600 uppercase tracking-widest">{t('change_stage')}</p>
+            <p className="px-3 py-1.5 text-[8px] font-bold text-gray-500 uppercase tracking-wide">{t('change_stage')}</p>
             {DEAL_STAGES.filter(s => s.id !== deal.stage).map(s => (
               <button
                 key={s.id}
                 onClick={(e) => { e.stopPropagation(); setMenuOpen(false); onPickStage(deal.id, s.id); }}
-                className="w-full text-left px-3 py-2 text-[10px] font-black uppercase tracking-wide text-gray-300 hover:bg-white/5 flex items-center gap-2"
+                className="w-full text-left px-3 py-2 text-[10px] font-bold uppercase tracking-wide text-gray-300 hover:bg-white/5 flex items-center gap-2"
               >
                 <span className={cn("w-1.5 h-1.5 rounded-full", STAGE_MAP[s.id].bar)} /> {t(s.labelKey)}
               </button>

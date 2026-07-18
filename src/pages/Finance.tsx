@@ -65,10 +65,10 @@ export default function Finance() {
     <div className="space-y-5 text-left font-sans pb-24 md:pb-10">
       <div className="flex justify-between items-center px-4">
         <div>
-          <h2 className="text-2xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-white uppercase tracking-tighter flex items-center gap-2">
             <Wallet size={22} className="text-primary" /> {t('finance_analysis')}
           </h2>
-          <p className="text-[10px] text-gray-500 font-black uppercase tracking-wider mt-0.5">Real-time Financial Status</p>
+          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mt-0.5">Real-time Financial Status</p>
         </div>
         <button onClick={() => exportToPDF("Moliya_Hisoboti", [["KATEGORIYA", "SUMMA"]], stats.categoryData.map((c:any) => [c.name, convert(c.value)]))}
           className="p-3 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all">
@@ -78,11 +78,11 @@ export default function Finance() {
 
       <div className="mx-4 grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="relative">
-          <Filter className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600" size={16} />
+          <Filter className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
           <select 
             value={categoryFilter} 
             onChange={e => setCategoryFilter(e.target.value)}
-            className="w-full pl-14 pr-5 py-4 bg-[#0c0c0e] border border-white/5 rounded-2xl text-white font-black text-[11px] uppercase tracking-widest outline-none appearance-none cursor-pointer"
+            className="w-full pl-14 pr-5 py-4 bg-[#0c0c0e] border border-white/5 rounded-2xl text-white font-bold text-[11px] uppercase tracking-wide outline-none appearance-none cursor-pointer"
           >
             <option value="ALL" className="bg-black">{t('all')} {t('category').toLowerCase()}</option>
             {availableCategories.map((c: string) => (
@@ -97,8 +97,8 @@ export default function Finance() {
               key={r}
               onClick={() => setDateRange(r)}
               className={cn(
-                "flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
-                dateRange === r ? "bg-primary text-black shadow-lg" : "text-gray-500 hover:text-white"
+                "flex-1 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wide transition-all",
+                dateRange === r ? "bg-primary text-black shadow-lg" : "text-gray-400 hover:text-white"
               )}
             >
               {r === 'today' && t('today')}
@@ -120,7 +120,7 @@ export default function Finance() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mx-4">
         <div className="p-5 bg-[#0c0c0e] border border-white/5 rounded-2xl shadow-2xl h-100">
-          <h4 className="text-[10px] font-black text-gray-500 uppercase mb-6 flex items-center gap-2">
+          <h4 className="text-[10px] font-bold text-gray-400 uppercase mb-6 flex items-center gap-2">
             <Activity size={14} className="text-primary"/> {t('flow_dynamics')}
           </h4>
           <div className="h-64 w-full">
@@ -145,7 +145,7 @@ export default function Finance() {
         </div>
 
         <div className="p-5 bg-[#0c0c0e] border border-white/5 rounded-2xl shadow-2xl flex flex-col items-center">
-           <h4 className="text-[10px] font-black text-gray-500 uppercase mb-5 self-start flex items-center gap-2">
+           <h4 className="text-[10px] font-bold text-gray-400 uppercase mb-5 self-start flex items-center gap-2">
             <PieIcon size={14} className="text-primary"/> {t('expense_distribution')}
            </h4>
            <div className="h-60 w-full">
@@ -165,7 +165,7 @@ export default function Finance() {
                       <div className="w-2 h-2 rounded-full" style={{backgroundColor: COLORS[i % COLORS.length]}} />
                       <span className="text-[10px] font-bold text-gray-400 uppercase">{cat.name}</span>
                    </div>
-                   <span className="text-[11px] font-black text-white">{convert(cat.value)}</span>
+                   <span className="text-[11px] font-bold text-white">{convert(cat.value)}</span>
                 </div>
               ))}
            </div>
@@ -173,22 +173,22 @@ export default function Finance() {
       </div>
 
       <div className="mx-4 p-5 bg-[#0c0c0e] border border-white/5 rounded-2xl shadow-2xl">
-         <h4 className="text-[10px] font-black text-gray-500 uppercase mb-5 flex items-center gap-2">
+         <h4 className="text-[10px] font-bold text-gray-400 uppercase mb-5 flex items-center gap-2">
            <History size={14} className="text-primary"/> {t('recent_transactions')}
          </h4>
          <div className="space-y-2.5">
             {stats.recentTransactions.map((tx: any) => (
               <div key={tx.id} className="flex justify-between items-center p-3 bg-white/2 rounded-xl border border-white/5 group hover:border-primary/20 transition-all">
                  <div className="text-left">
-                    <p className="text-sm font-black text-white uppercase tracking-tight truncate max-w-50">{tx.description}</p>
-                    <p className="text-[9px] text-gray-600 font-black uppercase mt-1 tracking-widest">{tx.category} • {new Date(tx.created_at).toLocaleDateString(i18n.language)}</p>
+                    <p className="text-sm font-bold text-white uppercase tracking-tight truncate max-w-50">{tx.description}</p>
+                    <p className="text-[9px] text-gray-500 font-bold uppercase mt-1 tracking-wide">{tx.category} • {new Date(tx.created_at).toLocaleDateString(i18n.language)}</p>
                  </div>
-                 <div className={cn("text-base font-black tracking-tighter", tx.type === 'income' ? "text-emerald-500" : "text-rose-500")}>
+                 <div className={cn("text-base font-bold tracking-tighter", tx.type === 'income' ? "text-emerald-500" : "text-rose-500")}>
                     {tx.type === 'income' ? '+' : '-'}{convert(tx.amount)}
                  </div>
               </div>
             ))}
-            {stats.recentTransactions.length === 0 && <p className="py-10 text-center text-gray-700 font-black uppercase text-[10px] tracking-widest">{t('no_data')}</p>}
+            {stats.recentTransactions.length === 0 && <p className="py-10 text-center text-gray-700 font-bold uppercase text-[10px] tracking-wide">{t('no_data')}</p>}
          </div>
       </div>
     </div>
@@ -202,8 +202,8 @@ function FinanceKPI({ icon: Icon, label, value, color, iconBg, border }: any) {
         <Icon size={18} strokeWidth={2.5} />
       </div>
       <div className="min-w-0">
-        <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500 truncate">{label}</p>
-        <p className={cn("text-xl font-black tracking-tighter truncate", color)}>{value}</p>
+        <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400 truncate">{label}</p>
+        <p className={cn("text-xl font-bold tracking-tighter truncate", color)}>{value}</p>
       </div>
     </div>
   );

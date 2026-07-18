@@ -26,21 +26,21 @@ export default function PaymentSection({
   return (
     <div className="pt-4 border-t border-white/5 space-y-4">
       <div className="flex justify-between items-center px-2">
-        <span className="text-[10px] font-black text-gray-500 uppercase">{t('total')}:</span>
-        <span className="text-3xl font-black text-white italic">{convert(totalCartSum)}</span>
+        <span className="text-[10px] font-bold text-gray-400 uppercase">{t('total')}:</span>
+        <span className="text-3xl font-bold text-white italic">{convert(totalCartSum)}</span>
       </div>
       
       <input 
         type="number" 
         step="0.01"
-        className="w-full px-5 py-5 bg-emerald-500/5 border border-emerald-500/10 rounded-3xl text-emerald-500 text-2xl font-black outline-none text-center" 
+        className="w-full px-5 py-5 bg-emerald-500/5 border border-emerald-500/10 rounded-3xl text-emerald-500 text-2xl font-bold outline-none text-center" 
         placeholder={t('paid_amount_placeholder')} 
         value={paidAmount} 
         onChange={e => onPaidChange(e.target.value)} 
       />
       
       {debtAmount > 0 && (
-        <div className="text-center text-rose-500 text-xs font-black uppercase">
+        <div className="text-center text-rose-500 text-xs font-bold uppercase">
           {t('debt')}: {debtAmount.toLocaleString()}$
         </div>
       )}
@@ -48,7 +48,7 @@ export default function PaymentSection({
       <button 
         disabled={loading || cartLength === 0} 
         onClick={onSubmit} 
-        className="w-full py-5 bg-primary text-black font-black rounded-2xl uppercase text-xs tracking-widest flex justify-center items-center gap-3 disabled:opacity-50"
+        className="w-full py-5 bg-primary text-black font-bold rounded-2xl uppercase text-xs tracking-wide flex justify-center items-center gap-3 disabled:opacity-50"
       >
         {loading ? <Loader2 className="animate-spin" /> : <CheckCircle2 />} 
         {t('complete_sale')}

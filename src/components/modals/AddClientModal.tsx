@@ -114,15 +114,15 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initialData
         className="relative w-full max-w-112.5 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] p-10 shadow-2xl space-y-8 max-h-[92vh] overflow-y-auto no-scrollbar"
       >
         <div className="flex justify-between items-center">
-          <h3 className="text-xl font-black text-white uppercase tracking-tighter">
+          <h3 className="text-xl font-bold text-white uppercase tracking-tighter">
             {initialData ? t('edit_client') : t('new_client')}
           </h3>
-          <button onClick={onClose} className="p-2 bg-white/5 rounded-xl text-gray-500 hover:text-white transition-all"><X size={20}/></button>
+          <button onClick={onClose} className="p-2 bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all"><X size={20}/></button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6 text-left">
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">{t('counterparty_kind')}</label>
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide ml-2">{t('counterparty_kind')}</label>
             <div className="grid grid-cols-2 gap-2 p-1.5 bg-white/5 rounded-2xl border border-white/5">
               {([
                 { id: 'person', name: t('kind_person'), icon: User },
@@ -135,8 +135,8 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initialData
                     type="button"
                     onClick={() => setFormData({ ...formData, kind: k.id })}
                     className={cn(
-                      "py-2.5 rounded-xl text-[9px] font-black uppercase transition-all flex items-center justify-center gap-1.5",
-                      formData.kind === k.id ? "bg-primary text-black" : "text-gray-500 hover:text-white"
+                      "py-2.5 rounded-xl text-[9px] font-bold uppercase transition-all flex items-center justify-center gap-1.5",
+                      formData.kind === k.id ? "bg-primary text-black" : "text-gray-400 hover:text-white"
                     )}
                   >
                     <Icon size={13} /> {k.name}
@@ -147,34 +147,34 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initialData
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide ml-2">
               {isCompany ? t('company_name') : t('client_full_name')}
             </label>
             <div className="relative">
               {isCompany
-                ? <Building2 className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600" size={16} />
-                : <User className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600" size={16} />}
-              <input required className="w-full pl-12 pr-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-black outline-none focus:border-primary/30 transition-all uppercase text-xs" placeholder={isCompany ? 'OOO "Stroy Invest"' : 'Azizbek Karimov'} value={formData.full_name} onChange={e => setFormData({...formData, full_name: e.target.value})} />
+                ? <Building2 className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                : <User className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={16} />}
+              <input required className="w-full pl-12 pr-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-bold outline-none focus:border-primary/30 transition-all uppercase text-xs" placeholder={isCompany ? 'OOO "Stroy Invest"' : 'Azizbek Karimov'} value={formData.full_name} onChange={e => setFormData({...formData, full_name: e.target.value})} />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">{t('phone_number')}</label>
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide ml-2">{t('phone_number')}</label>
             <div className="relative">
-              <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600" size={16} />
-              <input required type="text" className="w-full pl-12 pr-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-mono font-black text-lg outline-none focus:border-primary/30 transition-all" value={formData.phone} onChange={handlePhoneChange} />
+              <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+              <input required type="text" className="w-full pl-12 pr-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-mono font-bold text-lg outline-none focus:border-primary/30 transition-all" value={formData.phone} onChange={handlePhoneChange} />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">{t('client_category')}</label>
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide ml-2">{t('client_category')}</label>
             <div className="grid grid-cols-3 gap-2 p-1.5 bg-white/5 rounded-2xl border border-white/5">
               {clientTypes.map((type) => (
                 <button 
                   key={type.id} 
                   type="button" 
                   onClick={() => setFormData({...formData, client_type: type.id})} 
-                  className={`py-2.5 rounded-xl text-[9px] font-black uppercase transition-all ${formData.client_type === type.id ? "bg-primary text-black" : "text-gray-500 hover:text-white"}`}
+                  className={`py-2.5 rounded-xl text-[9px] font-bold uppercase transition-all ${formData.client_type === type.id ? "bg-primary text-black" : "text-gray-400 hover:text-white"}`}
                 >
                   {type.name}
                 </button>
@@ -184,17 +184,17 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initialData
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">{t('client_source')}</label>
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide ml-2">{t('client_source')}</label>
               <div className="relative">
-                <Compass className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600" size={16} />
+                <Compass className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
                 <input className="w-full pl-12 pr-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-bold outline-none focus:border-primary/30 transition-all text-xs" placeholder={t('source_placeholder')} value={formData.source || ''} onChange={e => setFormData({...formData, source: e.target.value})} />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">{t('responsible_person')}</label>
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide ml-2">{t('responsible_person')}</label>
               <div className="relative">
-                <UserCheck className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 z-10" size={16} />
+                <UserCheck className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 z-10" size={16} />
                 <select className="w-full pl-12 pr-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-bold outline-none focus:border-primary/30 transition-all text-xs appearance-none" value={formData.responsible_id || ''} onChange={e => setFormData({...formData, responsible_id: e.target.value})}>
                   <option value="" className="bg-[#0c0c0e]">{t('no_responsible')}</option>
                   {staff.map(s => (
@@ -206,16 +206,16 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initialData
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">{t('client_address')}</label>
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide ml-2">{t('client_address')}</label>
             <div className="relative">
-              <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600" size={16} />
+              <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
               <input className="w-full pl-12 pr-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-bold outline-none focus:border-primary/30 transition-all text-xs" placeholder={t('address_placeholder')} value={formData.address || ''} onChange={e => setFormData({...formData, address: e.target.value})} />
             </div>
           </div>
 
           {isCompany && (
             <div className="space-y-4 p-5 bg-white/3 border border-white/5 rounded-3xl">
-              <p className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-2">
+              <p className="text-[10px] font-bold text-primary uppercase tracking-wide flex items-center gap-2">
                 <Landmark size={14} strokeWidth={3} /> {t('requisites')}
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -233,14 +233,14 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initialData
           )}
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">{t('client_notes')}</label>
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide ml-2">{t('client_notes')}</label>
             <div className="relative">
-              <FileText className="absolute left-5 top-4 text-gray-600" size={16} />
+              <FileText className="absolute left-5 top-4 text-gray-500" size={16} />
               <textarea rows={2} className="w-full pl-12 pr-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-bold outline-none focus:border-primary/30 transition-all text-xs resize-none" placeholder={t('notes_placeholder')} value={formData.notes || ''} onChange={e => setFormData({...formData, notes: e.target.value})} />
             </div>
           </div>
 
-          <button disabled={loading} type="submit" className="w-full py-5 bg-primary text-black font-black rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all uppercase text-[11px] tracking-widest flex items-center justify-center gap-2">
+          <button disabled={loading} type="submit" className="w-full py-5 bg-primary text-black font-bold rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all uppercase text-[11px] tracking-wide flex items-center justify-center gap-2">
             {loading ? <Loader2 className="animate-spin" size={18}/> : <Save size={18} strokeWidth={3} />} {t('save')}
           </button>
         </form>
@@ -252,7 +252,7 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initialData
 function ReqField({ label, value, onChange, placeholder, type = 'text' }: any) {
   return (
     <div className="space-y-1.5">
-      <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">{label}</label>
+      <label className="text-[9px] font-bold text-gray-400 uppercase tracking-wide ml-1">{label}</label>
       <input
         type={type}
         value={value || ''}

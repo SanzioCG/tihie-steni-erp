@@ -45,10 +45,10 @@ export default function Login() {
            </div>
            
            <div className="space-y-1">
-             <h1 className="text-3xl font-black text-white uppercase tracking-tighter">
+             <h1 className="text-3xl font-bold text-white uppercase tracking-tighter">
                ТИХИЕ СТЕНЫ
              </h1>
-             <p className="text-[10px] text-primary font-black uppercase tracking-[0.4em] opacity-80">
+             <p className="text-[10px] text-primary font-bold uppercase tracking-wide opacity-80">
                ERP SYSTEM V1.0
              </p>
            </div>
@@ -58,7 +58,7 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-4">
             <div className="relative group">
-              <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-primary transition-colors" size={18} />
+              <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors" size={18} />
               <input 
                 required 
                 type="email" 
@@ -70,7 +70,7 @@ export default function Login() {
             </div>
             
             <div className="relative group">
-              <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-primary transition-colors" size={18} />
+              <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors" size={18} />
               <input 
                 required 
                 type="password" 
@@ -85,7 +85,7 @@ export default function Login() {
           <button 
             disabled={loading} 
             type="submit" 
-            className="w-full py-5 bg-primary text-black font-black rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest text-[11px] flex items-center justify-center gap-3"
+            className="w-full py-5 bg-primary text-black font-bold rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-wide text-[11px] flex items-center justify-center gap-3"
           >
             {loading ? (
               <Loader2 className="animate-spin" size={20} />
@@ -99,7 +99,7 @@ export default function Login() {
         </form>
 
         <div className="pt-4 text-center border-t border-white/5">
-           <p className="text-[9px] text-gray-600 font-black uppercase tracking-[0.2em]">
+           <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wide">
              Buxgalteriya va Ombor Nazorati
            </p>
         </div>
