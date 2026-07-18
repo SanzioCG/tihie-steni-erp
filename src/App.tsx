@@ -17,6 +17,7 @@ import OfficeExpenses from './pages/OfficeExpenses';
 import Settings from './pages/Settings';
 import LowStock from './pages/LowStock';
 import KP from './pages/KP';
+import Analytics from './pages/Analytics';
 import Login from './pages/Login';
 import ReloadPrompt from './components/ui/ReloadPrompt';
 import { useAuthStore } from './store/useAuthStore';
@@ -62,6 +63,7 @@ export default function App() {
 
   // Manager uchun dashboard cheklash — default route'ni belgilash
   const defaultRoute = profile?.role === 'manager' ? '/kp' : '/dashboard';
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'director';
 
   return (
     <ThemeProvider attribute="class" defaultTheme="dark">
@@ -102,6 +104,7 @@ export default function App() {
                   <Route path="/deals" element={<Deals />} />
                   <Route path="/tasks" element={<Tasks />} />
                   <Route path="/debts" element={<Debts />} />
+                  <Route path="/analytics" element={isAdmin ? <Analytics /> : <Navigate to={defaultRoute} replace />} />
                   <Route path="/audit" element={<Audit />} />
                   <Route path="/expenses" element={<OfficeExpenses />} />
                   <Route path="/settings" element={<Settings />} />

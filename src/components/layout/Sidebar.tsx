@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Wallet, ShoppingCart, Users, Banknote,
-  Package, Boxes, LogOut, ShieldCheck, Settings, Receipt, X, AlertTriangle, Calculator, CalendarClock, GitBranch
+  Package, Boxes, LogOut, ShieldCheck, Settings, Receipt, X, AlertTriangle, Calculator, CalendarClock, GitBranch, BarChart3
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
@@ -91,6 +91,7 @@ useEffect(() => {
       title: t('admin_menu', 'Boshqaruv'),
       items: [
         ...(isAdmin ? [
+          { id: 'analytics', icon: BarChart3, label: t('analytics') },
           { id: 'expenses', icon: Receipt, label: t('expenses') },
           { id: 'audit', icon: ShieldCheck, label: t('audit') }
         ] : []),
