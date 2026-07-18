@@ -43,12 +43,12 @@ export default function Inventory() {
   }) || [];
 
   return (
-    <div className="space-y-6 text-left p-2 animate-in fade-in duration-500 font-sans">
-      
+    <div className="space-y-5 text-left p-2 animate-in fade-in duration-500 font-sans">
+
       {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-2">
         <div>
-          <h2 className="text-3xl font-black uppercase tracking-tighter text-primary">
+          <h2 className="text-2xl font-black uppercase tracking-tighter text-primary">
             {t('products')}
           </h2>
           <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.3em] opacity-60">{t('inventory_subtitle')}</p>
@@ -79,36 +79,36 @@ export default function Inventory() {
           placeholder={t('search')} 
           value={search} 
           onChange={e => setSearch(e.target.value)}
-          className="w-full pl-14 pr-4 py-5 bg-[#0c0c0e] border border-white/5 rounded-3xl text-white outline-none focus:border-primary/40 transition-all shadow-2xl font-bold text-sm uppercase"
+          className="w-full pl-14 pr-4 py-3.5 bg-[#0c0c0e] border border-white/5 rounded-2xl text-white outline-none focus:border-primary/40 transition-all shadow-2xl font-bold text-sm uppercase"
         />
       </div>
 
       {/* JADVAL */}
-      <div className="bg-[#0c0c0e] border border-white/5 rounded-4xl overflow-hidden shadow-2xl relative min-h-125 mx-2">
+      <div className="bg-[#0c0c0e] border border-white/5 rounded-2xl overflow-hidden shadow-2xl relative min-h-125 mx-2">
         {loading && <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 backdrop-blur-sm"><Loader2 className="animate-spin text-primary" size={40} /></div>}
         
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-250">
             <thead className="bg-white/5 text-primary border-b border-white/10">
               <tr>
-                <th className="px-6 py-6 text-[10px] font-black uppercase text-center w-16">#</th>
-                <th className="px-6 py-6 text-[10px] font-black uppercase">{t('image')}</th>
-                <th className="px-6 py-6 text-[10px] font-black uppercase text-center">{t('category')}</th>
-                <th className="px-6 py-6 text-[10px] font-black uppercase">{t('name')}</th>
-                <th className="px-6 py-6 text-[10px] font-black uppercase text-center">{t('sku')}</th>
-                <th className="px-6 py-6 text-[10px] font-black uppercase text-center">{t('stock') || 'Zaxira'}</th>
-                <th className="px-6 py-6 text-[10px] font-black uppercase text-right">{t('actions')}</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase text-center w-16">#</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase">{t('image')}</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase text-center">{t('category')}</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase">{t('name')}</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase text-center">{t('sku')}</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase text-center">{t('stock') || 'Zaxira'}</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase text-right">{t('actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {filtered.map((p: any, index: number) => (
                 <tr key={p.id} className="group hover:bg-white/5 transition-all text-white font-medium">
-                  <td className="px-6 py-5 text-gray-700 font-black text-xs text-center">{index + 1}</td>
+                  <td className="px-6 py-2.5 text-gray-700 font-black text-xs text-center">{index + 1}</td>
                   
-                  <td className="px-6 py-5">
+                  <td className="px-6 py-2.5">
                     <div 
                       onClick={() => p.image_url && setZoomImage(p.image_url)}
-                      className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 overflow-hidden shadow-inner cursor-pointer relative group/img"
+                      className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 overflow-hidden shadow-inner cursor-pointer relative group/img"
                     >
                       {p.image_url ? (
                         <>
@@ -130,20 +130,20 @@ export default function Inventory() {
                     </div>
                   </td>
 
-                  <td className="px-6 py-5 text-center">
+                  <td className="px-6 py-2.5 text-center">
                     <span className="px-3 py-1 bg-white/5 text-gray-400 border border-white/5 rounded-lg text-[9px] font-black uppercase tracking-widest">
                       {p.categories?.name_uz}
                     </span>
                   </td>
 
-                  <td className="px-6 py-5">
+                  <td className="px-6 py-2.5">
                     <p className="font-black text-sm uppercase tracking-tight">{p.name_uz}</p>
                     <p className="text-[9px] text-gray-600 font-bold uppercase tracking-widest mt-0.5">{p.series || '—'}</p>
                   </td>
 
-                  <td className="px-6 py-5 text-center font-mono text-[10px] text-gray-500 font-black uppercase tracking-tighter">{p.sku}</td>
+                  <td className="px-6 py-2.5 text-center font-mono text-[10px] text-gray-500 font-black uppercase tracking-tighter">{p.sku}</td>
                   
-                  <td className="px-6 py-5 text-center">
+                  <td className="px-6 py-2.5 text-center">
                     <div className={cn(
                       "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border font-black text-xs",
                       p.total_stock <= (p.min_stock || 10) 
@@ -155,7 +155,7 @@ export default function Inventory() {
                     </div>
                   </td>
 
-                  <td className="px-6 py-5 text-right">
+                  <td className="px-6 py-2.5 text-right">
                     <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
                       <button 
                         onClick={() => { setEditingData(p); setIsModalOpen(true); }} 

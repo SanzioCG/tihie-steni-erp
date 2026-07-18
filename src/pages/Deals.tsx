@@ -247,7 +247,7 @@ function Column({ stage, totals, deals, convert, language, ownerNames, onAdd, on
         ))}
         {deals.length === 0 && (
           <div className="py-8 text-center text-gray-700 opacity-40">
-            <Inbox size={22} className="mx-auto mb-1.5" />
+            <Inbox size={18} className="mx-auto mb-1.5" />
             <p className="text-[9px] font-black uppercase tracking-widest">{t('no_deals')}</p>
           </div>
         )}
@@ -273,7 +273,7 @@ function Card({ deal, convert, language, ownerNames, onEdit, onPickStage, dragHa
 
   return (
     <div className={cn(
-      "relative group bg-[#121214] border border-white/5 rounded-2xl p-3 select-none",
+      "relative group bg-[#121214] border border-white/5 rounded-xl p-2.5 select-none",
       overlay ? "shadow-2xl rotate-2 cursor-grabbing" : "cursor-grab hover:border-white/10"
     )}>
       {/* Sudrash zonasi + tahrirlash uchun bosish */}

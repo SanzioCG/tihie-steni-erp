@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useCurrencyStore } from '../store/useCurrencyStore';
-import { 
-  FileDown, Activity, PieChart as PieIcon, 
-  TrendingUp, History, Filter
+import {
+  FileDown, Activity, PieChart as PieIcon,
+  TrendingUp, History, Filter,
+  Wallet, Percent, TrendingDown
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, 
@@ -61,14 +62,16 @@ export default function Finance() {
   }, []);
 
   return (
-    <div className="space-y-6 text-left font-sans pb-24 md:pb-10">
+    <div className="space-y-5 text-left font-sans pb-24 md:pb-10">
       <div className="flex justify-between items-center px-4">
         <div>
-          <h2 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter">{t('finance_analysis')}</h2>
-          <p className="text-[9px] text-gray-500 font-black uppercase tracking-[0.3em]">Real-time Financial Status</p>
+          <h2 className="text-2xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
+            <Wallet size={22} className="text-primary" /> {t('finance_analysis')}
+          </h2>
+          <p className="text-[10px] text-gray-500 font-black uppercase tracking-wider mt-0.5">Real-time Financial Status</p>
         </div>
-        <button onClick={() => exportToPDF("Moliya_Hisoboti", [["KATEGORIYA", "SUMMA"]], stats.categoryData.map((c:any) => [c.name, convert(c.value)]))} 
-          className="p-3 bg-white/5 border border-white/10 rounded-2xl text-white hover:bg-white/10 transition-all">
+        <button onClick={() => exportToPDF("Moliya_Hisoboti", [["KATEGORIYA", "SUMMA"]], stats.categoryData.map((c:any) => [c.name, convert(c.value)]))}
+          className="p-3 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all">
           <FileDown size={20} />
         </button>
       </div>
@@ -107,36 +110,17 @@ export default function Finance() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mx-4">
-        <div className="p-6 bg-[#0c0c0e] border border-white/5 rounded-4xl shadow-xl">
-          <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-3">{t('total_balance')}</p>
-          <h3 className="text-2xl font-black text-white tracking-tighter">{convert(stats.balance)}</h3>
-        </div>
-
-        <div className="p-6 bg-[#0c0c0e] border border-emerald-500/10 rounded-4xl shadow-xl">
-          <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-3">{t('gross_profit')}</p>
-          <h3 className="text-2xl font-black text-white tracking-tighter">{convert(stats.grossProfit || 0)}</h3>
-        </div>
-
-        <div className="p-6 bg-[#0c0c0e] border border-emerald-500/20 rounded-4xl shadow-xl">
-          <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-3">{t('net_profit_label')}</p>
-          <h3 className="text-2xl font-black text-white tracking-tighter">{convert(stats.netProfit || 0)}</h3>
-        </div>
-
-        <div className="p-6 bg-[#0c0c0e] border border-amber-500/10 rounded-4xl shadow-xl">
-          <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest mb-3">{t('profit_margin')}</p>
-          <h3 className="text-2xl font-black text-white tracking-tighter">{stats.profitMargin || 0}%</h3>
-        </div>
-
-        <div className="p-6 bg-[#0c0c0e] border border-rose-500/10 rounded-4xl shadow-xl">
-          <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest mb-3">{t('total_expenses')}</p>
-          <h3 className="text-2xl font-black text-white tracking-tighter">-{convert(stats.totalExpense)}</h3>
-        </div>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mx-4">
+        <FinanceKPI icon={Wallet} label={t('total_balance')} value={convert(stats.balance)} color="text-white" iconBg="bg-white/5 text-primary" border="border-white/5" />
+        <FinanceKPI icon={TrendingUp} label={t('gross_profit')} value={convert(stats.grossProfit || 0)} color="text-white" iconBg="bg-emerald-500/10 text-emerald-500" border="border-emerald-500/10" />
+        <FinanceKPI icon={TrendingUp} label={t('net_profit_label')} value={convert(stats.netProfit || 0)} color="text-white" iconBg="bg-emerald-500/10 text-emerald-500" border="border-emerald-500/20" />
+        <FinanceKPI icon={Percent} label={t('profit_margin')} value={`${stats.profitMargin || 0}%`} color="text-white" iconBg="bg-amber-500/10 text-amber-500" border="border-amber-500/10" />
+        <FinanceKPI icon={TrendingDown} label={t('total_expenses')} value={`-${convert(stats.totalExpense)}`} color="text-white" iconBg="bg-rose-500/10 text-rose-500" border="border-rose-500/10" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mx-4">
-        <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl h-100">
-          <h4 className="text-[10px] font-black text-gray-500 uppercase mb-10 flex items-center gap-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mx-4">
+        <div className="p-5 bg-[#0c0c0e] border border-white/5 rounded-2xl shadow-2xl h-100">
+          <h4 className="text-[10px] font-black text-gray-500 uppercase mb-6 flex items-center gap-2">
             <Activity size={14} className="text-primary"/> {t('flow_dynamics')}
           </h4>
           <div className="h-64 w-full">
@@ -160,8 +144,8 @@ export default function Finance() {
           </div>
         </div>
 
-        <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl flex flex-col items-center">
-           <h4 className="text-[10px] font-black text-gray-500 uppercase mb-8 self-start flex items-center gap-2">
+        <div className="p-5 bg-[#0c0c0e] border border-white/5 rounded-2xl shadow-2xl flex flex-col items-center">
+           <h4 className="text-[10px] font-black text-gray-500 uppercase mb-5 self-start flex items-center gap-2">
             <PieIcon size={14} className="text-primary"/> {t('expense_distribution')}
            </h4>
            <div className="h-60 w-full">
@@ -188,13 +172,13 @@ export default function Finance() {
         </div>
       </div>
 
-      <div className="mx-4 p-8 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl">
-         <h4 className="text-[10px] font-black text-gray-500 uppercase mb-8 flex items-center gap-2">
+      <div className="mx-4 p-5 bg-[#0c0c0e] border border-white/5 rounded-2xl shadow-2xl">
+         <h4 className="text-[10px] font-black text-gray-500 uppercase mb-5 flex items-center gap-2">
            <History size={14} className="text-primary"/> {t('recent_transactions')}
          </h4>
-         <div className="space-y-4">
+         <div className="space-y-2.5">
             {stats.recentTransactions.map((tx: any) => (
-              <div key={tx.id} className="flex justify-between items-center p-4 bg-white/2 rounded-2xl border border-white/5 group hover:border-primary/20 transition-all">
+              <div key={tx.id} className="flex justify-between items-center p-3 bg-white/2 rounded-xl border border-white/5 group hover:border-primary/20 transition-all">
                  <div className="text-left">
                     <p className="text-sm font-black text-white uppercase tracking-tight truncate max-w-50">{tx.description}</p>
                     <p className="text-[9px] text-gray-600 font-black uppercase mt-1 tracking-widest">{tx.category} • {new Date(tx.created_at).toLocaleDateString(i18n.language)}</p>
@@ -206,6 +190,20 @@ export default function Finance() {
             ))}
             {stats.recentTransactions.length === 0 && <p className="py-10 text-center text-gray-700 font-black uppercase text-[10px] tracking-widest">{t('no_data')}</p>}
          </div>
+      </div>
+    </div>
+  );
+}
+
+function FinanceKPI({ icon: Icon, label, value, color, iconBg, border }: any) {
+  return (
+    <div className={cn("p-4 bg-[#0c0c0e] border rounded-2xl shadow-xl flex items-center gap-3", border)}>
+      <div className={cn("p-2.5 rounded-xl shrink-0", iconBg)}>
+        <Icon size={18} strokeWidth={2.5} />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500 truncate">{label}</p>
+        <p className={cn("text-xl font-black tracking-tighter truncate", color)}>{value}</p>
       </div>
     </div>
   );

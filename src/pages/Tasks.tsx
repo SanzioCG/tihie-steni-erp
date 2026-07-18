@@ -76,15 +76,17 @@ export default function Tasks() {
   }
 
   return (
-    <div className="space-y-8 text-left animate-in fade-in duration-500">
+    <div className="space-y-5 text-left animate-in fade-in duration-500">
       {/* HEADER */}
       <div className="px-2">
-        <h2 className="text-3xl font-black text-white uppercase tracking-tighter">{t('crm_tasks')}</h2>
-        <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.3em] mt-1">{t('tasks_subtitle')}</p>
+        <h2 className="text-2xl font-black text-white uppercase tracking-tight flex items-center gap-2">
+          <CalendarClock size={22} className="text-primary" /> {t('crm_tasks')}
+        </h2>
+        <p className="text-[10px] text-gray-500 font-black uppercase tracking-wider mt-0.5">{t('tasks_subtitle')}</p>
       </div>
 
       {/* KPI */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mx-2">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mx-2">
         <KpiTile icon={AlertTriangle} label={t('overdue_tasks')} value={overview?.overdue_count ?? groups.overdue.length} color="text-rose-500" bg="bg-rose-500/10" border="border-rose-500/20" />
         <KpiTile icon={Clock} label={t('today_tasks')} value={overview?.today_count ?? groups.today.length} color="text-amber-500" bg="bg-amber-500/10" border="border-amber-500/20" />
         <KpiTile icon={CalendarDays} label={t('upcoming_tasks')} value={groups.upcoming.length} color="text-primary" bg="bg-primary/10" border="border-primary/20" />
@@ -96,7 +98,7 @@ export default function Tasks() {
           <p className="text-[11px] font-black uppercase tracking-[0.3em]">{t('no_tasks')}</p>
         </div>
       ) : (
-        <div className="space-y-8 mx-2">
+        <div className="space-y-5 mx-2">
           <TaskSection title={t('overdue_tasks')} icon={AlertTriangle} accent="text-rose-500" tasks={groups.overdue} onComplete={completeTask} completing={completing} language={i18n.language} />
           <TaskSection title={t('today_tasks')} icon={Clock} accent="text-amber-500" tasks={groups.today} onComplete={completeTask} completing={completing} language={i18n.language} />
           <TaskSection title={t('upcoming_tasks')} icon={CalendarDays} accent="text-primary" tasks={groups.upcoming} onComplete={completeTask} completing={completing} language={i18n.language} />
@@ -130,11 +132,11 @@ export default function Tasks() {
 
 function KpiTile({ icon: Icon, label, value, color, bg, border }: any) {
   return (
-    <div className={cn("p-6 rounded-3xl border flex items-center gap-5", bg, border)}>
-      <div className={cn("p-3 rounded-2xl bg-white/5", color)}><Icon size={26} /></div>
-      <div>
-        <p className={cn("text-[10px] font-black uppercase tracking-widest", color)}>{label}</p>
-        <p className="text-3xl font-black text-white tracking-tighter">{value}</p>
+    <div className={cn("p-4 rounded-2xl border flex items-center gap-3", bg, border)}>
+      <div className={cn("p-2.5 rounded-xl bg-white/5 shrink-0", color)}><Icon size={18} /></div>
+      <div className="min-w-0">
+        <p className={cn("text-[10px] font-black uppercase tracking-wide truncate", color)}>{label}</p>
+        <p className="text-xl font-black text-white tracking-tighter">{value}</p>
       </div>
     </div>
   );
@@ -161,7 +163,7 @@ function TaskCard({ task, accent, onComplete, completing, language }: any) {
   const isBusy = completing === task.id;
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-      className="p-5 bg-[#0c0c0e] border border-white/5 rounded-3xl flex flex-col gap-4"
+      className="p-4 bg-[#0c0c0e] border border-white/5 rounded-2xl flex flex-col gap-3"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">

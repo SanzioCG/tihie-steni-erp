@@ -33,20 +33,20 @@ export default function LowStock() {
   );
 
   return (
-    <div className="space-y-6 text-left p-2 animate-in fade-in duration-500 pb-20">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-2">
+    <div className="space-y-5 text-left p-2 animate-in fade-in duration-500 pb-20">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-2">
         <div>
-          <h2 className="text-3xl font-black text-rose-500 uppercase tracking-tighter flex items-center gap-3">
-            <AlertTriangle size={32} className="animate-bounce" /> {t('low_stock')}
+          <h2 className="text-2xl font-black text-rose-500 uppercase tracking-tighter flex items-center gap-2">
+            <AlertTriangle size={22} className="animate-bounce" /> {t('low_stock')}
           </h2>
-          <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.3em] opacity-60">
+          <p className="text-[10px] text-gray-500 font-black uppercase tracking-wider mt-0.5">
             {t('low_stock_subtitle') || "Zaxira nazorati"}
           </p>
         </div>
 
-        <button 
+        <button
           onClick={handleExport}
-          className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl flex items-center gap-2 hover:bg-white/10 transition-all font-black text-[10px] uppercase tracking-widest"
+          className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-xl flex items-center gap-2 hover:bg-white/10 transition-all font-black text-[10px] uppercase tracking-widest"
         >
           <FileDown size={18} /> {t('pdf_export')}
         </button>

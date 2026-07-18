@@ -22,6 +22,7 @@ export default function InboundModal({ isOpen, onClose, onSuccess, editData }: I
   const [allProducts, setAllProducts] = useState<any[]>([]); 
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState({
@@ -62,11 +63,24 @@ export default function InboundModal({ isOpen, onClose, onSuccess, editData }: I
         });
         if (prods.data) {
           setFilteredProducts(prods.data.filter(p => p.category_id === editData.products?.category_id));
+          const editProd = prods.data.find(p => p.id === editData.product_id);
+          if (editProd) setSearchTerm(editProd.name_uz);
         }
       }
     };
     if (isOpen) fetchData();
   }, [isOpen, editData]);
+
+  // Dropdown tashqarisiga bosilganda yopish
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   // Cleanup
   useEffect(() => {
@@ -77,6 +91,8 @@ export default function InboundModal({ isOpen, onClose, onSuccess, editData }: I
         width_m: '', length_m: '', item_count: '1',
         min_limit: '5', color_name: ''
       });
+      setSearchTerm('');
+      setIsDropdownOpen(false);
       setLoading(false);
     }
   }, [isOpen]);
@@ -84,6 +100,14 @@ export default function InboundModal({ isOpen, onClose, onSuccess, editData }: I
   const handleCategoryChange = (id: string) => {
     setFormData({ ...formData, category_id: id, product_id: '' });
     setFilteredProducts(allProducts.filter(p => p.category_id === id));
+    setSearchTerm('');
+    setIsDropdownOpen(false);
+  };
+
+  const selectProduct = (p: any) => {
+    setFormData(prev => ({ ...prev, product_id: p.id }));
+    setSearchTerm(p.name_uz);
+    setIsDropdownOpen(false);
   };
 
   const selectedCategory = categories.find(c => c.id === formData.category_id);
@@ -204,29 +228,41 @@ export default function InboundModal({ isOpen, onClose, onSuccess, editData }: I
 
             <div className="space-y-2 relative" ref={dropdownRef}>
               <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-2">2. {t('products')}</label>
-              <div 
-                onClick={() => formData.category_id && !editData && setIsDropdownOpen(!isDropdownOpen)} 
-                className={cn(
-                  "w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white flex justify-between items-center", 
-                  (!formData.category_id || editData) ? "opacity-30 cursor-not-allowed" : "cursor-pointer hover:bg-white/10"
-                )}
-              >
-                <span className="text-sm font-black truncate uppercase">
-                  {selectedProduct ? selectedProduct.name_uz : t('search_placeholder')}
-                </span>
-                <Search size={16} className="text-gray-600" />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  disabled={!formData.category_id || !!editData}
+                  onChange={e => {
+                    setSearchTerm(e.target.value);
+                    setIsDropdownOpen(true);
+                    if (formData.product_id) setFormData(prev => ({ ...prev, product_id: '' }));
+                  }}
+                  onFocus={() => formData.category_id && !editData && setIsDropdownOpen(true)}
+                  placeholder={t('search_placeholder')}
+                  className={cn(
+                    "w-full px-5 py-4 pr-12 bg-white/5 border border-white/5 rounded-2xl text-white font-black outline-none uppercase text-sm placeholder:text-gray-600",
+                    (!formData.category_id || editData) ? "opacity-30 cursor-not-allowed" : "focus:border-primary/40"
+                  )}
+                />
+                <Search size={16} className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
               </div>
-              {isDropdownOpen && (
+              {isDropdownOpen && formData.category_id && !editData && (
                 <div className="absolute top-full left-0 right-0 mt-2 bg-[#121214] border border-white/10 rounded-2xl z-160 max-h-48 overflow-y-auto">
-                  {filteredProducts.map(p => (
-                    <div 
-                      key={p.id} 
-                      onClick={() => { setFormData({...formData, product_id: p.id}); setIsDropdownOpen(false); }} 
-                      className="px-6 py-4 hover:bg-primary/10 text-sm text-white font-black cursor-pointer border-b border-white/2 uppercase"
-                    >
-                      {p.name_uz}
-                    </div>
-                  ))}
+                  {filteredProducts
+                    .filter(p => p.name_uz.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .map(p => (
+                      <div
+                        key={p.id}
+                        onClick={() => selectProduct(p)}
+                        className="px-6 py-4 hover:bg-primary/10 text-sm text-white font-black cursor-pointer border-b border-white/2 uppercase"
+                      >
+                        {p.name_uz}
+                      </div>
+                    ))}
+                  {filteredProducts.filter(p => p.name_uz.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
+                    <div className="px-6 py-4 text-xs text-gray-600 font-black uppercase">{t('not_found', 'Topilmadi')}</div>
+                  )}
                 </div>
               )}
             </div>

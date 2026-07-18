@@ -64,10 +64,10 @@ export default function Debts() {
   const totalDebt = clients.reduce((sum: number, c: any) => sum + Math.abs(c.balance), 0);
 
   return (
-    <div className="space-y-8 text-left animate-in fade-in duration-500">
+    <div className="space-y-5 text-left animate-in fade-in duration-500">
       <div className="flex justify-between items-center px-2">
         <div>
-          <h2 className="text-3xl font-black text-white uppercase ">{t('debts_control')}</h2>
+          <h2 className="text-2xl font-black text-white uppercase ">{t('debts_control')}</h2>
           <p className="text-sm text-gray-500 italic">{t('manage_debtors')}</p>
         </div>
         <div className="flex gap-3">
@@ -77,12 +77,12 @@ export default function Debts() {
         </div>
       </div>
 
-      <div className="p-8 bg-rose-500/10 border border-rose-500/20 rounded-[2.5rem] backdrop-blur-md flex items-center justify-between mx-2">
-        <div className="flex items-center gap-6">
-          <div className="p-4 bg-rose-500/20 rounded-2xl text-rose-500"><Wallet size={32} /></div>
+      <div className="p-5 bg-rose-500/10 border border-rose-500/20 rounded-2xl backdrop-blur-md flex items-center justify-between mx-2">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-rose-500/20 rounded-xl text-rose-500"><Wallet size={26} /></div>
           <div>
             <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">{t('total_debtors_sum')}:</p>
-            <p className="text-3xl font-black text-white tracking-tighter">${totalDebt.toLocaleString()}</p>
+            <p className="text-2xl font-black text-white tracking-tighter">${totalDebt.toLocaleString()}</p>
           </div>
         </div>
         <div className="text-right hidden md:block">
@@ -96,28 +96,28 @@ export default function Debts() {
         <input 
           type="text" placeholder={t('search_debtor_placeholder')} 
           value={search} onChange={e => setSearch(e.target.value)}
-          className="w-full pl-14 pr-4 py-5 bg-[#0c0c0e] border border-white/5 rounded-3xl text-white outline-none focus:border-rose-500/30 transition-all font-black"
+          className="w-full pl-14 pr-4 py-3.5 bg-[#0c0c0e] border border-white/5 rounded-2xl text-white outline-none focus:border-rose-500/30 transition-all font-black"
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mx-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mx-2">
         {clients.filter((c: any) => c.full_name.toLowerCase().includes(search.toLowerCase())).map((client: any) => (
-          <div key={client.id} className="p-6 bg-[#0c0c0e] border border-white/5 rounded-4xl shadow-2xl hover:border-rose-500/30 transition-all group">
-            <div className="flex justify-between items-start mb-6">
-               <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform">
-                  <User size={24} />
+          <div key={client.id} className="p-4 bg-[#0c0c0e] border border-white/5 rounded-2xl shadow-2xl hover:border-rose-500/30 transition-all group">
+            <div className="flex justify-between items-start mb-4">
+               <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform">
+                  <User size={20} />
                </div>
                <div className="text-right">
                   <p className="text-[9px] font-black text-gray-500 uppercase">{t('debt_label')}:</p>
                   <p className="text-xl font-black text-rose-500 italic">-${Math.abs(client.balance).toLocaleString()}</p>
                </div>
             </div>
-            <h4 className="text-lg font-bold text-white mb-1 uppercase">{client.full_name}</h4>
-            <p className="text-[10px] text-gray-600 font-bold mb-6 uppercase tracking-widest">{client.phone || t('no_contact')}</p>
-            
-            <button 
+            <h4 className="text-base font-bold text-white mb-1 uppercase">{client.full_name}</h4>
+            <p className="text-[10px] text-gray-600 font-bold mb-4 uppercase tracking-widest">{client.phone || t('no_contact')}</p>
+
+            <button
               onClick={() => setSelectedClient(client)}
-              className="w-full py-4 bg-white/5 hover:bg-rose-500 hover:text-white text-gray-400 font-black rounded-xl transition-all uppercase text-[10px] tracking-widest flex items-center justify-center gap-2"
+              className="w-full py-3 bg-white/5 hover:bg-rose-500 hover:text-white text-gray-400 font-black rounded-xl transition-all uppercase text-[10px] tracking-widest flex items-center justify-center gap-2"
             >
               <ArrowRightCircle size={16} /> {t('accept_payment')}
             </button>

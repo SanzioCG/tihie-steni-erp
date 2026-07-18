@@ -159,18 +159,18 @@ export default function KP() {
   const totalSum = cart.reduce((sum, item) => sum + item.total, 0);
 
   return (
-    <div className="space-y-8 text-left animate-in fade-in duration-500 max-w-7xl mx-auto pb-20 font-sans">
+    <div className="space-y-5 text-left animate-in fade-in duration-500 max-w-7xl mx-auto pb-20 font-sans">
       <div className="flex justify-between items-center px-4">
-        <h2 className="text-4xl font-black uppercase tracking-tighter text-primary">{t('kp')}</h2>
+        <h2 className="text-2xl font-black uppercase tracking-tighter text-primary">{t('kp')}</h2>
         <button onClick={() => setShowHistory(!showHistory)} className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl flex items-center gap-2 font-black text-[10px] uppercase">
           <History size={18} /> {showHistory ? t('calculator') : t('view_history')}
         </button>
       </div>
 
       {!showHistory ? (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mx-2">
-          <div className="lg:col-span-4 space-y-6">
-            <div className="bg-[#0c0c0e] border border-white/5 rounded-4xl p-8 shadow-2xl space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mx-2">
+          <div className="lg:col-span-4 space-y-4">
+            <div className="bg-[#0c0c0e] border border-white/5 rounded-2xl p-5 shadow-2xl space-y-4">
               
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-primary uppercase tracking-widest ml-2">1. {t('select_client')}</label>
@@ -251,20 +251,20 @@ export default function KP() {
           </div>
 
           <div className="lg:col-span-8 flex flex-col">
-             <div className="bg-[#0c0c0e] border border-white/5 rounded-4xl p-10 shadow-2xl flex-1 flex flex-col">
+             <div className="bg-[#0c0c0e] border border-white/5 rounded-2xl p-5 shadow-2xl flex-1 flex flex-col">
                 <div className="flex-1 overflow-y-auto pr-2 no-scrollbar">
                    {cart.length > 0 ? (
                      <table className="w-full text-left border-collapse">
                        <thead className="text-[10px] font-black text-gray-600 uppercase border-b border-white/5">
-                        <tr><th className="pb-6">{t('products')}</th><th className="pb-6 text-center">{t('details')}</th><th className="pb-6 text-right">{t('total')}</th><th className="pb-6"></th></tr>
+                        <tr><th className="pb-4">{t('products')}</th><th className="pb-4 text-center">{t('details')}</th><th className="pb-4 text-right">{t('total')}</th><th className="pb-4"></th></tr>
                        </thead>
                        <tbody className="divide-y divide-white/3">
                           {cart.map(i => (
                             <tr key={i.id} className="group">
-                               <td className="py-6 font-black text-white text-sm uppercase">{i.product_name}</td>
-                               <td className="py-6 text-center text-[10px] text-gray-500 font-black uppercase">{i.details} = {i.qty.toFixed(2)}{i.unit}</td>
-                               <td className="py-6 text-right font-black text-primary text-sm">${i.total.toLocaleString()}</td>
-                               <td className="py-6 text-right"><button onClick={() => setCart(cart.filter(c => c.id !== i.id))} className="p-2 text-gray-700 hover:text-rose-500 transition-colors"><Trash2 size={16}/></button></td>
+                               <td className="py-2.5 font-black text-white text-[13px] uppercase">{i.product_name}</td>
+                               <td className="py-2.5 text-center text-[10px] text-gray-500 font-black uppercase">{i.details} = {i.qty.toFixed(2)}{i.unit}</td>
+                               <td className="py-2.5 text-right font-black text-primary text-[13px]">${i.total.toLocaleString()}</td>
+                               <td className="py-2.5 text-right"><button onClick={() => setCart(cart.filter(c => c.id !== i.id))} className="p-2 text-gray-700 hover:text-rose-500 transition-colors"><Trash2 size={16}/></button></td>
                             </tr>
                           ))}
                        </tbody>
@@ -274,13 +274,13 @@ export default function KP() {
                    )}
                 </div>
 
-                <div className="mt-auto pt-8 border-t border-white/5 flex justify-between items-end">
+                <div className="mt-auto pt-5 border-t border-white/5 flex justify-between items-end">
                    <div className="text-left">
                     <p className="text-[10px] font-black text-gray-600 uppercase">{t('selected_client')}:</p>
                     <p className="text-xl font-black text-white uppercase">{clients.find(c => c.id === clientId)?.full_name || t('not_selected')}</p>
                    </div>
                    <div className="text-right flex items-center gap-6">
-                      <div><p className="text-[10px] font-black text-primary uppercase mb-1 tracking-widest">{t('total_bill')}:</p><h3 className="text-4xl font-black text-white tracking-tighter italic">{convert(totalSum)}</h3></div>
+                      <div><p className="text-[10px] font-black text-primary uppercase mb-1 tracking-widest">{t('total_bill')}:</p><h3 className="text-2xl font-black text-white tracking-tighter italic">{convert(totalSum)}</h3></div>
                       {cart.length > 0 && <button onClick={saveAndExport} disabled={loading} className="p-5 bg-primary text-black rounded-3xl shadow-lg hover:scale-110 transition-all"><Save size={24} /></button>}
                    </div>
                 </div>

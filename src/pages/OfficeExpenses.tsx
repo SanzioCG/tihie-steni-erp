@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../services/supabase';
-import { Loader2, PieChart, X, ChevronDown, DollarSign, Save } from 'lucide-react';
+import { Loader2, PieChart, X, ChevronDown, DollarSign, Save, Receipt } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/useAuthStore';
@@ -54,47 +54,47 @@ export default function OfficeExpenses() {
   const selectedCat = CATEGORIES.find(c => c.id === formData.category) || CATEGORIES[0];
 
   return (
-    <div className="space-y-8 text-left p-6 animate-in fade-in duration-500 pb-20">
+    <div className="space-y-5 text-left p-5 animate-in fade-in duration-500 pb-20">
       <div className="flex justify-between items-center px-2">
-        <h2 className="text-3xl font-black text-white uppercase tracking-tighter">
-          {t('office_expenses_title')}
+        <h2 className="text-2xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
+          <Receipt size={22} className="text-primary" /> {t('office_expenses_title')}
         </h2>
-        <button onClick={() => setIsModalOpen(true)} className="px-8 py-3.5 bg-primary text-black font-black rounded-2xl shadow-lg hover:scale-105 transition-all uppercase text-[10px] tracking-widest">
+        <button onClick={() => setIsModalOpen(true)} className="px-8 py-3.5 bg-primary text-black font-black rounded-xl shadow-lg hover:scale-105 transition-all uppercase text-[10px] tracking-widest">
           + {t('new_expense')}
         </button>
       </div>
 
-      <div className="p-8 bg-rose-500/10 border border-rose-500/20 rounded-[2.5rem] flex items-center gap-6 mx-2 backdrop-blur-sm shadow-xl">
-        <div className="p-4 bg-rose-500/20 rounded-2xl text-rose-500 shadow-inner"><PieChart size={32} /></div>
+      <div className="p-5 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-4 mx-2 backdrop-blur-sm shadow-xl">
+        <div className="p-3 bg-rose-500/20 rounded-xl text-rose-500 shadow-inner shrink-0"><PieChart size={26} /></div>
         <div>
           <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">{t('total_expenses_label')}:</p>
-          <p className="text-4xl font-black text-white tracking-tighter">
+          <p className="text-2xl font-black text-white tracking-tighter">
             ${expenses.reduce((sum: number, e: any) => sum + Number(e.amount), 0).toLocaleString()}
           </p>
         </div>
       </div>
 
-      <div className="bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl relative min-h-75 mx-2">
+      <div className="bg-[#0c0c0e] border border-white/5 rounded-2xl overflow-hidden shadow-2xl relative min-h-75 mx-2">
         {loading && <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-10"><Loader2 className="animate-spin text-primary" size={40} /></div>}
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-white/5 text-primary border-b border-white/5">
               <tr>
-                <th className="px-10 py-7 text-[10px] font-black uppercase tracking-widest">{t('name')}</th>
-                <th className="px-10 py-7 text-[10px] font-black uppercase tracking-widest text-center">{t('category')}</th>
-                <th className="px-10 py-7 text-[10px] font-black uppercase tracking-widest text-right">{t('total')}</th>
+                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest">{t('name')}</th>
+                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-center">{t('category')}</th>
+                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-right">{t('total')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {expenses.map((e: any) => (
                 <tr key={e.id} className="group hover:bg-white/[0.02] transition-colors">
-                  <td className="px-10 py-6 text-white font-black uppercase text-sm">{e.title}</td>
-                  <td className="px-10 py-6 text-center">
+                  <td className="px-8 py-2.5 text-white font-black uppercase text-sm">{e.title}</td>
+                  <td className="px-8 py-2.5 text-center">
                     <span className="px-4 py-1.5 bg-white/5 border border-white/5 rounded-xl text-[9px] text-gray-500 font-black uppercase tracking-widest">
                       {CATEGORIES.find(c => c.id === e.category)?.name || e.category}
                     </span>
                   </td>
-                  <td className="px-10 py-6 text-right font-black text-rose-500 text-lg italic tracking-tighter">
+                  <td className="px-8 py-2.5 text-right font-black text-rose-500 text-lg italic tracking-tighter">
                     -${Number(e.amount).toLocaleString()}
                   </td>
                 </tr>

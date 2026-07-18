@@ -1,5 +1,5 @@
 import { Plus, Search } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface ProductPickerProps {
@@ -31,14 +31,26 @@ interface ProductPickerProps {
 
 export default function ProductPicker(p: ProductPickerProps) {
   const { t } = useTranslation();
-  
+  const pickerRef = useRef<HTMLDivElement>(null);
+
   const filteredProducts = useMemo(() => {
     if (!p.selectedCatId) return [];
-    return p.allProducts.filter(prod => 
-      prod.category_id === p.selectedCatId && 
+    return p.allProducts.filter(prod =>
+      prod.category_id === p.selectedCatId &&
       prod.name_uz.toLowerCase().includes(p.searchTerm.toLowerCase())
     );
   }, [p.selectedCatId, p.searchTerm, p.allProducts]);
+
+  // Dropdown tashqarisiga bosilganda yopish
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (p.isDropdownOpen && pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        p.onDropdownToggle();
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [p.isDropdownOpen, p.onDropdownToggle]);
 
   return (
     <div className="p-6 bg-white/5 border border-white/5 rounded-[2rem] space-y-4">
@@ -54,25 +66,34 @@ export default function ProductPicker(p: ProductPickerProps) {
           ))}
         </select>
         
-        <div 
-          onClick={() => p.selectedCatId && p.onDropdownToggle()} 
-          className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-white flex justify-between items-center cursor-pointer text-[11px] font-black uppercase relative"
-        >
-          <span className="truncate">
-            {p.selectedProdId ? p.searchTerm : t('search_product')}
-          </span>
-          <Search size={14} />
-          {p.isDropdownOpen && (
+        <div className="relative" ref={pickerRef}>
+          <input
+            type="text"
+            value={p.searchTerm}
+            disabled={!p.selectedCatId}
+            onChange={e => {
+              p.onSearchTermChange(e.target.value);
+              if (!p.isDropdownOpen) p.onDropdownToggle();
+            }}
+            onFocus={() => { if (p.selectedCatId && !p.isDropdownOpen) p.onDropdownToggle(); }}
+            placeholder={t('search_product')}
+            className="w-full px-4 py-3 pr-9 bg-white/5 border border-white/5 rounded-xl text-white text-[11px] font-black uppercase outline-none placeholder:text-gray-600 disabled:opacity-30"
+          />
+          <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+          {p.isDropdownOpen && p.selectedCatId && (
             <div className="absolute top-full left-0 right-0 mt-2 bg-[#121214] border border-white/10 rounded-xl z-50 max-h-48 overflow-y-auto">
               {filteredProducts.map(prod => (
-                <div 
-                  key={prod.id} 
-                  onClick={(e) => { e.stopPropagation(); p.onProductSelect(prod); }}
-                  className="px-4 py-3 hover:bg-primary/10 text-xs text-white font-black border-b border-white/5"
+                <div
+                  key={prod.id}
+                  onClick={() => p.onProductSelect(prod)}
+                  className="px-4 py-3 hover:bg-primary/10 text-xs text-white font-black border-b border-white/5 cursor-pointer uppercase"
                 >
                   {prod.name_uz}
                 </div>
               ))}
+              {filteredProducts.length === 0 && (
+                <div className="px-4 py-3 text-[11px] text-gray-600 font-black uppercase">{t('not_found', 'Topilmadi')}</div>
+              )}
             </div>
           )}
         </div>

@@ -149,11 +149,11 @@ export default function Clients() {
   }, [clients, search, filterMode, clientStats]);
 
   return (
-    <div className="space-y-8 text-left text-app-fg font-sans animate-in fade-in duration-500">
+    <div className="space-y-5 text-left text-app-fg font-sans animate-in fade-in duration-500">
       {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-2">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
         <div>
-          <h2 className="text-3xl font-black tracking-tighter uppercase text-white">{t('clients_database')}</h2>
+          <h2 className="text-2xl font-black tracking-tighter uppercase text-white">{t('clients_database')}</h2>
           <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.3em] mt-1">{t('crm_subtitle')}</p>
         </div>
         <div className="flex gap-3">
@@ -175,7 +175,7 @@ export default function Clients() {
             placeholder={t('search_client_placeholder')} 
             value={search} 
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-14 pr-4 py-5 bg-[#0c0c0e] border border-white/5 rounded-2xl text-white outline-none focus:border-primary/40 transition-all shadow-2xl font-black"
+            className="w-full pl-14 pr-4 py-3.5 bg-[#0c0c0e] border border-white/5 rounded-2xl text-white outline-none focus:border-primary/40 transition-all shadow-2xl font-black"
           />
         </div>
 
@@ -206,25 +206,25 @@ export default function Clients() {
       </div>
 
       {/* JADVAL */}
-      <div className="bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl relative min-h-112.5 mx-2">
+      <div className="bg-[#0c0c0e] border border-white/5 rounded-2xl overflow-hidden shadow-2xl relative min-h-112.5 mx-2">
         {loading && <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 backdrop-blur-sm"><Loader2 className="animate-spin text-primary" size={40} /></div>}
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead className="bg-white/5 text-primary border-b border-white/5">
               <tr>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em]">{t('client_and_type')}</th>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-center">{t('phone')}</th>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-center">{t('turnover')}</th>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-center">{t('balance_label')}</th>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-right">{t('actions')}</th>
+                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em]">{t('client_and_type')}</th>
+                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-center">{t('phone')}</th>
+                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-center">{t('turnover')}</th>
+                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-center">{t('balance_label')}</th>
+                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-right">{t('actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/2">
               {filteredClients.map((c: any) => (
                 <tr key={c.id} className="group hover:bg-white/1 transition-all cursor-pointer">
-                  <td onClick={() => openHistory(c)} className="px-8 py-5">
+                  <td onClick={() => openHistory(c)} className="px-8 py-2.5">
                     <div className="flex items-center gap-4">
-                      <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all shrink-0">
                         {c.kind === 'company' ? <Building2 size={18} strokeWidth={2.5} /> : <User size={18} strokeWidth={2.5} />}
                       </div>
                       <div>
@@ -240,18 +240,18 @@ export default function Clients() {
                       </div>
                     </div>
                   </td>
-                  <td onClick={() => openHistory(c)} className="px-8 py-5 text-center text-xs font-bold text-gray-500 font-mono">
+                  <td onClick={() => openHistory(c)} className="px-8 py-2.5 text-center text-xs font-bold text-gray-500 font-mono">
                     {c.phone || '--'}
                   </td>
-                  <td onClick={() => openHistory(c)} className="px-8 py-5 text-center font-black text-sm tracking-tighter text-white">
+                  <td onClick={() => openHistory(c)} className="px-8 py-2.5 text-center font-black text-sm tracking-tighter text-white">
                     {convert(clientStats[c.id] || 0)}
                   </td>
-                  <td onClick={() => openHistory(c)} className="px-8 py-5 text-center font-black text-sm tracking-tighter">
+                  <td onClick={() => openHistory(c)} className="px-8 py-2.5 text-center font-black text-sm tracking-tighter">
                     <span className={cn(Number(c.balance) < 0 ? "text-rose-500" : Number(c.balance) > 0 ? "text-emerald-500" : "text-gray-500")}>
                         {Number(c.balance) < 0 ? `-${convert(Math.abs(c.balance))}` : convert(c.balance)}
                     </span>
                   </td>
-                  <td className="px-8 py-5 text-right">
+                  <td className="px-8 py-2.5 text-right">
                     <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
                        <button onClick={(e) => { e.stopPropagation(); setSelectedClient(c); setIsModalOpen(true); }} className="p-2.5 bg-white/5 text-gray-500 hover:text-primary rounded-xl border border-white/5"><Edit2 size={15}/></button>
                        <button onClick={(e) => { e.stopPropagation(); if(window.confirm(t('confirm_delete'))) supabase.from('clients').delete().eq('id', c.id).then(() => fetchClients()) }} className="p-2.5 bg-white/5 text-gray-500 hover:text-rose-500 rounded-xl border border-white/5"><Trash2 size={15}/></button>

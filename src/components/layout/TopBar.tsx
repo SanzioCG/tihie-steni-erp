@@ -17,7 +17,7 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
   };
 
   return (
-    <header className="h-20 bg-[#0c0c0e]/90 backdrop-blur-xl border-b border-white/5 sticky top-0 z-40 px-4 md:px-8 flex items-center justify-between font-sans">
+    <header className="h-14 bg-[#0c0c0e]/90 backdrop-blur-xl border-b border-white/5 sticky top-0 z-40 px-4 md:px-6 flex items-center justify-between font-sans">
       
       {/* CHAP TOMON: MENU VA TITLE */}
       <div className="flex items-center gap-3">
@@ -66,12 +66,12 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
             </p>
           </div>
           
-          <div className="relative w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-white/5 border border-white/10 overflow-hidden shadow-2xl shrink-0 group cursor-pointer hover:border-primary/50 transition-all">
+          <div className="relative w-8 h-8 md:w-9 md:h-9 rounded-xl bg-white/5 border border-white/10 overflow-hidden shadow-2xl shrink-0 group cursor-pointer hover:border-primary/50 transition-all">
             {profile?.avatar_url ? (
               <img src={profile.avatar_url} alt="User" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-700">
-                <User size={20} strokeWidth={3} />
+                <User size={18} strokeWidth={3} />
               </div>
             )}
           </div>

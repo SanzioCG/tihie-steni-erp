@@ -48,12 +48,12 @@ export default function Sales() {
   });
 
   return (
-    <div className="space-y-8 text-left animate-in fade-in duration-500 font-sans pb-20">
-      
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-2">
+    <div className="space-y-5 text-left animate-in fade-in duration-500 font-sans pb-20">
+
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-2">
         <div>
-          <h2 className="text-3xl font-black text-white uppercase tracking-tighter flex items-center gap-3">
-             <ShoppingBag className="text-primary" size={32} /> {t('sales_history')}
+          <h2 className="text-2xl font-black text-white uppercase tracking-tighter flex items-center gap-3">
+             <ShoppingBag className="text-primary" size={26} /> {t('sales_history')}
           </h2>
           <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.3em] mt-1">{t('sales_subtitle')}</p>
         </div>
@@ -75,20 +75,20 @@ export default function Sales() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mx-2">
         <div className="md:col-span-2 relative group">
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-primary transition-colors" size={18} />
-          <input 
-            type="text" placeholder={t('search_sales')} 
+          <input
+            type="text" placeholder={t('search_sales')}
             value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full pl-14 pr-4 py-5 bg-[#0c0c0e] border border-white/5 rounded-3xl text-white outline-none focus:border-primary/40 transition-all shadow-xl font-black text-sm uppercase"
+            className="w-full pl-14 pr-4 py-3.5 bg-[#0c0c0e] border border-white/5 rounded-2xl text-white outline-none focus:border-primary/40 transition-all shadow-xl font-black text-sm uppercase"
           />
         </div>
 
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="w-full h-full px-6 py-4 bg-[#0c0c0e] border border-white/5 rounded-3xl text-white outline-none font-black text-[10px] uppercase tracking-widest appearance-none cursor-pointer">
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="w-full h-full px-6 py-3.5 bg-[#0c0c0e] border border-white/5 rounded-2xl text-white outline-none font-black text-[10px] uppercase tracking-widest appearance-none cursor-pointer">
           <option value="ALL">{t('all_statuses')}</option>
           <option value="completed">{t('completed')}</option>
           <option value="pending">{t('pending')}</option>
         </select>
 
-        <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="w-full h-full px-6 py-4 bg-[#0c0c0e] border border-white/5 rounded-3xl text-white outline-none font-black text-[10px] uppercase tracking-widest appearance-none cursor-pointer">
+        <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="w-full h-full px-6 py-3.5 bg-[#0c0c0e] border border-white/5 rounded-2xl text-white outline-none font-black text-[10px] uppercase tracking-widest appearance-none cursor-pointer">
           <option value="ALL">{t('client_types')}</option>
           <option value="retail">{t('retail')}</option>
           <option value="vip">{t('vip')}</option>
@@ -96,19 +96,19 @@ export default function Sales() {
         </select>
       </div>
 
-      <div className="bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl relative min-h-125 mx-2">
+      <div className="bg-[#0c0c0e] border border-white/5 rounded-2xl overflow-hidden shadow-2xl relative min-h-125 mx-2">
         {loading && <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 backdrop-blur-sm"><Loader2 className="animate-spin text-primary" size={40} /></div>}
         
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-250">
             <thead className="bg-white/5 text-primary">
               <tr>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em]">{t('date')}</th>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em]">{t('client_and_type')}</th>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em]">{t('sold_product')}</th>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-center">{t('status')}</th>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-right">{t('total')}</th>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-right">{t('actions')}</th>
+                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em]">{t('date')}</th>
+                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em]">{t('client_and_type')}</th>
+                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em]">{t('sold_product')}</th>
+                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-center">{t('status')}</th>
+                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-right">{t('total')}</th>
+                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-right">{t('actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/3">
@@ -116,21 +116,21 @@ export default function Sales() {
                 const isTek = sale.products?.categories?.name_uz?.toLowerCase().includes('tekstil');
                 return (
                   <tr key={sale.id} className="group hover:bg-white/1 transition-all">
-                    <td className="px-8 py-6">
+                    <td className="px-8 py-2.5">
                        <div className="flex items-center gap-2 text-app-muted font-mono text-[11px] font-black uppercase">
                          <Calendar size={12} /> {new Date(sale.created_at).toLocaleDateString(i18n.language)}
                        </div>
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-8 py-2.5">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-primary font-black text-xs">{sale.clients?.full_name?.charAt(0)}</div>
+                        <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-primary font-black text-xs">{sale.clients?.full_name?.charAt(0)}</div>
                         <div>
                           <p className="text-sm font-black text-white uppercase">{sale.clients?.full_name || t('general')}</p>
                           <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded border border-gray-800 text-gray-500">{sale.clients?.client_type ? t(sale.clients.client_type) : ''}</span>
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-8 py-2.5">
                        <div className="space-y-1">
                           <p className="text-sm font-black text-white uppercase truncate max-w-50">{sale.products?.name_uz}</p>
                           <div className="flex items-center gap-3">
@@ -139,7 +139,7 @@ export default function Sales() {
                           </div>
                        </div>
                     </td>
-                    <td className="px-8 py-6 text-center">
+                    <td className="px-8 py-2.5 text-center">
                       <span className={cn(
                         "inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[9px] font-black uppercase border",
                         sale.status === 'completed' ? "text-emerald-500 border-emerald-500/20 bg-emerald-500/5" : "text-rose-500 border-rose-500/20 bg-rose-500/5"
@@ -147,10 +147,10 @@ export default function Sales() {
                         {sale.status === 'completed' ? t('completed') : t('debt')}
                       </span>
                     </td>
-                    <td className="px-8 py-6 text-right font-black text-white tracking-tighter text-lg">
+                    <td className="px-8 py-2.5 text-right font-black text-white tracking-tighter text-lg">
                        {convert(sale.total_amount)}
                     </td>
-                    <td className="px-8 py-6 text-right">
+                    <td className="px-8 py-2.5 text-right">
                        <button onClick={() => { setSelectedSale(sale); setIsReturnOpen(true); }} className="p-2.5 bg-white/5 hover:bg-rose-500/20 text-rose-500 rounded-xl transition-all active:scale-90">
                          <RotateCcw size={16} strokeWidth={3} />
                        </button>

@@ -51,19 +51,19 @@ export default function Audit() {
   });
 
   return (
-    <div className="space-y-8 text-left text-app-fg animate-in fade-in duration-500 pb-20">
-      
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-2">
+    <div className="space-y-5 text-left text-app-fg animate-in fade-in duration-500 pb-20">
+
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
         <div>
-          <h2 className="text-3xl font-black text-white uppercase tracking-tight flex items-center gap-3 italic">
-            <ShieldCheck className="text-primary" size={36} strokeWidth={2.5} /> {t('audit')}
+          <h2 className="text-2xl font-black text-white uppercase tracking-tight flex items-center gap-2">
+            <ShieldCheck className="text-primary" size={22} strokeWidth={2.5} /> {t('audit')}
           </h2>
-          <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.3em] opacity-60 ml-12">
+          <p className="text-[10px] text-gray-500 font-black uppercase tracking-wider mt-0.5 ml-8">
             {t('audit_subtitle') || "System Security & Action Logs"}
           </p>
         </div>
-        
-        <button className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-white transition-all">
+
+        <button className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-white transition-all">
           <DownloadCloud size={16} /> Export CSV
         </button>
       </div>
@@ -71,12 +71,12 @@ export default function Audit() {
       <div className="space-y-5 mx-2">
         <div className="relative group">
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-primary transition-colors" size={20} />
-          <input 
-            type="text" 
-            placeholder={t('search') + " (Xodim, mahsulot yoki harakat)..."} 
-            value={search} 
+          <input
+            type="text"
+            placeholder={t('search') + " (Xodim, mahsulot yoki harakat)..."}
+            value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-16 pr-6 py-6 bg-[#0c0c0e] border border-white/5 rounded-[2rem] text-white outline-none focus:border-primary/30 transition-all font-bold text-sm uppercase shadow-2xl"
+            className="w-full pl-16 pr-6 py-3.5 bg-[#0c0c0e] border border-white/5 rounded-2xl text-white outline-none focus:border-primary/30 transition-all font-bold text-sm uppercase shadow-2xl"
           />
         </div>
 
@@ -86,7 +86,7 @@ export default function Audit() {
               key={f.id}
               onClick={() => setActiveFilter(f.id)}
               className={cn(
-                "px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.15em] transition-all whitespace-nowrap border-2",
+                "px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all whitespace-nowrap border-2",
                 activeFilter === f.id 
                   ? "bg-primary text-black border-primary shadow-lg shadow-primary/20 scale-105" 
                   : "bg-white/5 text-gray-500 border-white/5 hover:border-white/10"
@@ -98,7 +98,7 @@ export default function Audit() {
         </div>
       </div>
 
-      <div className="bg-[#0c0c0e] border border-white/5 rounded-[3rem] overflow-hidden min-h-125 relative mx-2 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+      <div className="bg-[#0c0c0e] border border-white/5 rounded-2xl overflow-hidden min-h-125 relative mx-2 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
         {loading && (
             <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
                 <Loader2 className="animate-spin text-primary" size={48} />
@@ -109,10 +109,10 @@ export default function Audit() {
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead className="bg-white/5 border-b border-white/5">
               <tr>
-                <th className="px-10 py-7 text-[10px] font-black uppercase tracking-widest text-gray-500 w-52">{t('time')}</th>
-                <th className="px-10 py-7 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center w-40">{t('type')}</th>
-                <th className="px-10 py-7 text-[10px] font-black uppercase tracking-widest text-gray-500">{t('details')}</th>
-                <th className="px-10 py-7 text-[10px] font-black uppercase tracking-widest text-gray-500 text-right">{t('admin')}</th>
+                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-gray-500 w-52">{t('time')}</th>
+                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center w-40">{t('type')}</th>
+                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-gray-500">{t('details')}</th>
+                <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-right">{t('admin')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
@@ -122,7 +122,7 @@ export default function Audit() {
 
                 return (
                   <tr key={log.id} className="group hover:bg-white/[0.02] transition-colors">
-                    <td className="px-10 py-6">
+                    <td className="px-8 py-2.5">
                        <div className="flex flex-col">
                           <span className="text-white font-black text-xs">
                              {new Date(log.created_at).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
@@ -132,7 +132,7 @@ export default function Audit() {
                           </span>
                        </div>
                     </td>
-                    <td className="px-10 py-6 text-center">
+                    <td className="px-8 py-2.5 text-center">
                       <span className={cn(
                         "inline-flex items-center gap-2 px-4 py-1.5 rounded-xl text-[9px] font-black uppercase border tracking-tighter",
                         Config.color
@@ -141,12 +141,12 @@ export default function Audit() {
                         {log.entity}
                       </span>
                     </td>
-                    <td className="px-10 py-6">
+                    <td className="px-8 py-2.5">
                         <p className="text-sm font-black text-gray-200 uppercase tracking-tight leading-relaxed">
                             {log.details}
                         </p>
                     </td>
-                    <td className="px-10 py-6 text-right">
+                    <td className="px-8 py-2.5 text-right">
                         <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/5">
                             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                             <span className="font-black text-[10px] text-white uppercase tracking-widest">{log.user_name}</span>

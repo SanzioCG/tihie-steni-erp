@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, Save, Loader2, Users, Store, Plus, Trash2, X, Globe } from 'lucide-react';
+import { User, Save, Loader2, Users, Store, Plus, Trash2, X, Globe, Settings as SettingsIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../services/supabase';
 import { useAuthStore } from '../store/useAuthStore';
@@ -111,10 +111,12 @@ export default function Settings() {
     : staff;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-20 animate-in fade-in font-sans text-left">
-      <h2 className="text-4xl font-black text-white uppercase tracking-tighter px-2">{t('settings')}</h2>
+    <div className="max-w-4xl mx-auto space-y-5 pb-20 animate-in fade-in font-sans text-left">
+      <h2 className="text-2xl font-black text-white uppercase tracking-tighter px-2 flex items-center gap-2">
+        <SettingsIcon size={22} className="text-primary" /> {t('settings')}
+      </h2>
 
-      <div className="flex gap-2 bg-white/5 p-1.5 rounded-3xl border border-white/5 mx-2">
+      <div className="flex gap-2 bg-white/5 p-1.5 rounded-2xl border border-white/5 mx-2">
         <TabBtn active={activeTab === 'profile'} onClick={() => setActiveTab('profile')} icon={<User size={14}/>} label={t('profile')} />
         {isAdmin && (
           <>

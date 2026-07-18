@@ -72,11 +72,11 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-10 text-left animate-in fade-in duration-700 font-sans pb-20">
-      
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-2">
+    <div className="space-y-5 text-left animate-in fade-in duration-700 font-sans pb-20">
+
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-2">
         <div>
-          <h2 className="text-4xl font-black text-white uppercase tracking-tighter ">{t('dashboard')}</h2>
+          <h2 className="text-2xl font-black text-white uppercase tracking-tighter ">{t('dashboard')}</h2>
           <div className="flex items-center gap-4 mt-2">
              <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.4em] flex items-center gap-2">
                 <Activity size={12} className="text-primary animate-pulse" /> Live Monitoring
@@ -106,80 +106,73 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* 1-qator: Bugungi ko'rsatkichlar */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mx-2">
-        <KPIItem 
-          label={t('today_sales') || "Bugungi sotuv"} 
-          value={convert(stats.todaySales)} 
-          icon={TrendingUp} 
-          color="text-emerald-500" 
+      {/* KPI to'ri: bugungi ko'rsatkichlar + ombor/top (zich 2×4) */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 mx-2">
+        <KPIItem
+          label={t('today_sales') || "Bugungi sotuv"}
+          value={convert(stats.todaySales)}
+          icon={TrendingUp}
+          color="text-emerald-500"
         />
-        <KPIItem 
-          label={t('today_profit') || "Bugungi foyda"} 
-          value={convert(stats.todayProfit)} 
-          icon={DollarSign} 
-          color="text-emerald-500" 
+        <KPIItem
+          label={t('today_profit') || "Bugungi foyda"}
+          value={convert(stats.todayProfit)}
+          icon={DollarSign}
+          color="text-emerald-500"
           trend={`${profitMargin}%`}
         />
-        <KPIItem 
-          label={t('cash_balance') || "Naqd pul"} 
-          value={convert(stats.cashBalance)} 
-          icon={Wallet} 
-          color="text-blue-400" 
+        <KPIItem
+          label={t('cash_balance') || "Naqd pul"}
+          value={convert(stats.cashBalance)}
+          icon={Wallet}
+          color="text-blue-400"
         />
-        <div onClick={() => navigate('/debts')} className="cursor-pointer">
-          <KPIItem 
-            label={t('debts_label')} 
-            value={convert(stats.totalDebt)} 
-            icon={Wallet} 
-            color="text-rose-500" 
-            trend="DEBT" 
-          />
-        </div>
-      </div>
-
-      {/* 2-qator: Ombor va top */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mx-2">
-        <div onClick={() => navigate('/stock')} className="cursor-pointer">
-          <KPIItem 
-            label={t('inventory_value')} 
-            value={convert(stats.inventoryValue)} 
-            icon={ShoppingBag} 
-            color="text-blue-400" 
-            trend="STOCK" 
-          />
-        </div>
-        <div onClick={() => navigate('/lowstock')} className="cursor-pointer">
-          <KPIItem 
-            label={t('low_stock')} 
-            value={stats.lowStockCount.toString()} 
-            icon={AlertTriangle} 
-            color={stats.lowStockCount > 0 ? "text-rose-500 animate-pulse" : "text-amber-500"} 
-            trend="LIMIT" 
-          />
-        </div>
-        <KPIItem 
-          label={t('top_product') || "Top mahsulot"} 
-          value={stats.topProduct || '—'} 
-          icon={Award} 
-          color="text-amber-500" 
+        <KPIItem
+          label={t('debts_label')}
+          value={convert(stats.totalDebt)}
+          icon={Wallet}
+          color="text-rose-500"
+          trend="DEBT"
+          onClick={() => navigate('/debts')}
+        />
+        <KPIItem
+          label={t('inventory_value')}
+          value={convert(stats.inventoryValue)}
+          icon={ShoppingBag}
+          color="text-blue-400"
+          trend="STOCK"
+          onClick={() => navigate('/stock')}
+        />
+        <KPIItem
+          label={t('low_stock')}
+          value={stats.lowStockCount.toString()}
+          icon={AlertTriangle}
+          color={stats.lowStockCount > 0 ? "text-rose-500 animate-pulse" : "text-amber-500"}
+          trend="LIMIT"
+          onClick={() => navigate('/lowstock')}
+        />
+        <KPIItem
+          label={t('top_product') || "Top mahsulot"}
+          value={stats.topProduct || '—'}
+          icon={Award}
+          color="text-amber-500"
           isText
         />
-        <KPIItem 
-          label={t('top_client') || "Top mijoz"} 
-          value={stats.topClient || '—'} 
-          icon={User} 
-          color="text-purple-400" 
+        <KPIItem
+          label={t('top_client') || "Top mijoz"}
+          value={stats.topClient || '—'}
+          icon={User}
+          color="text-purple-400"
           isText
         />
       </div>
 
       {/* Grafik va Recent activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mx-2">
-          <div className="lg:col-span-2 p-10 bg-[#0c0c0e] border border-white/5 rounded-[3.5rem] shadow-2xl relative overflow-hidden h-[480px]">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mx-2">
+          <div className="lg:col-span-2 p-5 bg-[#0c0c0e] border border-white/5 rounded-2xl shadow-2xl relative overflow-hidden h-[420px]">
              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] -mr-32 -mt-32" />
-             <div className="flex justify-between items-center relative z-10 mb-8">
-                <h3 className="text-xl font-black text-white uppercase flex items-center gap-3 tracking-tight">
+             <div className="flex justify-between items-center relative z-10 mb-5">
+                <h3 className="text-lg font-black text-white uppercase flex items-center gap-3 tracking-tight">
                   <Activity className="text-primary"/> {t('sales_dynamics')}
                 </h3>
                 <div className="px-4 py-2 bg-white/5 rounded-xl text-[10px] font-bold text-gray-500 flex items-center gap-2">
@@ -209,11 +202,11 @@ export default function Dashboard() {
              </div>
           </div>
 
-          <div className="p-10 bg-[#0c0c0e] border border-white/5 rounded-[3.5rem] shadow-2xl h-[480px] flex flex-col overflow-hidden">
-             <h3 className="text-xl font-black text-white uppercase mb-8 flex items-center gap-3 tracking-tighter">
+          <div className="p-5 bg-[#0c0c0e] border border-white/5 rounded-2xl shadow-2xl h-[420px] flex flex-col overflow-hidden">
+             <h3 className="text-lg font-black text-white uppercase mb-5 flex items-center gap-3 tracking-tighter">
                <History className="text-primary"/> {t('recent_activity')}
              </h3>
-             <div className="space-y-6 flex-1 overflow-y-auto no-scrollbar pr-2">
+             <div className="space-y-4 flex-1 overflow-y-auto no-scrollbar pr-2">
                 {recentActivity.map((log: any) => (
                   <div key={log.id} className="flex items-start gap-4 group">
                     <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shadow-[0_0_8px_#34d399] group-hover:scale-150 transition-all" />
@@ -286,25 +279,31 @@ export default function Dashboard() {
   );
 }
 
-function KPIItem({ label, value, icon: Icon, color, trend, isText }: any) {
+function KPIItem({ label, value, icon: Icon, color, trend, isText, onClick }: any) {
   return (
-    <div className="p-8 bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
+    <div
+      onClick={onClick}
+      className={cn(
+        "p-4 bg-[#0c0c0e] border border-white/5 rounded-2xl shadow-2xl relative overflow-hidden group flex items-center gap-3",
+        onClick && "cursor-pointer hover:border-white/10 transition-colors"
+      )}
+    >
       <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-3xl -mr-12 -mt-12 group-hover:bg-primary/10 transition-all duration-700" />
-      <div className="flex items-center justify-between mb-6 relative z-10">
-        <div className={cn("p-4 bg-white/5 rounded-2xl group-hover:scale-110 transition-transform duration-500 shadow-inner", color)}>
-          <Icon size={28} strokeWidth={2.5} />
-        </div>
-        {trend && (
-          <span className="text-[9px] font-black px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-gray-500 uppercase tracking-widest">
-            {trend}
-          </span>
-        )}
+      <div className={cn("p-2.5 bg-white/5 rounded-xl group-hover:scale-110 transition-transform duration-500 shadow-inner shrink-0 relative z-10", color)}>
+        <Icon size={18} strokeWidth={2.5} />
       </div>
-      <div className="relative z-10">
-        <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-2">{label}</p>
+      <div className="relative z-10 min-w-0 flex-1">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider truncate">{label}</p>
+          {trend && (
+            <span className="text-[8px] font-black px-1.5 py-0.5 rounded-md bg-white/5 border border-white/5 text-gray-500 uppercase tracking-widest shrink-0">
+              {trend}
+            </span>
+          )}
+        </div>
         <h3 className={cn(
-          "font-black text-white tracking-tighter uppercase",
-          isText ? "text-base truncate" : "text-3xl"
+          "font-black text-white tracking-tighter uppercase mt-0.5 truncate",
+          isText ? "text-sm" : "text-xl"
         )}>{value}</h3>
       </div>
     </div>
