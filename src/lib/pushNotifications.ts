@@ -25,6 +25,18 @@ export function getNotificationPermission(): NotificationPermission {
   return Notification.permission;
 }
 
+// Shu qurilma allaqachon obuna bo'lganmi (permission + faol subscription)
+export async function isCurrentlySubscribed(): Promise<boolean> {
+  if (!isPushSupported() || Notification.permission !== 'granted') return false;
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.getSubscription();
+    return !!subscription;
+  } catch {
+    return false;
+  }
+}
+
 // Foydalanuvchini push ga obuna qilish
 export async function subscribeUserToPush(userId: string): Promise<boolean> {
   try {
@@ -54,17 +66,14 @@ export async function subscribeUserToPush(userId: string): Promise<boolean> {
       });
     }
 
-    // DB'ga saqlash
-    const subJson = subscription.toJSON();
+    // DB'ga saqlash — jadval sxemasi: { user_id, subscription (jsonb) }.
+    // endpoint — generated column (subscription->>'endpoint'), yozilmaydi.
     const { error } = await supabase
       .from('push_subscriptions')
       .upsert({
         user_id: userId,
-        endpoint: subscription.endpoint,
-        p256dh: subJson.keys?.p256dh || '',
-        auth: subJson.keys?.auth || '',
-        user_agent: navigator.userAgent,
-      }, { onConflict: 'endpoint' });
+        subscription: subscription.toJSON(),
+      }, { onConflict: 'user_id,endpoint' });
 
     if (error) {
       console.error('Subscription saqlanmadi:', error);

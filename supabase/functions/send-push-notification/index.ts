@@ -81,13 +81,8 @@ Deno.serve(async (req) => {
     const payload = JSON.stringify({ title, body, data: data || {} })
     const results = await Promise.allSettled(
       subscriptions.map(sub =>
-        webpush.sendNotification(
-          {
-            endpoint: sub.endpoint,
-            keys: { p256dh: sub.p256dh, auth: sub.auth }
-          },
-          payload
-        )
+        // sub.subscription — to'liq PushSubscription JSON ({ endpoint, keys })
+        webpush.sendNotification(sub.subscription, payload)
       )
     )
 

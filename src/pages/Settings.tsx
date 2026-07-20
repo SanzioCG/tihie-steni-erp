@@ -1,11 +1,17 @@
 import { useState, useEffect } from 'react';
-import { User, Save, Loader2, Users, Store, Plus, Trash2, X, Globe, Settings as SettingsIcon } from 'lucide-react';
+import { User, Save, Loader2, Users, Store, Plus, Trash2, X, Globe, Settings as SettingsIcon, Bell, BellOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../services/supabase';
 import { useAuthStore } from '../store/useAuthStore';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../lib/utils';
 import toast from 'react-hot-toast';
+import {
+  isPushSupported,
+  isCurrentlySubscribed,
+  subscribeUserToPush,
+  getNotificationPermission,
+} from '../lib/pushNotifications';
 
 export default function Settings() {
   const { t, i18n } = useTranslation();
@@ -22,9 +28,35 @@ export default function Settings() {
   const [showAddStaff, setShowAddStaff] = useState(false);
   const [newStaff, setNewStaff] = useState({ email: '', password: '', full_name: '', role: 'manager' });
 
+  const pushSupported = isPushSupported();
+  const [pushSubscribed, setPushSubscribed] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
+
   useEffect(() => {
     setFullName(profile?.full_name || '');
   }, [profile]);
+
+  useEffect(() => {
+    if (pushSupported) isCurrentlySubscribed().then(setPushSubscribed);
+  }, [pushSupported]);
+
+  const handleEnablePush = async () => {
+    if (!user?.id) return;
+    setPushLoading(true);
+    try {
+      const ok = await subscribeUserToPush(user.id);
+      if (ok) {
+        setPushSubscribed(true);
+        toast.success(t('push_enabled'));
+      } else {
+        toast.error(getNotificationPermission() === 'denied' ? t('push_denied') : t('push_error'));
+      }
+    } catch {
+      toast.error(t('push_error'));
+    } finally {
+      setPushLoading(false);
+    }
+  };
 
   const fetchAdminData = async () => {
     const { data: st } = await supabase.from('profiles').select('*').order('role');
@@ -168,6 +200,35 @@ export default function Settings() {
                   ))}
                 </div>
               </div>
+
+              {pushSupported && (
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase ml-2 flex items-center gap-2">
+                    <Bell size={12} /> {t('notifications')}
+                  </label>
+                  <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center shrink-0", pushSubscribed ? "bg-primary/10 text-primary" : "bg-white/5 text-gray-500")}>
+                      {pushSubscribed ? <Bell size={18} /> : <BellOff size={18} />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-white uppercase truncate">
+                        {pushSubscribed ? t('notifications_enabled') : t('enable_notifications')}
+                      </p>
+                      <p className="text-[10px] text-gray-500 mt-0.5">{t('push_hint')}</p>
+                    </div>
+                    {!pushSubscribed && (
+                      <button
+                        onClick={handleEnablePush}
+                        disabled={pushLoading}
+                        className="px-5 py-3 bg-primary text-black font-bold rounded-xl uppercase text-[10px] tracking-wide flex items-center gap-2 shrink-0 disabled:opacity-50"
+                      >
+                        {pushLoading ? <Loader2 className="animate-spin" size={14} /> : <Bell size={14} strokeWidth={3} />}
+                        {t('enable_notifications')}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <button onClick={handleSaveProfile} disabled={loading} className="w-full py-5 bg-primary text-black font-bold rounded-2xl shadow-lg uppercase text-[11px] tracking-wide flex justify-center items-center gap-3">
                 {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} strokeWidth={3} />} {t('save')}
