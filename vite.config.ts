@@ -16,8 +16,12 @@ export default defineConfig(({ mode }) => {
         strategies: 'injectManifest',
         srcDir: 'src',
         filename: 'sw.ts',
+        // injectionPoint default = 'self.__WB_MANIFEST' — sw.ts precacheAndRoute
+        // shu joyга precache ro'yxatini kutadi. Uni o'chirsak (undefined),
+        // __WB_MANIFEST almashmay qoladi → precacheAndRoute(undefined) throw →
+        // SW o'rnatilmaydi → registration bo'sh. Shuning uchun defaultда qoldiramiz.
         injectManifest: {
-          injectionPoint: undefined,
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
         },
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
         manifest: {
