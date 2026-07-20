@@ -1,7 +1,9 @@
 
 [functions.send-push-notification]
 enabled = true
-verify_jwt = true
+# Auth funksiya ichida boshqariladi: cron uchun x-cron-secret, frontend uchun getUser.
+# Platforma JWT gateway'i keraksiz (va cron chaqiruvini 401 qilardi) — o'chirilgan.
+verify_jwt = false
 import_map = "./functions/send-push-notification/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx

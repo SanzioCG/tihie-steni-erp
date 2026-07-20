@@ -17,6 +17,7 @@ DECLARE
   v_count INT := 0;
   v_project_url TEXT;
   v_anon_key TEXT;
+  v_cron_secret TEXT;
 BEGIN
   -- Loyiha URL va service kalitini Supabase Vault'dan olamiz.
   -- (ALTER DATABASE ruxsati yo'q — Vault to'g'ri yo'l.)
@@ -25,6 +26,10 @@ BEGIN
       FROM vault.decrypted_secrets WHERE name = 'project_url';
     SELECT decrypted_secret INTO v_anon_key
       FROM vault.decrypted_secrets WHERE name = 'service_key';
+    -- Cron chaqiruvi uchun maxfiy kalit (edge funksiyadagi CRON_SECRET bilan bir xil).
+    -- Bu edge funksiyada user tekshiruvini o'tkazib yuborishga imkon beradi.
+    SELECT decrypted_secret INTO v_cron_secret
+      FROM vault.decrypted_secrets WHERE name = 'cron_secret';
   EXCEPTION WHEN OTHERS THEN
     v_project_url := NULL;
   END;
@@ -45,7 +50,8 @@ BEGIN
         url := v_project_url || '/functions/v1/send-push-notification',
         headers := jsonb_build_object(
           'Content-Type', 'application/json',
-          'Authorization', 'Bearer ' || v_anon_key
+          'Authorization', 'Bearer ' || v_anon_key,
+          'x-cron-secret', COALESCE(v_cron_secret, '')
         ),
         body := jsonb_build_object(
           'user_id', v_row.assigned_to,
@@ -93,6 +99,13 @@ SELECT cron.schedule('task-reminders', '0 3 * * *',
 --
 -- DIQQAT: service_role kalit — maxfiy. U faqat bazada qoladi,
 -- frontendga chiqmaydi. push edge function uni auth uchun ishlatadi.
+--
+-- CRON himoyasi: cron chaqiruvi user tekshiruvidan o'tmaydi, shuning uchun
+-- x-cron-secret header orqali himoyalanadi. Vault'ga 'cron_secret' qo'shing
+-- va AYNAN SHU qiymatni edge funksiya secretiga qo'ying:
+--   SELECT vault.create_secret('<TASODIFIY-UZUN-SATR>', 'cron_secret');
+--   supabase secrets set CRON_SECRET=<AYNAN SHU SATR>
+-- (project_url va service_key ham Vault'da 'project_url' / 'service_key' nomi bilan.)
 -- ============================================================
 
 -- Tekshirish (qo'lda sinash):

@@ -3,7 +3,7 @@ import webpush from 'https://esm.sh/web-push@3'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret',
 }
 
 Deno.serve(async (req) => {
@@ -18,15 +18,33 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Auth: faqat tizimga kirgan foydalanuvchi push yubora oladi
-    const authHeader = req.headers.get('Authorization')
-    const token = authHeader?.replace('Bearer ', '') ?? ''
-    const { data: { user } } = await supabase.auth.getUser(token)
-    if (!user) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+    // Chaqiruv turini aniqlash:
+    //  - Cron/server (pg_net) — x-cron-secret CRON_SECRET ga teng bo'lsa,
+    //    user tekshiruvi shart emas (maxfiy kalit himoya qiladi).
+    //  - Frontend — Authorization token orqali foydalanuvchi tekshiriladi.
+    const cronSecret = Deno.env.get('CRON_SECRET') ?? ''
+    const cronHeader = req.headers.get('x-cron-secret')
+    const isCron = !!cronSecret && cronHeader === cronSecret
+
+    // --- DEBUG (vaqtincha — tuzatilgach O'CHIRING) ---
+    console.log('[push-debug] method:', req.method)
+    console.log('[push-debug] CRON_SECRET env set:', !!cronSecret, 'len:', cronSecret.length)
+    console.log('[push-debug] x-cron-secret header:', cronHeader, 'len:', (cronHeader ?? '').length)
+    console.log('[push-debug] header === env:', cronHeader === cronSecret, '| isCron:', isCron)
+    console.log('[push-debug] all header keys:', JSON.stringify([...req.headers.keys()]))
+    // --- /DEBUG ---
+
+    if (!isCron) {
+      // Frontend chaqiruvi: faqat tizimga kirgan foydalanuvchi push yubora oladi
+      const authHeader = req.headers.get('Authorization')
+      const token = authHeader?.replace('Bearer ', '') ?? ''
+      const { data: { user } } = await supabase.auth.getUser(token)
+      if (!user) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
     }
 
     const { title, body, data } = await req.json()
