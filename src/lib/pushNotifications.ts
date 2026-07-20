@@ -14,6 +14,25 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return outputArray;
 }
 
+// Va'dani timeout bilan o'raymiz — hech qachon cheksiz osilib qolmasin.
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} (timeout ${ms}ms)`)), ms)
+    ),
+  ]);
+}
+
+// Service worker faollashishini kutamiz (timeout bilan — osilib qolmasligi uchun).
+async function waitForServiceWorker(ms = 10000): Promise<ServiceWorkerRegistration> {
+  return withTimeout(
+    navigator.serviceWorker.ready,
+    ms,
+    'Service worker tayyor bo\'lmadi'
+  );
+}
+
 // Push notification qo'llab-quvvatlanadimi
 export function isPushSupported(): boolean {
   return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
@@ -29,10 +48,11 @@ export function getNotificationPermission(): NotificationPermission {
 export async function isCurrentlySubscribed(): Promise<boolean> {
   if (!isPushSupported() || Notification.permission !== 'granted') return false;
   try {
-    const registration = await navigator.serviceWorker.ready;
+    const registration = await waitForServiceWorker();
     const subscription = await registration.pushManager.getSubscription();
     return !!subscription;
-  } catch {
+  } catch (err) {
+    console.error('isCurrentlySubscribed xatosi:', err);
     return false;
   }
 }
@@ -45,6 +65,11 @@ export async function subscribeUserToPush(userId: string): Promise<boolean> {
       return false;
     }
 
+    if (!VAPID_PUBLIC_KEY) {
+      console.error('VITE_VAPID_PUBLIC_KEY sozlanmagan');
+      return false;
+    }
+
     // Permission so'rash
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
@@ -52,18 +77,22 @@ export async function subscribeUserToPush(userId: string): Promise<boolean> {
       return false;
     }
 
-    // Service worker registration
-    const registration = await navigator.serviceWorker.ready;
+    // Service worker faollashuvini kutamiz (timeout bilan — osilmasin)
+    const registration = await waitForServiceWorker();
 
     // Mavjud subscription bormi tekshirish
     let subscription = await registration.pushManager.getSubscription();
 
     if (!subscription) {
-      // Yangi subscription yaratish
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
-      });
+      // Yangi subscription yaratish (timeout bilan — push xizmati javob bermasa osilmasin)
+      subscription = await withTimeout(
+        registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
+        }),
+        15000,
+        'pushManager.subscribe javob bermadi'
+      );
     }
 
     // DB'ga saqlash — jadval sxemasi: { user_id, subscription (jsonb) }.
